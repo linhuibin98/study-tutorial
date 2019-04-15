@@ -23,6 +23,8 @@
 - [JavaScript设计模式](https://pan.baidu.com/s/1tC-dfsK75zKk4siJh53HjA)
 - [开发微信小程序跳一跳](<https://pan.baidu.com/s/14yWOiStxUg9hUolJ214vbA>)
 - [小程序教程合集](<https://pan.baidu.com/s/1o3e5DVa7DDn59u3FrIif3A>)
+- [Echarts入门到实战](https://pan.baidu.com/s/1rwqda74BzfBDicWT39K2EA)
+- [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 
 
 
@@ -48,6 +50,7 @@
 ### Python
 
 - [Python网络爬虫](<https://pan.baidu.com/s/1WLnrDQnR3fvlE51q6CuIhg>)
+- [Python教程01](<https://pan.baidu.com/s/1x7rRkpNSh2rdKK9Qng-sqA>)
 
 
 
