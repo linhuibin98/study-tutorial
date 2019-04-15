@@ -10,12 +10,12 @@
 ### 前端
 
 - [前端常见面试题](<https://pan.baidu.com/s/1gV0NQScNejaZfXdWLfSErg>)
-- [PHP教程](<https://pan.baidu.com/s/16FcWMU9s7XhKXu3bEMZ9HA>)
+- [2018黑马整套PHP教程](<https://pan.baidu.com/s/16FcWMU9s7XhKXu3bEMZ9HA>)
 - [尤雨溪讲解vue高级特性](<https://pan.baidu.com/s/1lZS1i6fjZowpnv-7P2wung>)
-- [HTML+CSS+JS基础](<https://pan.baidu.com/s/1dEoHU998kug4nDuYahk1VQ>)
+- [奇舞HTML+CSS+JS基础](<https://pan.baidu.com/s/1dEoHU998kug4nDuYahk1VQ>)
 - [UI设计课程](<https://pan.baidu.com/s/1dMxafzkuoJawyb-gbmZwuQ>)
-- [前端教程01](<https://pan.baidu.com/s/1pjcmHZrfFjDPZqdshY2nMA>)
-- [前端教程02](<https://pan.baidu.com/s/1rBYt_nQvLDiwRjrz6H-jyQ>)
+- [2018尚硅谷前端整套](<https://pan.baidu.com/s/1pjcmHZrfFjDPZqdshY2nMA>)
+- [传智黑马前端36期](<https://pan.baidu.com/s/18h86KEb-R5dd94nbJwMSrw> )
 - [javascript版数据结构](<https://pan.baidu.com/s/1NjBfx534awp9t9mWo9S4Gg>)
 - [TypeScript精讲](<https://pan.baidu.com/s/1eQ9eCSkz6TAdbkGXpNRweA>)
 - [React实战进阶45讲](<https://pan.baidu.com/s/1wRl_sUO0s3o6u9cCl2I0BA>)
@@ -23,6 +23,7 @@
 - [JavaScript设计模式](https://pan.baidu.com/s/1tC-dfsK75zKk4siJh53HjA)
 - [开发微信小程序跳一跳](<https://pan.baidu.com/s/14yWOiStxUg9hUolJ214vbA>)
 - [小程序教程合集](<https://pan.baidu.com/s/1o3e5DVa7DDn59u3FrIif3A>)
+- [vue.js开发小米阅读](<https://pan.baidu.com/s/1pDWJXhT3gdsS5qmRpDR8GQ>)
 - [Echarts入门到实战](https://pan.baidu.com/s/1rwqda74BzfBDicWT39K2EA)
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 
@@ -50,7 +51,7 @@
 ### Python
 
 - [Python网络爬虫](<https://pan.baidu.com/s/1WLnrDQnR3fvlE51q6CuIhg>)
-- [Python教程01](<https://pan.baidu.com/s/1x7rRkpNSh2rdKK9Qng-sqA>)
+- [黑马Python37期](<https://pan.baidu.com/s/1x7rRkpNSh2rdKK9Qng-sqA>)
 
 
 
