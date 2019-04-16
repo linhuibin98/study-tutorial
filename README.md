@@ -26,6 +26,7 @@
 - [vue.js开发小米阅读](<https://pan.baidu.com/s/1pDWJXhT3gdsS5qmRpDR8GQ>)
 - [Echarts入门到实战](https://pan.baidu.com/s/1rwqda74BzfBDicWT39K2EA)
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
+- [Javascript高级框架设计教程](https://pan.baidu.com/s/1Qpmmh2VRyl-kg3VUajBRnQ)
 
 
 
