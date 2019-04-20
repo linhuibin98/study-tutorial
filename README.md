@@ -27,6 +27,7 @@
 - [Echarts入门到实战](https://pan.baidu.com/s/1rwqda74BzfBDicWT39K2EA)
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 - [Javascript高级框架设计教程](https://pan.baidu.com/s/1Qpmmh2VRyl-kg3VUajBRnQ)
+- [uni-app](https://pan.baidu.com/s/101pK2ZZ1PsVcSipEHzSrbg)
 
 
 
