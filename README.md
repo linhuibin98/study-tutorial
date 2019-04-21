@@ -66,7 +66,7 @@
 
 ### 考研 / 考证
 
-- [考研资料](https://pan.baidu.com/s/1iUSIrE6nofuGDit8bIv3fA)
+- [考研数学](https://pan.baidu.com/s/1-13B7MQAGtFs-UKwMIr2cg)
 
 - [考研英语](<https://pan.baidu.com/s/1coifN97dIslKPTQMugBSUw>)
 - [考研政治](<https://pan.baidu.com/s/1HWMKEoza284GQ4yXHUG1lw>)
