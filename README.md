@@ -62,3 +62,14 @@
 
 - [侯捷C++教程](https://pan.baidu.com/s/13hmtWtzzMpZP0K_Sn0VSNA)
 
+
+
+### 考研 / 考证
+
+- [考研资料](https://pan.baidu.com/s/1iUSIrE6nofuGDit8bIv3fA)
+
+- [考研英语](<https://pan.baidu.com/s/1coifN97dIslKPTQMugBSUw>)
+- [考研政治](<https://pan.baidu.com/s/1HWMKEoza284GQ4yXHUG1lw>)
+- [王道考研 基础+冲刺班(数据结构,计算机网络,操作系统,组成原理)](<https://pan.baidu.com/s/1DoDnWluDht2FVoYRf1LFsA>)
+- [2019教师资格证备考资料](<https://pan.baidu.com/s/1YU8ggMGt4uWONF8p-zz7vg>)
+
