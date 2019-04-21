@@ -28,6 +28,7 @@
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 - [Javascript高级框架设计教程](https://pan.baidu.com/s/1Qpmmh2VRyl-kg3VUajBRnQ)
 - [uni-app](https://pan.baidu.com/s/101pK2ZZ1PsVcSipEHzSrbg)
+- [华清远见线上课程（创客学院）嵌入式+物联网](https://pan.baidu.com/s/1l4627DGWgORTrG4z55KFzA)
 
 
 
