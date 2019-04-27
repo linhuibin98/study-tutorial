@@ -61,15 +61,16 @@
 ### C、C++
 
 - [侯捷C++教程](https://pan.baidu.com/s/13hmtWtzzMpZP0K_Sn0VSNA)
+- [邓俊辉-算法训练营 第二期](<https://pan.baidu.com/s/1SC66zN7UBE7kjrrIrWNK1Q>)
 
 
 
 ### 考研 / 考证
 
 - [考研数学](https://pan.baidu.com/s/1-13B7MQAGtFs-UKwMIr2cg)
-
 - [考研英语](<https://pan.baidu.com/s/1coifN97dIslKPTQMugBSUw>)
 - [考研政治](<https://pan.baidu.com/s/1HWMKEoza284GQ4yXHUG1lw>)
 - [王道考研 基础+冲刺班(数据结构,计算机网络,操作系统,组成原理)](<https://pan.baidu.com/s/1DoDnWluDht2FVoYRf1LFsA>)
 - [2019教师资格证备考资料](<https://pan.baidu.com/s/1YU8ggMGt4uWONF8p-zz7vg>)
+- [计算机三级网络技术+二级Python语言(提取c1na)](<https://pan.baidu.com/s/1l1Xr7WJbqhquvkNnYaB3BA>)
 
