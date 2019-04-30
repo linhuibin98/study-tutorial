@@ -28,7 +28,7 @@
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 - [Javascript高级框架设计教程](https://pan.baidu.com/s/1Qpmmh2VRyl-kg3VUajBRnQ)
 - [uni-app](https://pan.baidu.com/s/101pK2ZZ1PsVcSipEHzSrbg)
-- [华清远见线上课程（创客学院）嵌入式+物联网](https://pan.baidu.com/s/1l4627DGWgORTrG4z55KFzA)
+- [（创客学院）嵌入式+物联网](https://pan.baidu.com/s/1l4627DGWgORTrG4z55KFzA)
 
 
 
@@ -67,10 +67,11 @@
 
 ### 考研 / 考证
 
-- [考研数学](https://pan.baidu.com/s/1-13B7MQAGtFs-UKwMIr2cg)
+- [考研资料](<https://pan.baidu.com/s/1fCvnxCiHi8xy_2YxO3MF3Q>)
 - [考研英语](<https://pan.baidu.com/s/1coifN97dIslKPTQMugBSUw>)
 - [考研政治](<https://pan.baidu.com/s/1HWMKEoza284GQ4yXHUG1lw>)
 - [王道考研 基础+冲刺班(数据结构,计算机网络,操作系统,组成原理)](<https://pan.baidu.com/s/1DoDnWluDht2FVoYRf1LFsA>)
 - [2019教师资格证备考资料](<https://pan.baidu.com/s/1YU8ggMGt4uWONF8p-zz7vg>)
 - [计算机三级网络技术+二级Python语言(提取c1na)](<https://pan.baidu.com/s/1l1Xr7WJbqhquvkNnYaB3BA>)
+- [专升本资料](<https://pan.baidu.com/s/136bIwqyTr-2JXHcZ-w2YfQ>)
 
