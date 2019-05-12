@@ -62,6 +62,7 @@
 
 - [侯捷C++教程](https://pan.baidu.com/s/13hmtWtzzMpZP0K_Sn0VSNA)
 - [邓俊辉-算法训练营 第二期](<https://pan.baidu.com/s/1SC66zN7UBE7kjrrIrWNK1Q>)
+- [传智C++24期](<https://pan.baidu.com/s/1GQRGqgBNe9f4YznQkaY24A>)
 
 
 
