@@ -48,6 +48,7 @@
 ### Java
 
 - [javaSE最新教程](<https://pan.baidu.com/s/1_ft2822SdI8wCH95XSWPbQ>)
+- [尚硅谷大数据（jh8z）](<https://pan.baidu.com/s/1GCOZZr1OIPvtYWxeZuMxsA>)
 
 
 
