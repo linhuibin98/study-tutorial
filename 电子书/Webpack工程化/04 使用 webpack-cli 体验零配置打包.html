@@ -1,0 +1,252 @@
+<html><head><meta charset="utf-8"><title>04 使用 webpack-cli 体验零配置打包-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 1-4 04 使用 webpack-cli 体验零配置打包
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                04 使用 webpack-cli 体验零配置打包
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-25 11:11:52
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img4.mukewang.com/5cd962f40001a7a706400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">人生太短，要干的事太多，我要争分夺秒。<p class="author">——爱迪生</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面通过搭建一个使用 Webpack 打包的项目，来体验下 Webpack 的零配置打包。</p>
+</div><div class="cl-preview-section"><h2 id="初始化项目" style="font-size: 30px;">初始化项目</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先是创建项目，创建一个名字为<code>zero-config</code>的文件夹，并且进入文件夹使用<code>npm init</code>进行初始化：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 创建目录并且进入</span>
+<span class="token function">mkdir</span> zero-config <span class="token operator">&amp;&amp;</span> <span class="token function">cd</span> <span class="token variable">$_</span>
+<span class="token comment"># 初始化</span>
+<span class="token function">npm</span> init -y
+<span class="token comment"># 安装 webpack 和 webpack-cli到开发依赖</span>
+<span class="token function">npm</span> i webpack --save-dev
+<span class="token function">npm</span> i webpack-cli --save-dev
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="创建目录" style="font-size: 30px;">创建目录</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">新建<code>src</code>目录，放置我们的源码，目录结构如下：</p>
+</div><div class="cl-preview-section"><pre><code>└── src
+    ├── hello.js
+    ├── index.js
+    └── world.js
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>hello.js</code>、 <code>world.js</code>和<code>index.js</code>三个文件内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// hello</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'hello'</span><span class="token punctuation">;</span>
+<span class="token comment">// world</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'world'</span><span class="token punctuation">;</span>
+<span class="token comment">// index</span>
+<span class="token keyword">const</span> hello <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./hello'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> world <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./world'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>hello<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>world<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候我们使用 <code>webpack</code>命令（如果全局安装 webpack-cli 包的话）可以直接体验 Webpack 打包效果。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">TIPS: <a href="https://www.npmjs.com/package/npx">npx</a> 是一个方便开发者访问 <code>node_modules</code> 内的 <code>bin</code> 命令行的小工具，<code>npx webpack -v</code> 相当于执行了 <code>node ./node_modules/webpack/bin/webpack -v</code> ，npx 在开发中非常方便，推荐安装：<code>npm install -g npx</code> 。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="npm-scripts" style="font-size: 30px;">npm scripts</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面，我们打开<code>package.json</code>文件，然后添加<code>scripts</code>字段：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+  <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"webpack"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">添加完保存后，在项目目录下执行<code>npm run build</code>，看到如下执行结果：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cd8d3f50001297014441032.png" alt="图片描述" data-original="http://img.mukewang.com/5cd8d3f50001297014441032.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行成功，index.js 文件被打包到了<code>dist</code>文件夹下了，同时提示我们默认使用了<code>production</code> mode，即生产环境，打开<code>dist/main.js</code>，里面的代码的确是被压缩的，说明是生产环境打包；下面继续修改<code>package.json</code>添加<code>scripts</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+  <span class="token string">"dev"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode development"</span><span class="token punctuation">,</span>
+  <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode production"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候在执行<code>npm run dev</code>，结果如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cd8d4240001846f14440648.png" alt="图片描述" data-original="http://img.mukewang.com/5cd8d4240001846f14440648.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">嗯，这次没有压缩，而且也不报 warning 了！</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips:  Webpack 的打包环境有 production 和 development 两种，分别对应生产环境和开发环境，生产环境默认配置包括压缩等常用的配置。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="修改打包输出目录" style="font-size: 30px;">修改打包输出目录</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的演示，我们得到下面的结论：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">Webpack 默认的入口文件是<code>src/index.js</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">Webpack 的默认输出目录是<code>dist/main.js</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们如果要修改 Webpack 的默认输出目录，需要用到 Webpack 命令的<code>--output</code>，我们将上面的 npm scripts 做下修改：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+  <span class="token string">"dev"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode development --output ./output/main.js"</span><span class="token punctuation">,</span>
+  <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode production --output ./output/main.js"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候在执行<code>npm run build</code>，则 webpack 会将打包之后的文件输出到<code>output/main.js</code>路径了：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cd8d60900015b7016860744.png" alt="图片描述" data-original="http://img.mukewang.com/5cd8d60900015b7016860744.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><h2 id="使用-loader-来做-es6-语法转换" style="font-size: 30px;">使用 Loader 来做 ES6 语法转换</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">现在，我们将之前的代码用的是 ES6 的 Module 语法进行重写，这在普通的浏览器执行起来可能会因为语法「太先进」而报错，所以我们需要使用 Babel 来对 ES6 语法的代码进行转换。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 src 下新建一个 es 的文件夹，将 ES6 语法的代码放进去。</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// hello.es.js</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token string">'hello'</span><span class="token punctuation">;</span>
+
+<span class="token comment">// world.es.js</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token string">'world'</span><span class="token punctuation">;</span>
+<span class="token comment">// index.es.js</span>
+<span class="token keyword">import</span> hello <span class="token keyword">from</span> <span class="token string">'./hello'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> world <span class="token keyword">from</span> <span class="token string">'./world'</span><span class="token punctuation">;</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>hello<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>world<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这是需要修改下<code>package.json</code>的 scripts 字段，将默认打包的入口文件（<code>src/index.js</code>）修改为<code>src/es/index.js</code>地址：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+  <span class="token string">"dev"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode development ./src/es/index.js"</span><span class="token punctuation">,</span>
+  <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode production ./src/es/index.js"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候执行<code>npm run dev</code>的打包出来的是 ES6 语法的代码，在一些老点的浏览器或者移动终端浏览器中都会报错，这时候就需要 Babel 来转换 ES6 语法了。</p>
+</div><div class="cl-preview-section"><h2 id="通过-babel-来转换-es6-语法" style="font-size: 30px;">通过 Babel 来转换 ES6 语法</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel 是 JavaScript 的一个编译器，能够将 ES6+ 语法转换为 ES5 语法，保证浏览器的兼容性，后面的章节还会继续介绍 Babel 的用法，这里为了快速入门 webpack 所以从简介绍。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Loader 是 Webpack 中的一个重要概念，通过 Loader 我们可以做一些跟文件自身属性相关的一些操作，比如这里做的 ES6 语法转换，用到的是<code>babel-loader</code>，这个 Loader 依赖<code>@babel/core</code>和<code>@babel/preset-env</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以首先安装它们：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> i @babel/core babel-loader @babel/preset-env --save-dev
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后在项目的根目录下，创建一个 babel 的配置文件<code>.babelrc</code>，内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">有了 babel-loader，可以使用 webpack 命令的<code>--module-bind</code>来指定对应的文件需要经过怎样的 Loader 处理，所以继续修改 npm scripts：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"dev"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode development ./src/es/index.js --module-bind js=babel-loader"</span><span class="token punctuation">,</span>
+    <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"webpack --mode production ./src/es/index.js --module-bind js=babel-loader"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">添加完毕，执行<code>npm run build</code>，看下 <code>dist/main.js</code>的文件，就是转换后的 ES5 语法的打包结果了。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cd8d62f00016e7114440696.png" alt="图片描述" data-original="http://img.mukewang.com/5cd8d62f00016e7114440696.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：<br>
+下面介绍几个 webpack-cli 的小技巧：<br>
+1.当项目逐渐变大或者使用生产环境打包的时候，Webpack 的编译时间会变长，可以通过参数让编译的输出内容带有进度和颜色： <code>webpack --progress --colors</code>；<br>
+2. Webpack 的配置比较复杂，很容出现错误，如果出问题，会打印一些简单的错误信息，我们还可以通过参数 <code>--display-error-details</code> 来打印错误详情：<code>webpack --display-error-details</code>；<br>
+3.如果不想每次修改模块后都重新编译，那么可以启动监听模式，开启监听模式后，没有变化的模块会在编译后缓存到内存中，而不会每次都被重新编译，所以监听模式的整体速度是很快的：<code>webpack --watch</code>；<br>
+4. webpack-cli 支持两个快捷选项：<code>-d</code> 和 <code>-p</code> ，分别代表一些常用的开发环境和生产环境的打包。</p>
+</blockquote>
+</div><div class="cl-preview-section"><div class="summary"><h5 class="centertitle" style="font-size: 20px; line-height: 38px;">小结 </h5></div><!--title:&#23567;&#32467; -->
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">至此，我们已经学习并且演示了使用 webpack-cli 命令来完成 Webpack 的零配置打包，后面章节我们继续介绍 Webpack 的打包配置。webpack-cli 命令的选项比较多，详细可以通过 <a href="https://webpack.js.org/api/cli">webpack-cli 的文档</a>进行查阅，这里总结我们日常用的最多的几个选项（options）：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><strong>–config</strong>：指定一个 Webpack 配置文件的路径；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–mode</strong>：指定打包环境的 mode，取值为<code>development</code>和<code>production</code>，分别对应着开发环境和生产环境；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–json</strong>：输mode出 Webpack 打包的结果，可以使用<code>webpack --json &gt; stats.json</code>方式将打包结果输出到指定的文件；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–progress</strong>：显示 Webpack 打包进度；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–watch, -w</strong>：watch 模式打包，监控文件变化之后重新开始打包；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–color, --colors<code>/</code>–no-color, --no-colors</strong>：控制台输出的内容是否开启颜色；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–hot</strong>：开启 Hot Module Replacement模式，后面会详细介绍；</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>–profile</strong>：会详细的输出每个环节的用时（时间），方便排查打包速度瓶颈。</li>
+</ul>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/261">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    03 Webpack 开发环境搭建
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/263">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    05 基础概念和常见配置项介绍（一）
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

@@ -1,0 +1,268 @@
+<html><head><meta charset="utf-8"><title>Promise及其语法糖async和await-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/35" target="_blank">零基础学透 TypeScript</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 4-5 Promise及其语法糖async和await
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                Promise及其语法糖async和await
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-17 13:38:55
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img1.mukewang.com/5d2450bb0001012806400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">每个人的生命都是一只小船，理想是小船的风帆。<p class="author">——张海迪</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">TS 在 1.6 版本实验性地支持了 async 函数。在过去的 JavaScript 当中，如果想保证代码的执行顺序，需要使用回调函数，当需要执行的步骤多了时就会陷入当说的“回调地狱”。自从 ES6 增加了 Promise 之后，状况有了缓解，我们先来看个例子，一个简单的多个 ajax 请求的例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript">ajax<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span> <span class="token comment">// 这里你可以先忽略ajax的定义，他的post方法用来发送一个post请求</span>
+  <span class="token string">"/login"</span><span class="token punctuation">,</span> <span class="token comment">// 第一个参数时要请求的url</span>
+  <span class="token punctuation">{</span>
+    data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      user_name<span class="token punctuation">:</span> <span class="token string">"lison"</span><span class="token punctuation">,</span>
+      password<span class="token punctuation">:</span> <span class="token string">"xxxxx"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// 第二个参数是这个请求要携带的参数</span>
+  <span class="token keyword">function</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> user_id <span class="token operator">=</span> res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>user_id<span class="token punctuation">;</span>
+    ajax<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span> <span class="token comment">// 这里在/login接口成功返回数据后，再调用一个/user_roles接口，用来获取该登录用户的角色信息</span>
+      <span class="token string">"/user_roles"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>
+        data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+          user_id<span class="token punctuation">:</span> user_id
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token keyword">function</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> role <span class="token operator">=</span> res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>role<span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>role<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token comment">// 第三个参数是接口响应之后的回调函数</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在这个例子中，我们先调用登录的接口发送用户名和密码，然后服务端进行校验之后返回这个用户的一些信息，然后我们可以从信息中拿到用户 id 去获取它的角色用于权限控制。这个过程是有先后顺序的，必须先登录后获取角色，为了保证这个顺序，在过去要使用回调函数，当然一些库也支持链式调用。再来看下使用 ES6 的 Promise 需要怎么写：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript"><span class="token keyword">const</span> <span class="token function-variable function">loginReq</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> user_name<span class="token punctuation">,</span> password <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 封装一个loginReq函数，用来返回一个Promise，用来调用/login接口</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// Promise接收一个回调函数参数，这个函数有两个参数，两个参数都是回调函数</span>
+    ajax<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span>
+      <span class="token string">"/login"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>
+        user_name<span class="token punctuation">,</span>
+        password
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">resolve</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 第一个参数resolve用来在执行成功后调用，传给他的参数，可以在这个promise的then函数参数中获取到</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      error <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">reject</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 第二个参数reject用来在执行出现错误后调用，传给他的错误信息，可以在这个promise的catch函数参数中获取到</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token function-variable function">getRolesReq</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">{</span> user_id <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 封装一个getRolesReq函数，用来返回一个Promise，用来调用/user_roles接口</span>
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    ajax<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span>
+      <span class="token string">"/user_roles"</span><span class="token punctuation">,</span>
+      <span class="token punctuation">{</span>
+        data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+          user_id
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">resolve</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      error <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token function">reject</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token function">loginReq</span><span class="token punctuation">(</span><span class="token punctuation">{</span> user_name<span class="token punctuation">:</span> <span class="token string">"lison"</span><span class="token punctuation">,</span> password<span class="token punctuation">:</span> <span class="token string">"xxxxx"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 这里在调用loginReq函数后返回一个Promise，在内部当执行到resolve的地方时，这里的then的回调函数就会执行</span>
+  <span class="token function">getRolesReq</span><span class="token punctuation">(</span><span class="token punctuation">{</span> user_id<span class="token punctuation">:</span> res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>user_id <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>role<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这看起来代码变长了，但是当我们搭配使用诸如 Axios 这类 ajax 请求库和 ES6 语法时，对于一些复用性高的接口调用能够起到很好的封装作用，而且使用起来较为简洁。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">ES7 中增加了 async 和 await 的规范，它们其实是 Promise 的语法糖。TypeScript 在 1.6 支持了 async 和 await，下面我们通过 setTimeout 来实现异步过程，看下在 TypeScript 中如何使用 async 和 await：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">interface</span> <span class="token class-name">Res</span> <span class="token punctuation">{</span> <span class="token comment">// 我们定义一个接口，用来定义接口返回结果的结构</span>
+  data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token punctuation">[</span>key<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">]</span><span class="token punctuation">:</span> <span class="token keyword">any</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">namespace</span> axios <span class="token punctuation">{</span> <span class="token comment">// 现在我们来定义一个命名空间，用来模拟axios实现接口调用</span>
+  <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">post</span><span class="token punctuation">(</span>url<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">,</span> config<span class="token punctuation">:</span> object<span class="token punctuation">)</span><span class="token punctuation">:</span> Promise<span class="token operator">&lt;</span>Res<span class="token operator">&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 返回值类型是一个Promise，resolve传的参数的类型是Res</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 然后这里返回一个Promise</span>
+      <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 通过setTimeout实现异步效果</span>
+        <span class="token keyword">let</span> res<span class="token punctuation">:</span> Res <span class="token operator">=</span> <span class="token punctuation">{</span> data<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>url <span class="token operator">===</span> <span class="token string">"/login"</span><span class="token punctuation">)</span> res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>user_id <span class="token operator">=</span> <span class="token number">111</span><span class="token punctuation">;</span> <span class="token comment">// 我们这里通过简单判断，来模拟调用不同接口返回不同数据的效果</span>
+        <span class="token keyword">else</span> res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>role <span class="token operator">=</span> <span class="token string">"admin"</span><span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token function">resolve</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 在这里传入res结果</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">interface</span> <span class="token class-name">Info</span> <span class="token punctuation">{</span>
+  user_name<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  password<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">loginReq</span><span class="token punctuation">(</span><span class="token punctuation">{</span> user_name<span class="token punctuation">,</span> password <span class="token punctuation">}</span><span class="token punctuation">:</span> Info<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 这里使用async关键字修饰这个函数，那么他内部就可以包含异步逻辑了</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> axios<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/login"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token comment">// 这里调用/login接口</span>
+      data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        user_name<span class="token punctuation">,</span>
+        password
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> res<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">getRoleReq</span><span class="token punctuation">(</span>user_id<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> axios<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/user_roles"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      data<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        user_id
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> res<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span><span class="token class-name">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token function">loginReq</span><span class="token punctuation">(</span><span class="token punctuation">{</span> user_name<span class="token punctuation">:</span> <span class="token string">"lison"</span><span class="token punctuation">,</span> password<span class="token punctuation">:</span> <span class="token string">"123"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{</span>
+    data<span class="token punctuation">:</span> <span class="token punctuation">{</span> user_id <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span> <span class="token operator">=</span> res<span class="token punctuation">;</span>
+  <span class="token function">getRoleReq</span><span class="token punctuation">(</span>user_id<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>res <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{</span>
+      data<span class="token punctuation">:</span> <span class="token punctuation">{</span> role <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span> <span class="token operator">=</span> res<span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>role<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这个例子中用到了很多我们前面学习到的知识，可以帮大家进行复习和实践。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我们定义一个命名空间 axios，定义它用来简单模拟 axios 这个 ajax 请求库。我们在命名空间内定义一个 post 方法，第一个参数是要请求的 url，第二个参数是一些配置，这里我们只是定义一个参数，不做具体参数的处理和判断。这个 post 方法返回一个 Promise，这和 axios 库是一样的，使用 setTimeout 来模拟 ajax 请求的异步行为和延迟，当 1 秒后调用 resolve 回调函数，并根据调用的 url 返回不同的结果。post 方法返回的是一个 Promise，所以这个函数返回类型我们使用 TypeScript 内置的条件类型<code>Promise&lt;T&gt;</code>来指定返回类型，这个 T 的类型就是在 resolve 回调函数中返回的值的类型，我们这里返回的值为一个包含 data 属性的对象，所以我们定义一个接口 Res。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来要定义两个发起 ajax 请求的函数了，这里我们使用 async/await 来定义这两个函数。先来看 loginReq 函数。我们在 function 关键字前加<code>async</code>表明这是一个异步函数，然后就可以在它的函数体内使用<code>await</code>关键字来让异步代码同步执行了。如果不使用 await，我们可以通过<code>.then()</code>拿到 axios.post 的结果并且进行后面的操作。我们这里在 axios.post 方法调用前面加上<code>await</code>，这样就可以让这个异步函数同步返回结果，它的返回值就是 Promise 中 resolve 回调函数传入的实际参数。我们在使用 Promise 时，可以使用<code>.catch(error =&gt; {})</code>来捕获异常拿到错误信息，如果使用 await，需要使用 try catch 来捕获异常。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们再定义一个 getRoleReq 函数来发起获取用户角色的请求，这个请求依赖登录请求返回的用户 id，形式和 loginReq 函数差不多。使用 async/await 要注意，await 只能出现在使用 async 修饰的函数或方法体内。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后我们调用这两个函数，还是使用.then 的方式，这样要比使用 async/await 的形式简单些。这里我们在几个地方打印几个标记，让大家看下执行顺序，可以看到，打印出来的数字，是按 1-&gt;2-&gt;3 的顺序打印出来的，这是因为代码执行到 console.log(1)后会等 await 修饰的异步代码执行完，才会往后执行，所以 3 在 2 后面执行。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">TypeScript 对于 async/await 的支持是在 1.6 版本开始的，但是这要求你代码的构建目标是"ES6"；1.7 版本对原生支持 ES6 Generator 的引擎中支持了异步函数；2.1 版本可以将异步函数编译为 ES3 和 ES5。</p>
+</div><div class="cl-preview-section"><h3 id="本节小结">本节小结</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节我们学习了如何使用Promise来保证异步代码的执行顺序，通常我们在调用多个接口，后面接口依赖前面接口返回的数据的时候会用到；还有就是比如confirm弹窗这种，需要在用户点击了“确定”或者“取消”之后才能执行一些逻辑，这种也适用。我们还学习了Promise的语法糖async/await，使用这种语法更为形象清晰，但是不好的地方在于需要使用<code>try … catch</code>来获取原本Promise使用catch获取的错误信息。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本章到这里就结束了，下一章我们将学习《项目配置及书写声明文件》，更加偏实战了，所以前面这些基础知识一定要学扎实了，要经常复习运用下，不过我们后面的课程也会对前面部分知识进行巩固的。<br>
+<img src="http://img.mukewang.com/5d22b9a900011b4a16000510.jpg" alt="图片描述" data-original="http://img.mukewang.com/5d22b9a900011b4a16000510.jpg" class="" style="cursor: pointer;"></p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/366">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    混入，兼顾值和类型的合并操作
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/368">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    逐条来看tsconfig.json配置
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div><script language="javascript">
+		self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',50000);
+	</script></div></body></html>

@@ -1,0 +1,290 @@
+<html><head><meta charset="utf-8"><title>22 为你准备了一份 Webpack 工程化最佳实践总结-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 3-6 22 为你准备了一份 Webpack 工程化最佳实践总结
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                22 为你准备了一份 Webpack 工程化最佳实践总结
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-24 09:33:23
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img1.mukewang.com/5cd9642f0001145406400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">世界上最快乐的事，莫过于为理想而奋斗。<p class="author">——苏格拉底</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">介绍了这么多 Webpack 的配置和优化项目，可能大家有点迷糊了，本小节将用小幅内容来总结下 Webpack 的最佳实践，让大家在实际项目中可以直接拿本篇文章的内容作为 CheckList 手册使用！</p>
+</div><div class="cl-preview-section"><h2 id="使用-npm-scripts-来管理开发命令" style="font-size: 30px;">使用 NPM Scripts 来管理开发命令</h2>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">使用 NPM Scripts 来配置开发命令，即<code>package.json</code>的<code>scripts</code>字段，这样即使我们修改脚本甚至切换 Webpack 到其他的打包工具，对于团队其他成员来说，使用的命令还是不变的，建议的命令包括：
+<ol>
+<li style="font-size: 20px; line-height: 38px;"><code>npm start</code>：相当于<code>npm run start</code>，用于开发命令，快速启动本地开发服务；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>npm run build</code>：用于生产环境打包；</li>
+<li style="font-size: 20px; line-height: 38px;">其他命令，类似<code>npm run test/lint</code> 等，根据相关的需要添加即可</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">在<code>package.json</code>中使用<a href="https://www.npmjs.com/package/cross-env">cross-env</a>来区分环境。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面来看个示例：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    <span class="token string">"scripts"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"start"</span><span class="token punctuation">:</span> <span class="token string">"cross-env NODE_ENV=development webpack --config webpack.config.dev.js --mode development"</span><span class="token punctuation">,</span>
+        <span class="token string">"build"</span><span class="token punctuation">:</span> <span class="token string">"cross-env NODE_ENV=production webpack --config webpack.config.prod.js --mode producation"</span><span class="token punctuation">,</span>
+        <span class="token string">"analyzer"</span><span class="token punctuation">:</span> <span class="token string">"cross-env NODE_ENV=production webpack --config webpack.config.analyzer.js --mode producation"</span><span class="token punctuation">,</span>
+        <span class="token string">"lint"</span><span class="token punctuation">:</span> <span class="token string">"lint-staged"</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="webpack-区分多环境配置" style="font-size: 30px;">Webpack 区分多环境配置</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">区分生产环境和开发环境配置，并且封装通用配置，即将 Webpack 配置文件分为：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">通用配置<code>webpack.config.base.js</code>;</li>
+<li style="font-size: 20px; line-height: 38px;">开发环境配置<code>webpack.config.dev.js</code>;</li>
+<li style="font-size: 20px; line-height: 38px;">生产环境配置<code>webpack.config.prod.js</code>;</li>
+</ol>
+</div><div class="cl-preview-section"><h3 id="webpack.config.base.js"><code>webpack.config.base.js</code></h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通用配置<code>webpack.config.base.js</code>用于通用的配置，例如 entry、loader 和 plugin 等，但是有些需要根据<code>cross-env</code>传入<code>NODE_ENV</code>环境变量进行相关的配置，例如：<code>NODE_ENV=development</code>的时候使用<code>style-loader</code>，而<code>production</code>的时候使用<a href="https://github.com/webpack-contrib/mini-css-extract-plugin">mini-css-extract-plugin</a>的 loader 将生产环境的 CSS 生成单独的 CSS 文件；</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.config.base.js</span>
+<span class="token keyword">const</span> MiniCssExtractPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'mini-css-extract-plugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> isProduction <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span>NODE_ENV <span class="token operator">===</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.css?$/</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                    <span class="token punctuation">{</span>
+                        loader<span class="token punctuation">:</span> isProduction <span class="token operator">?</span> MiniCssExtractPlugin<span class="token punctuation">.</span>loader <span class="token punctuation">:</span> <span class="token string">'style-loader'</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token punctuation">{</span>
+                        loader<span class="token punctuation">:</span> <span class="token string">'css-loader'</span><span class="token punctuation">,</span>
+                        options<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                            importLoaders<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+                            sourceMap<span class="token punctuation">:</span> <span class="token operator">!</span>isProduction
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    <span class="token punctuation">{</span>
+                        loader<span class="token punctuation">:</span> <span class="token string">'postcss-loader'</span><span class="token punctuation">,</span>
+                        options<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                            sourceMap<span class="token punctuation">:</span> <span class="token operator">!</span>isProduction
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">]</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="webpack.config.dev.js"><code>webpack.config.dev.js</code></h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">开发环境配置<code>webpack.config.dev.js</code> 主要用于开发环境配置，主要是 devServer、API mock 等相关配置，这部分配置注重的是效率，所以打包速度优化也是很重要的。</p>
+</div><div class="cl-preview-section"><h3 id="webpack.config.prod.js"><code>webpack.config.prod.js</code></h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>webpack.config.prod.js</code>用于生产环境配置，这部分配置注重的是线上最优打包配置，包括<code>splitChunks</code>、压缩资源、CDN 路径配置（在<code>output</code>配置）等相关配置，还可以在<code>terser-webpack-plugin</code>配置中强制去除一些忘记删除的调试信息：例如 <code>debugger</code>、<code>alert</code>。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：生产环境打包不建议生成 sourcemap，如果生成了也不要上传到线上环境，因为如果 sourcemap 上线之后，等于别人就可以通过 Chrome 等工具直接查看线上代码的源码，这是十分危险的！但是如果你项目使用类似<a href="https://sentry.io/">Sentry</a>的 JavaScript 报错收集分析平台，可以将 sourcemap 经过 Webpack 生成，上传到对应的平台之后记得删除上线包中的这些文件，防止上传到线上！</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="webpack.config.analyzer.js"><code>webpack.config.analyzer.js</code></h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">除了上面的三个配置文件之外，为了方便我们分析打包是否合理做了代码拆分，我们可以增加一个<code>webpack.config.analyzer.js</code>，这个配置实际是继承<code>webpack.config.prod.js</code>然后增加<a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">webpack-bundle-analyzer</a>插件配置。</p>
+</div><div class="cl-preview-section"><h3 id="使用-webpack-merge-管理配置文件关系">使用 webpack-merge 管理配置文件关系</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 配置文件拆分之后，各自之间都有依赖关系，具体关系如下：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>webpack.config.dev.js</code>是合并了<code>webpack.config.base.js</code>和自己的配置；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>webpack.config.prod.js</code>合并了<code>webpack.config.base.js</code>和自己的配置；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>webpack.config.analyzer.js</code>合并了 <code>webpack.config.prod.js</code>和自己的配置，而<code>webpack.config.prod.js</code>又是来自于<code>webpack.config.base.js</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">要维护这个配置关系，那么就需要使用<a href="https://github.com/survivejs/webpack-merge">webpack-merge</a>这个工具库，webpack-merge 主要是提供一个 Webpack 配置对象 Merge 函数，用来合并两个配置，类似于<code>Object.assign</code>函数的功能。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">拿<code>webpack.config.analyzer.js</code>来看下<code>webpack-merge</code>怎么使用：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> merge <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'webpack-merge'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> prodWebpackConfig <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./webpack.config.prod.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span>BundleAnalyzerPlugin<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'webpack-bundle-analyzer'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token function">merge</span><span class="token punctuation">(</span>prodWebpackConfig<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 增加 webpack-bundle-analyzer 配置</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token keyword">new</span> <span class="token class-name">BundleAnalyzerPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="合理使用splitchunks" style="font-size: 30px;">合理使用<code>splitChunks</code></h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在使用<code>splitChunks</code>主要是为了合理的划分资源大小，提高缓存命中率，从而降低资源的加载时间，在划分合理性上一定要注意把握力度，太细不能充分利用 HTTP Cache，太粗又会导致加载速度慢，这个度不好笼统的来定义，但是一般来说可以按照下面三个原则来拆分代码：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">变更频次；</li>
+<li style="font-size: 20px; line-height: 38px;">页面 Router；</li>
+<li style="font-size: 20px; line-height: 38px;">动静分离。</li>
+</ol>
+</div><div class="cl-preview-section"><h3 id="变更频次">变更频次</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">代码按照变更频次来使用<code>splitChunks</code>进行拆分，即将这些不经常修改的通用框架和库放到一起作为<code>common</code>代码，然后把业务代码按照页面间公共部分和私有部分进行拆分</p>
+</div><div class="cl-preview-section"><h3 id="页面-router">页面 Router</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">不经常变动的框架和库代码拆分完之后，剩下的是业务代码，业务代码可以根据不同的页面之间公共代码拆分到一起，这样可以保证访问一个页面就可以将框架代码和公共代码缓存到浏览器中，再访问第二个页面就不会增加框架代码和公共代码页面请求了。</p>
+</div><div class="cl-preview-section"><h3 id="动静分离">动静分离</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">动静分离指的是页面内使用频次不高或者需要<strong>动态异步加载</strong>（使用<code>import()</code>或者<code>require.ensure()</code>）的模块代码可以单独拆分到各自的 chunks，这样保证了页面首屏展现速度，还记得之前介绍过的一个 Case 是页面的播放器代码不经常用吗，那就是根据这个原则来拆分代码的。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">另外类似 Vue、React 这类单页应用，页面 Router 之间的代码也是可以异步加载的，整个页面第一个入口就将大框架和当前页面的代码加载进来了，等点击跳到二级页面的时候只需要动态加载对应 Router 的代码即可。</p>
+</div><div class="cl-preview-section"><h2 id="多页应用-entry-和-html-管理" style="font-size: 30px;">多页应用 Entry 和 HTML 管理</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这个之前在 <a href="https://www.imooc.com/read/29/article/271">《Webpack 中打包 HTML 和多页面配置》</a>中提到过最佳实践，想继续了解的可以点击链接复习一下。</p>
+</div><div class="cl-preview-section"><h2 id="指定-chunk-的哈希值" style="font-size: 30px;">指定 chunk 的哈希值</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在生产环境打包，一定要配置文件<code>filename</code>的<code>hash</code>，推荐<code>hash</code>配置规则如下：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">JavaScript 文件使用：<code>[chunkhash]</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">CSS 文件使用：<code>[contenthash]</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">其他静态资源用：<code>[hash]</code>，例如图片、字体等，在<code>url-loader</code>中配置<code>[hash]</code></li>
+</ol>
+</div><div class="cl-preview-section"><h2 id="语法层面的最佳实践" style="font-size: 30px;">语法层面的最佳实践</h2>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">使用 ES6 Modules 语法，以保证 Tree-Shaking 起作用；</li>
+<li style="font-size: 20px; line-height: 38px;">合理使用 Ployfill，推荐使用<code>@babel/preset-env</code>的<code>useBuiltIns='usage'</code>方案，这部分可以参考 Babel 部分的 Polyfill 配置介绍<a href="https://www.imooc.com/read/29/article/266">Polyfill 配置介绍</a>；</li>
+<li style="font-size: 20px; line-height: 38px;">合理使用 Webpack 的魔法注释（magic comments），比如：动态加载的模块要用<code>webpackChunkName</code>进行命名，还可以重要资源使用<code>webpackPrefetch</code>提前预加载；</li>
+<li style="font-size: 20px; line-height: 38px;">框架或者类库使用合理的版本，举例说明：
+<ol>
+<li style="font-size: 20px; line-height: 38px;">Lodash 使用<code>lodash-es</code>版本，并且按模块使用；</li>
+<li style="font-size: 20px; line-height: 38px;">Momentjs 使用 <a href="https://date-fns.org/">date-fns</a>代替，并且按模块使用；</li>
+<li style="font-size: 20px; line-height: 38px;">移动页面使用 Zepto 代替 jQuery；</li>
+<li style="font-size: 20px; line-height: 38px;">Vue、San、React 这类框架库根据实际情况选择合适构建版本，以 Vue 为例，其实构建版本包含浏览器版本、ESM 版本、UMD 版本、完整版等多个版本，详细可以<a href="https://cn.vuejs.org/v2/guide/installation.html#%E5%AF%B9%E4%B8%8D%E5%90%8C%E6%9E%84%E5%BB%BA%E7%89%88%E6%9C%AC%E7%9A%84%E8%A7%A3%E9%87%8A">参考 Vue 构建版本部分的文档</a></li>
+</ol>
+</li>
+</ol>
+</div><div class="cl-preview-section"><h2 id="其他-webpack-配置的最佳实践" style="font-size: 30px;">其他 Webpack 配置的最佳实践</h2>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">生产环境使用<a href="https://github.com/webpack-contrib/mini-css-extract-plugin">mini-css-extract-plugin</a>导出 CSS 文件；</li>
+<li style="font-size: 20px; line-height: 38px;">生产环境使用压缩功能，包括 JavaScript、CSS、图片、SVG 等；</li>
+<li style="font-size: 20px; line-height: 38px;">合理配置查找路径，减少查找时间，比如设置 <code>alias</code>、添加项目路径、排查<code>node_modules</code>查找等；</li>
+<li style="font-size: 20px; line-height: 38px;">在 rule 配置上，有<code>test</code>、<code>include</code>、<code>exclude</code>三个可以控制范围的配置，最佳实践是:
+<ul>
+<li style="font-size: 20px; line-height: 38px;">只在 <code>test</code> 和 文件名匹配 中使用正则表达式；</li>
+<li style="font-size: 20px; line-height: 38px;">在 <code>include</code> 和 <code>exclude</code> 中使用绝对路径数组；</li>
+<li style="font-size: 20px; line-height: 38px;">尽量避免 <code>exclude</code>，更倾向于使用 <code>include</code>。</li>
+</ul>
+</li>
+<li style="font-size: 20px; line-height: 38px;">icon 类图片文件太多使用 CSS Sprite 来合并图片，防止设置<code>url-loader</code>和<code>svg-url-loader</code>的 limit 值不合理，导致 icon 文件都以 Base64 方式引入 CSS 文件中，导致 CSS 文件过大。</li>
+</ol>
+</div><div class="cl-preview-section"><h2 id="其他方面最佳实践" style="font-size: 30px;">其他方面最佳实践</h2>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">规范化 Git 工作流：
+<ol>
+<li style="font-size: 20px; line-height: 38px;">使用 Git Hook，类似 <a href="https://github.com/typicode/husky">Husky</a>这类 Git Hook 库，可以帮助我们在每次提交之前（<code>pre-commit</code>）自动做 lint 检查；</li>
+<li style="font-size: 20px; line-height: 38px;">使用<a href="https://github.com/commitizen/cz-cli">Commitizen</a>来规范 Git 的提交 Commit Log；</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">组件化开发，公共 UI 组件、公共函数库建设；这里说的比较抽象，需要具体项目来划分，例如我们可以将多个页面常用的 UI 组件抽象出来；也可以将通用的工具函数库建设起来，类似 Lodash 这类库；</li>
+<li style="font-size: 20px; line-height: 38px;">选择一个顺手的 CSS 预处理语言，Sass、Less、Stylus，只需要团队使用顺手即可；</li>
+<li style="font-size: 20px; line-height: 38px;">指定规则约定，包括代码规范、目录结构，文档规范等；</li>
+<li style="font-size: 20px; line-height: 38px;">前后端分离，选择合适的 Mock 方案；</li>
+<li style="font-size: 20px; line-height: 38px;">将最佳实践做成标准项目的脚手架，新项目使用脚手架工具来创建；</li>
+<li style="font-size: 20px; line-height: 38px;">抽象解决方案，融合到 Webpack 配置中，甚至是基于 Webpack 做自己的最佳实践工具链！这个部分在实战篇会用具体案例来介绍一些实用的解决方案。</li>
+</ol>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节主要是对之前的课程进行总结，是一篇系统性的最佳实践总结，通过本篇文章可以让你回顾之前所有的知识点，并且针对关键的知识点进行回顾，本篇文章也是一本操作手册，拿着这个手册来检查自己的项目是否还有可以改进的地方。本篇文章不再是从「配置工程师」角度来学习 Webpack 的配置，而是升华到工程化解决方案的角度，更是起到承上启下的作用，想要打造自己的工程化解决方案，需要掌握基础，然后深入内核原理，最后结合项目实践做到融会贯通，才能利用所学知识解决业务痛点。希望本文可以让大家学会多总结、多抽象业务问题的解决方案的好习惯。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<p style="font-size: 20px; line-height: 38px;">你有什么 Webpack 的最佳实践可以介绍吗？</p>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/279">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    21 使用 Webpack 的 Tree-Shaking
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/281">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    怎么调试 Webpack？
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

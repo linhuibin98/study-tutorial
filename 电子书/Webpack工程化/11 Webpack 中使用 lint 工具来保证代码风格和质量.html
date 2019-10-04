@@ -1,0 +1,282 @@
+<html><head><meta charset="utf-8"><title>11 Webpack 中使用 lint 工具来保证代码风格和质量-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 2-5 11 Webpack 中使用 lint 工具来保证代码风格和质量
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                11 Webpack 中使用 lint 工具来保证代码风格和质量
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-24 09:26:10
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img4.mukewang.com/5cd9637a000197b906400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">当你做成功一件事，千万不要等待着享受荣誉，应该再做那些需要的事。 <p class="author">—— 巴斯德</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><strong>代码不是写给机器看的，归根结底还是写给人看的</strong>！在团队的项目开发过程中，代码维护所占的时间比重往往大于新功能的开发。因此编写符合团队编码规范的代码是至关重要的，这样做不仅可以很大程度地避免基本语法错误，也保证了代码的可读性。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">对于代码版本管理系统（SVN 和 GIT 或者其他），代码格式不一致带来的问题是严重的，在代码一致的情况下，因为格式不同，触发了版本管理系统标记为 diff，导致无法检查代码和校验。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节就简单介绍一下如何通过 Webpack 结合 ESLint 和 Stylelint 为代码库配置针对 JavaScript 与 CSS 的代码风格检查。</p>
+</div><div class="cl-preview-section"><h2 id="eslint" style="font-size: 30px;">ESLint</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5ceb42a2000181cf01730066.png" alt="图片描述" data-original="http://img.mukewang.com/5ceb42a2000181cf01730066.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><a href="https://cn.eslint.org/">ESLint</a> 是国外大神 Nicholas C. Zakas（JavaScript 「红宝书」作者） 于 2013 年 6 月创建的开源项目。它的目标是提供一个插件化的 JavaScript 代码检测工具。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">ESLint 是通过配置规则（Rules）来检测 JavaScript 语法规范的，目前 ESLint 的规则可以在<a href="https://cn.eslint.org/docs/rules/">规则</a>页面查看。目前业内有很多针对团队代码风格制订的 ESLint 规则配置，然后生成一套自己的代码规范检查机制发布到开源社区供社区使用，业内比较著名的规范有：<a href="https://github.com/airbnb/javascript">Airbnb 的 JavaScript 代码规范</a>、<a href="https://github.com/standard/standard/blob/master/docs/README-zhcn.md">JavaScript Standard Style Guide</a>、<a href="https://google.github.io/styleguide/jsguide.html">Google JavaScript 代码规范</a>，国内则有百度的<a href="http://fecs.baidu.com/">FECS</a>，这些代码规范都有对应的 ESLint 版本的配置规则。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：除了 ESLint，前端业内还有同类型的代码检查工具<a href="https://www.jslint.com/">JSLint</a>和<a href="https://jshint.com/">JSHint</a>，和它们相比，ESLint 对 ES6 语法支持更好，这是我们选择使用 ESLint 的主要原因之一，可以通过 ESLint 在团队内快速统一 ES6 的语法，精简产品代码，提高开发效率，另外 ESLint 的扩展性很好，能够很好的支持 JSX 语法的检测。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在项目中使用 ESLint，需要先安装它的 CLI 工具：<code>npm install -D eslint</code>，安装之后，可以通过使用<code>npx eslint</code>直接运行，在运行之前，我们需要创建个 ESLint 的配置文件，使用<code>eslint --init</code>命令创建<code>.eslintrc.json</code>，创建配置文件之前，需要回答几个问题，最后还会让选择代码风格，这些问题只需要按照实际情况回答即可。下面是我回答的问题：</p>
+</div><div class="cl-preview-section"><pre class="  language-log"><code class="prism  language-log">? How would you like to use ESLint? To check syntax, find problems, and enforce code style
+? What type of modules does your project use? JavaScript modules (import/export)
+? Which framework does your project use? None of these
+? Where does your code run? (Press &lt;space&gt; to select, &lt;a&gt; to toggle all, &lt;i&gt; to invert selection)Browser
+? How would you like to define a style for your project? Use a popular style guide
+? Which style guide do you want to follow? Airbnb (https://github.com/airbnb/javascript)
+? What format do you want your config file to be in? JSON
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后生成的<code>.eslintrc.json</code>内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"env"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"browser"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+        <span class="token string">"es6"</span><span class="token punctuation">:</span> <span class="token boolean">true</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"extends"</span><span class="token punctuation">:</span> <span class="token string">"airbnb-base"</span><span class="token punctuation">,</span>
+    <span class="token string">"globals"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"Atomics"</span><span class="token punctuation">:</span> <span class="token string">"readonly"</span><span class="token punctuation">,</span>
+        <span class="token string">"SharedArrayBuffer"</span><span class="token punctuation">:</span> <span class="token string">"readonly"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"parserOptions"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"ecmaVersion"</span><span class="token punctuation">:</span> <span class="token number">2018</span><span class="token punctuation">,</span>
+        <span class="token string">"sourceType"</span><span class="token punctuation">:</span> <span class="token string">"module"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"rules"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果需要安装类似<code>airbnb</code>、<code>google</code>和<code>standard</code>的规则，则可以首先查找规则对应的 ESLint 配置 NPM 模块，然后安装它：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># airbnb</span>
+<span class="token function">npm</span> <span class="token function">install</span> --save-dev eslint-config-airbnb
+<span class="token comment"># google</span>
+<span class="token function">npm</span> <span class="token function">install</span> --save-dev eslint-config-google
+<span class="token comment">#standard</span>
+<span class="token function">npm</span> <span class="token function">install</span> --save-dev eslint-config-standard
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后在<code>.eslintrc.json</code>配置文件中修改<code>extends</code>到对应值：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"extends"</span><span class="token punctuation">:</span> <span class="token string">"google"</span><span class="token punctuation">,</span>
+    <span class="token string">"rules"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Additional, per-project rules...</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">一般 ESLint 的 rules 需要根据团队的规范来制定，出了这点之外，我个人推荐添加下面几点 rule：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+    <span class="token string">'rules'</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 禁止 console，要用写 eslint disbale</span>
+        <span class="token string">'no-console'</span><span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+        <span class="token comment">// 禁止 debugger，防止上线</span>
+        <span class="token string">'no-debugger'</span><span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+        <span class="token comment">// 禁止 alert，要用写 eslint disable</span>
+        <span class="token string">'no-alert'</span><span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+        <span class="token comment">// 不用的 var，要删除，手动 tree shaking，要洁癖</span>
+        <span class="token string">'no-unused-vars'</span><span class="token punctuation">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+        <span class="token comment">// 没定义就用的就别用，全局的要用 写 eslint global</span>
+        <span class="token string">'no-undef'</span><span class="token punctuation">:</span> <span class="token number">2</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：ESLint 的报错类型包括三种：<code>off</code>、<code>warn</code>和<code>error</code>，分别对应着：0、1、2，所以上面的配置的 rule 实际为<code>error</code>级别的规则，检测到了则直接报错误（Error）。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这几个 rule 是为了防止线下 debug 代码上到线上去的，曾经有段血泪史一不小心将<code>alert</code>和<code>debugger</code>上到线上去，加上这几个 rule 就可以得到代码提示，如果在代码中真的需要用到<code>alert</code>，可以使用 ESLint 的注释：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// eslint-disable-next-line</span>
+<span class="token function">alert</span><span class="token punctuation">(</span><span class="token string">'我就是要用 alert'</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// eslint-disable-line</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="webpack-中使用-eslint">Webpack 中使用 ESLint</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先需要安装<code>eslint-loader</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> <span class="token function">install</span> -D eslint-loader
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后在 webpack.config.js 中<code>module.rules</code>添加如下代码：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.js$/</span><span class="token punctuation">,</span>
+    loader<span class="token punctuation">:</span> <span class="token string">'eslint-loader'</span><span class="token punctuation">,</span>
+    enforce<span class="token punctuation">:</span> <span class="token string">'pre'</span><span class="token punctuation">,</span>
+    include<span class="token punctuation">:</span> <span class="token punctuation">[</span>path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'src'</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 指定检查的目录</span>
+    options<span class="token punctuation">:</span> <span class="token punctuation">{</span> <span class="token comment">// 这里的配置项参数将会被传递到 eslint 的 CLIEngine</span>
+        formatter<span class="token punctuation">:</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'eslint-friendly-formatter'</span><span class="token punctuation">)</span> <span class="token comment">// 指定错误报告的格式规范</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">ESLint 的配置单独做了一个 Webpack 的<code>module.rule</code>配置，所以使用了<code>enforce: 'pre'</code>来调整了 loader 加载顺序，保证先检测代码风格，之后再做 Babel 转换等工作；</li>
+<li style="font-size: 20px; line-height: 38px;">也可以放到 Babel 放到一起，不过要将 <code>eslint-loader</code>放到<code>babel-loader</code> 之前检测；</li>
+<li style="font-size: 20px; line-height: 38px;">这里为了让 ESLint 报错更加好看一些，使用了<a href="https://github.com/royriojas/eslint-friendly-formatter">eslint-formatter-friendly</a>这个 ESLint<code>formatter</code>，记得安装它：<code>npm i -D eslint-formatter-friendly</code></li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">新建一个 entry 文件，内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">import</span> _ <span class="token keyword">from</span> <span class="token string">'lodash'</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> b <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token function">alert</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行<code>npx webpack</code>之后，ESLint 报错内容如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5ceb43ad00017b1310740789.png" alt="图片描述" data-original="http://img.mukewang.com/5ceb43ad00017b1310740789.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">有关 ESLint 的更多使用方式，请参考<a href="https://cn.eslint.org/">中文官网内容</a>，这里不再做展开介绍。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：TypeScript 也有自己版本的 ESLint，可以使用<a href="https://github.com/wbuchwalter/tslint-loader">tslint-loader</a>进行检测。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="stylelint" style="font-size: 30px;">StyleLint</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5ceb43d300013c7f01500058.png" alt="图片描述" data-original="http://img.mukewang.com/5ceb43d300013c7f01500058.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">检测 CSS 语法使用<a href="https://stylelint.io/">StyleLint</a>。StyleLint 和 ESLint 很像，它们都只是提供了工具与规则，如何配置这些规则完全取决于使用者，所以我们要根据需要自己引入或配置规则。StyleLint 的代码风格也有很多社区开源版本，官方推荐的代码风格有两个：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/stylelint/stylelint-config-recommended">stylelint-config-recommended</a></li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/stylelint/stylelint-config-standard">stylelint-config-standard</a></li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">要使用 StyleLint 需要先安装它：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> <span class="token function">install</span> -D stylelint
+
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：除了 StyleLint 本身之外，还可以安装<a href="https://github.com/hudochenkov/stylelint-order">stylelint-order 插件</a>，该插件的作用是强制我们在写 CSS 的时候按照某个顺序来编写。例如先写定位，再写盒模型，再写内容区样式，最后写 CSS3 相关属性。这样可以极大的保证我们代码的可读性和风格统一。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">StyleLint 的配置文件是<code>.stylelintrc.json</code>，其中的写法跟 ESLint 的配置类似，都是包含<code>extend</code>和<code>rules</code>等内容，下面是一个示例：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"extends"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"stylelint-config-standard"</span><span class="token punctuation">,</span> <span class="token string">"stylelint-config-recess-order"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"rules"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"at-rule-no-unknown"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token string">"ignoreAtRules"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"mixin"</span><span class="token punctuation">,</span> <span class="token string">"extend"</span><span class="token punctuation">,</span> <span class="token string">"content"</span><span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">配置文件中单独配置 <code>at-rule-no-unknown</code> 是为了让 StyleLint 支持 SCSS 语法中的 <code>mixin</code>、<code>extend</code>、<code>content</code> 语法，更多详细的规则，可以查看<a href="https://stylelint.io/user-guide/rules/">官方文档</a>。</p>
+</div><div class="cl-preview-section"><h3 id="webpack-中使用-stylelint">Webpack 中使用 StyleLint</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 中使用 StyleLint 是通过插件的方式来使用，这个插件的名字是 <a href="https://www.npmjs.com/package/stylelint-webpack-plugin">stylelint-webpack-plugin</a>。</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> <span class="token function">install</span> -D stylelint-webpack-plugin
+
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">安装之后，按照插件的使用方式在 webpack.config.js 添加配置：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> StyleLintPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'stylelint-webpack-plugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token keyword">new</span> <span class="token class-name">StyleLintPlugin</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">]</span>
+    <span class="token comment">// ...</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">默认 StyleLint-webpack-plugin 会查找项目中的 StyleLint 配置文件，根据配置文件的配置来检测 CSS 代码。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 stylelint-webpack-plugin 插件中有两个跟 Webpack 编译相关的配置项：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><code>emitErrors</code>：默认是<code>true</code>，将遇见的错误信息发送给 webpack 的编辑器处理；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>failOnError</code>：默认是<code>false</code>，如果是 <code>true</code>遇见 StyleLint 报错则终止 Webpack 编译。</li>
+</ul>
+</div><div class="cl-preview-section"><div class="summary"><h5 class="centertitle" style="font-size: 20px; line-height: 38px;">小结 </h5></div><!--title:&#23567;&#32467; -->
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节主要介绍了 Webpack 中结合 ESLint 和 StyleLint 对 JavaScript 和 CSS 文件进行代码风格检测。结合 eslint-loader 和 stylelint-webpack-plugin 可以在 Webpack 编译的过程中检测出代码中不符合规范的部分，提醒开发者及时修改代码。Webpack 项目中配置 ESLint 和 StyleLint 可以提高项目的可维护性，保持团队代码风格统一。</p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/268">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    10 Webpack 中样式相关的配置
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/270">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    12 使用 Webpack 管理项目中的静态资源
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

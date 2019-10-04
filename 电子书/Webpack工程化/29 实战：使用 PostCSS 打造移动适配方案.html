@@ -1,0 +1,265 @@
+<html><head><meta charset="utf-8"><title>实战：使用 PostCSS 打造移动适配方案-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 5-1 实战：使用 PostCSS 打造移动适配方案
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                实战：使用 PostCSS 打造移动适配方案
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-05 10:41:18
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img4.mukewang.com/5cd964a00001e41606400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">生活永远不像我们想像的那样好，但也不会像我们想像的那样糟。<p class="author">——莫泊桑</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Web 移动开发中，手机屏幕适配是个很大的话题，最开始做屏幕适配可以追溯到桌面页面（PC）阶段。随着电脑屏幕越来越大和 iPad 的出现，前端工程师需要适配不同的屏幕页面，当时最火的技术是响应式布局，即通过媒体查询（Media Queries）将主流的设备进行分类，根据设备屏幕宽度占比划分出来大中小等多个标准尺寸，然后设置不同的尺寸，这样做有两个缺点：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">并不能完美适配屏幕；</li>
+<li style="font-size: 20px; line-height: 38px;">冗余代码较多，写起来还比较麻烦。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">随着 CSS 标准和浏览器的支持，REM+视口单位（Viewport units）方式越来越成熟，在移动端上可以用来做更好的适配方案。</p>
+</div><div class="cl-preview-section"><h2 id="视口单位（viewport-units）" style="font-size: 30px;">视口单位（Viewport units）</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">简单来说，视口指的是浏览器的可视区域。在桌面设备上，视口值得是浏览器的可视区域；但是移动设备上视口有三个不同的概念值，分别是 Layout Viewport（布局视口）、 Visual Viewport（视觉视口）、Ideal Viewport（理想视口）。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面以 iPhone 6 为例来说明下移动设备中 Layout Viewport、 Visual Viewport、Ideal Viewport 的区别。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">Layout Viewport：这是浏览器设置 Viewport 元标签（meta）之后定义的一个虚拟布局视口，大小跟 web 页面可呈现的区域有关系；</li>
+<li style="font-size: 20px; line-height: 38px;">Visual Viewport：物理设备的可视区域，物理像素来表示，iPhone 6 的物理像素值为 <code>750x1334</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">Ideal Viewport：这是我们通常说的屏幕分辨率，iPhone 6 的分辨率为<code>375x667</code>。</li>
+</ul>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：因为 iPhone 6 的屏幕分辨率为<code>375x667</code>而实际的物理像素为<code>750x1334</code>，所以一个分辨率的像素点实际等于 4 个物理像素点，即我们平时说的两倍屏（<code>@2x</code>），即 <code>dpr（Device Pixel Ratio）= 750/375 = 2</code>，即下图所示：</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d077f1d0001f34005070271.png" alt="图片描述" data-original="http://img.mukewang.com/5d077f1d0001f34005070271.png" class=""><br>
+视口单位根据设备不同，代表的意义不同。在桌面端，视口单位是浏览器的可视区域来划分的；但在移动端，它指的是<strong>布局视口</strong>（Layout Viewport）。CSS3 规范中，规定了四个视口单位：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">vw：<code>1vw</code> 等于视口宽度的 1%；</li>
+<li style="font-size: 20px; line-height: 38px;">vh：<code>1vh</code> 等于视口高度的 1%；</li>
+<li style="font-size: 20px; line-height: 38px;">vmin：选取 vw 和 vh 中最小的那个；</li>
+<li style="font-size: 20px; line-height: 38px;">vmax：选取 vw 和 vh 中最大的那个。</li>
+</ul>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：很多朋友看到这里可能会觉得：视口单位看上去跟<code>%</code>单位一样？视口单位是<strong>依赖于视口的尺寸，根据视口尺寸的百分比来定义的</strong>，在页面的任意元素 1vw 的值是固定的；而<code>%</code>单位则是依赖于元素的祖先元素，不同的祖先元素，则<code>1%</code>值不同。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">既然是 CSS3 规范的新单位，所以需要看下移动设备上的支持情况，下面是 <a href="https://caniuse.com/#search=vw">caniuse.com 网站</a>上对视口单位支持情况：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d077f2e0001029412600442.png" alt="图片描述" data-original="http://img.mukewang.com/5d077f2e0001029412600442.png" class=""></p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：做过小程序开发的朋友，可能会想起 WXSS 中使用了 rpx 这个长度单位。rpx 是以小程序容器宽度（等于设备宽度）恒等于 750rpx 来做定义的，<code>rpx</code>跟 vw 值意义类似，都是相对于视口宽度的固定值。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="rem-单位和-rem-布局" style="font-size: 30px;">rem 单位和 rem 布局</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面再来介绍个 CSS3 规范中的新单位：rem（root em）。顾名思义，rem 是 em 的「变种」，是一个相对单位值，相对的元素是 <code>root</code>元素，即 HTML 标签的 <code>font-size</code>值，所以如果 HTML 的<code>font-size=14px</code>，则<code>1rem=14px</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在来看看 rem 的兼容性：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d077f530001799312580460.png" alt="图片描述" data-original="http://img.mukewang.com/5d077f530001799312580460.png" class=""><br>
+rem 布局指的是页面固定宽高的元素使用 rem 来标示大小。<strong>rem 的本质是相对的等比例缩放，所以 rem 布局提供了等比例缩放的布局</strong>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当我们拿到一张视觉稿，完成切图之后，需要在不同的浏览器能够实现等比例缩放。假设视觉稿宽度可以分为 100 份，每一份用<code>x</code>来表示，某个元素我们根据视觉稿测量宽高，并且在 CSS 中设置了宽高为：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.sth</span> </span><span class="token punctuation">{</span>
+    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">400</span>x<span class="token punctuation">;</span>
+    <span class="token property">height</span><span class="token punctuation">:</span> <span class="token number">300</span>x<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当我们的页面在不同屏幕宽度进行渲染的时候，我们需要上门的<code>x</code>单位能够根据不同的屏幕自动进行缩放（跟视觉稿等比例），这样我们就不需要写任何代码都可以适配不同宽度的设备屏幕了。根据前面提到的 <strong>rem 的本质是相对的等比例缩放</strong>，我们将宽高设置为<code>rem</code>的对应值，这样不管页面怎么变，我们 rem 会跟着其相对的值来进行变化，即根据<code>root</code>元素的<code>font-size</code>进行变化，即 HTML 的<code>font-size</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以，我们可以将 HTML 的<code>font-size</code>设置为：屏幕宽度的<code>1/100</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector">html </span><span class="token punctuation">{</span>
+    <span class="token property">fons-size</span><span class="token punctuation">:</span> screen_width / <span class="token number">100</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token selector"><span class="token class">.sth</span> </span><span class="token punctuation">{</span>
+    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">400</span>rem<span class="token punctuation">;</span>
+    <span class="token property">height</span><span class="token punctuation">:</span> <span class="token number">300</span>rem<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">那么我们还需要通过 JavaScript 来计算 HTML 元素<code>font-size</code>值，即下面的代码：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js">document<span class="token punctuation">.</span>documentElement<span class="token punctuation">.</span>style<span class="token punctuation">.</span>fontSize <span class="token operator">=</span> document<span class="token punctuation">.</span>documentElement<span class="token punctuation">.</span>clientWidth <span class="token operator">/</span> <span class="token number">100</span> <span class="token operator">+</span> <span class="token string">'px'</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这就是 rem 布局切图的原理。为了做好横屏竖屏的适配，还需要添加上视口宽度变化和横竖屏事件绑定，在视口宽度发生变化后，重新设置 HTML 的<code>font-size</code>。</p>
+</div><div class="cl-preview-section"><h2 id="使用-vw--rem--postcss-实现移动页面适配方案" style="font-size: 30px;">使用 vw + rem + postcss 实现移动页面适配方案</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面的 rem 布局切图中，我们做了一个假设，假设存在一个单位<code>x</code>值为宽度的 1/100，后来这个<code>x</code>值是经过 JavaScript 来计算得到的，那么我们学习了视口单位的概念之后，应该很快想到：我们不需要计算 HTML 的 font-size 啊，直接用 1vw 不就行了吗？1vw 就是我们假设的单位<code>x</code>啊！</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以，在视口单位的兼容性做得还不够好的时候，rem 是最好的解决方案。而当设备浏览器升级之后，视口单位已经做了很好的支持，我们完全可以省掉计算 html font-size 的步骤，直接使用<code>vw</code>来布局。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">为了兼容两者，我们在实际开发中，采用了<code>vw</code>+<code>rem</code>的布局方式，同时配合 postcss 的插件，可以直接使用视觉稿的实际尺寸来进行布局计算，这样减少了我们转换单位的时间，也不需要考虑兼容性问题，极大地提升了我们的开发效率和开发体验。下面来详细介绍下我们项目中使用的移动页面适配方案。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先前面提到了，vw 的浏览器兼容性不如 rem 好，所以我们需要使用 JavaScript 来做好兼容，支持 vw 的则设置 html font-size 为<code>1vw</code>，不支持的则设置为<code>clinetWidth/100</code>。然后页面布局的时候，还是使用 rem 来计算尺寸：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">如果支持 vw，那么 1rem 实际等于 1vw，相当于我们直接使用了 vw 单位；</li>
+<li style="font-size: 20px; line-height: 38px;">不支持 vw，1rem 等于<code>clientWidth / 100</code>，相当于自己实现了 vw 单位。</li>
+</ol>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// 此段代码需要放到html页面 head 中</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>doc<span class="token punctuation">,</span> win<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 创建一个元素，检测是否支持1vw</span>
+    <span class="token keyword">var</span> dummy <span class="token operator">=</span> doc<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'_'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>style<span class="token punctuation">;</span>
+    dummy<span class="token punctuation">.</span>width <span class="token operator">=</span> <span class="token string">'1vw'</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>dummy<span class="token punctuation">.</span>width<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 设置root fontsize 为1vw</span>
+        doc<span class="token punctuation">.</span>documentElement<span class="token punctuation">.</span>style<span class="token punctuation">.</span>fontSize <span class="token operator">=</span> <span class="token string">'1vw'</span><span class="token punctuation">;</span>
+        <span class="token comment">// 支持就不在做处理</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 如果不支持，那么就用 JavaScript 来计算 font-size</span>
+    <span class="token keyword">var</span> docEl <span class="token operator">=</span> doc<span class="token punctuation">.</span>documentElement<span class="token punctuation">,</span>
+        resizeEvt <span class="token operator">=</span> <span class="token string">'orientationchange'</span> <span class="token keyword">in</span> win <span class="token operator">?</span> <span class="token string">'orientationchange'</span> <span class="token punctuation">:</span> <span class="token string">'resize'</span><span class="token punctuation">,</span>
+        <span class="token function-variable function">recalc</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> clientWidth <span class="token operator">=</span> docEl<span class="token punctuation">.</span>clientWidth<span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>clientWidth<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            docEl<span class="token punctuation">.</span>style<span class="token punctuation">.</span>fontSize <span class="token operator">=</span> clientWidth <span class="token operator">/</span> <span class="token number">100</span> <span class="token operator">+</span> <span class="token string">'px'</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token comment">// 初始化 font-size</span>
+    <span class="token function">recalc</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 添加事件绑定</span>
+    win<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span>resizeEvt<span class="token punctuation">,</span> recalc<span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span>document<span class="token punctuation">,</span> window<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在我们实际项目中，为了区分 rem 和 vw，专门引入了一个新的单位<code>pr</code>（再次类似小程序的 rpx），这样我们写 pr 的时候，经过postcss 处理会被转换成对应的 rem，而不是直接写 rem（防止混淆，万一真的用到 rem 或者 vw 呢），为了转换<code>pr</code>单位，这里引入了一个postcss插件：<a href="https://www.npmjs.com/package/postcss-plugin-pr2rem">postcss-plugin-pr2rem</a>。假设我们拿到一个以 iPhone 6 Plus 为基准的视觉稿，宽度为 <code>1242px</code>，视觉稿上有个 <code>621px</code> 宽度的 div，那么html <code>font-size=1vw</code>，所以我们写 CSS 则根据实际宽度来写：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector">div</span><span class="token punctuation">{</span>
+    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">621</span>pr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后安装<a href="https://www.npmjs.com/package/postcss-plugin-pr2rem">postcss-plugin-pr2rem</a>，</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> i -D postcss-plugin-pr2rem
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">并在 postcsss.config.js 中配置 <a href="https://www.npmjs.com/package/postcss-plugin-pr2rem">postcss-plugin-pr2rem</a>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> pr2rem <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'postcss-plugin-pr2rem'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> pr2remConfig <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 设计图为1242px，一份 root 对应着rootWidth/100=12.42px</span>
+    rootValue<span class="token punctuation">:</span> <span class="token number">12.42</span><span class="token punctuation">,</span>
+    <span class="token comment">// 这里是基本单位，前面设置了1vw</span>
+    unitPrecision<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    propWhiteList<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    propBlackList<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'font-size'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    selectorBlackList<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    ignoreIdentifier<span class="token punctuation">:</span> <span class="token string">'00'</span><span class="token punctuation">,</span>
+    replace<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    mediaQuery<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    minPixelValue<span class="token punctuation">:</span> <span class="token number">0</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token function">pr2rem</span><span class="token punctuation">(</span>pr2remConfig<span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">那么执行 Webpack 打包之后，对应的代码变成：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token comment">/* input */</span>
+<span class="token selector">div</span><span class="token punctuation">{</span>
+    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">621</span>pr<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">/* output */</span>
+<span class="token selector">div </span><span class="token punctuation">{</span>
+    <span class="token property">width</span><span class="token punctuation">:</span> <span class="token number">50</span>rem<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本文主要介绍 vw 和 rem 两个 css3规范的新单位，并且通过介绍 rem 布局原理，逐步推导出使用<code>vw</code>+<code>rem</code>的新移动适配方案，最后介绍了使用 Webpack 和 postcss 插件来实现自动转换 rem 的方式。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<p style="font-size: 20px; line-height: 38px;">你们项目是怎么实现移动屏幕适配的？</p>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/286">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    Webpack 的模块热替换做了什么？
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/288">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    实战：手写一个 markdown-loader
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

@@ -1,0 +1,257 @@
+<html><head><meta charset="utf-8"><title>封装接口请求-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/35" target="_blank">零基础学透 TypeScript</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 6-2 封装接口请求
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                封装接口请求
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-25 10:03:43
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img3.mukewang.com/5d37f1b1000127b506400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">加紧学习，抓住中心，宁精勿杂，宁专勿多。 <p class="author">—— 周恩来</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在开发中广泛使用的axios调用接口，为了更好地调用，做一些全局的拦截，我们通常会对其进行一下封装，本小节我们就来看下如何使用TypeScript对它进行封装，使其同时能够有很好的类型支持。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我们需要安装axios，如何安装依赖我们在1.3小节学习过了，这里直接安装：</p>
+</div><div class="cl-preview-section"><pre class="  language-shell"><code class="prism  language-shell">npm install axios
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在src文件夹下创建<em>utils</em>文件夹，然后在utils文件夹创建*axios.ts文件，axios这个插件自带声明文件，所以我们不需要另外安装了。先来看下最基础的封装：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">import</span> axios<span class="token punctuation">,</span> <span class="token punctuation">{</span> AxiosInstance<span class="token punctuation">,</span> AxiosRequestConfig<span class="token punctuation">,</span> AxiosPromise<span class="token punctuation">,</span>AxiosResponse <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'axios'</span><span class="token punctuation">;</span> <span class="token comment">// 引入axios和定义在node_modules/axios/index.ts文件里的类型声明</span>
+
+<span class="token keyword">class</span> <span class="token class-name">HttpRequest</span> <span class="token punctuation">{</span> <span class="token comment">// 定义一个接口请求类，用于创建一个axios请求实例</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> baseUrl<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 这个类接收一个字符串参数，是接口请求的基本路径</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>baseUrl <span class="token operator">=</span> baseUrl<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">public</span> <span class="token function">request</span><span class="token punctuation">(</span>options<span class="token punctuation">:</span> AxiosRequestConfig<span class="token punctuation">)</span><span class="token punctuation">:</span> AxiosPromise <span class="token punctuation">{</span> <span class="token comment">// 我们实际调用接口的时候调用实例的这个方法，他返回一个AxiosPromise</span>
+    <span class="token keyword">const</span> instance<span class="token punctuation">:</span> AxiosInstance <span class="token operator">=</span> axios<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// 这里使用axios.create方法创建一个axios实例，他是一个函数，同时这个函数包含多个属性，就像我们前面讲的计数器的例子</span>
+    options <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">mergeConfig</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token comment">// 合并基础路径和每个接口单独传入的配置，比如url、参数等</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">interceptors</span><span class="token punctuation">(</span>instance<span class="token punctuation">,</span> options<span class="token punctuation">.</span>url<span class="token punctuation">)</span> <span class="token comment">// 调用interceptors方法使拦截器生效</span>
+    <span class="token keyword">return</span> <span class="token function">instance</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token comment">// 最后返回AxiosPromise</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">private</span> <span class="token function">interceptors</span><span class="token punctuation">(</span>instance<span class="token punctuation">:</span> AxiosInstance<span class="token punctuation">,</span> url<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 定义这个函数用于添加全局请求和响应拦截逻辑</span>
+    <span class="token comment">// 在这里添加请求和响应拦截</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">private</span> <span class="token function">mergeConfig</span><span class="token punctuation">(</span>options<span class="token punctuation">:</span> AxiosRequestConfig<span class="token punctuation">)</span><span class="token punctuation">:</span> AxiosRequestConfig <span class="token punctuation">{</span> <span class="token comment">// 这个方法用于合并基础路径配置和接口单独配置</span>
+    <span class="token keyword">return</span> Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token punctuation">{</span> baseURL<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>baseUrl <span class="token punctuation">}</span><span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> HttpRequest<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们封装了这个类之后，里面的baseUrl一般本地开发环境的基础路径和线上生产环境的基础路径是不一样的，所以可以根据当前是开发环境还是生产环境做判断，应用不同的基础路径。这里我们要写在一个配置文件里，我们在<em>src</em>文件夹下创建一个<em>config</em>文件夹，然后在这个文件夹创建一个<em>index.ts</em>文件，在里面配置生产和开发环境接口基础路径：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// src/config/index.ts</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token punctuation">{</span>
+    api<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        devApiBaseUrl<span class="token punctuation">:</span> <span class="token string">'/test/api/xxx'</span><span class="token punctuation">,</span>
+        proApiBaseUrl<span class="token punctuation">:</span> <span class="token string">'/api/xxx'</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后我们在axios.ts文件里直接引入接口配置，然后判断当前环境：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// ... 其他代码省略</span>
+<span class="token keyword">import</span> config <span class="token keyword">from</span> <span class="token string">'@/config'</span><span class="token punctuation">;</span> <span class="token comment">// @代表src一级目录，是我们在vue.config.js文件里配置的</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> api<span class="token punctuation">:</span> <span class="token punctuation">{</span> devApiBaseUrl<span class="token punctuation">,</span> proApiBaseUrl <span class="token punctuation">}</span> <span class="token punctuation">}</span> <span class="token operator">=</span> config<span class="token punctuation">;</span>
+<span class="token keyword">const</span> apiBaseUrl <span class="token operator">=</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span>NODE_ENV <span class="token operator">===</span> <span class="token string">'production'</span> <span class="token operator">?</span> proApiBaseUrl <span class="token punctuation">:</span> devApiBaseUrl<span class="token punctuation">;</span>
+<span class="token comment">// process.env.NODE_ENV是vue服务内置的环境变量，有两个值，当本地开发时是development，当打包时是production</span>
+<span class="token comment">// ... 其他代码省略</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们就可以将这个apiBaseUrl作为默认值传入HttpRequest的参数：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// ...</span>
+<span class="token keyword">class</span> <span class="token class-name">HttpRequest</span> <span class="token punctuation">{</span> <span class="token comment">// 定义一个接口请求类，用于创建一个axios请求实例</span>
+  <span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> baseUrl<span class="token punctuation">:</span> <span class="token keyword">string</span> <span class="token operator">=</span> apiBaseUrl<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 这个类接收一个字符串参数，是接口请求的基本路径</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>baseUrl <span class="token operator">=</span> baseUrl<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">// ...</span>
+<span class="token comment">// ...</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们来完善拦截器，在类中interceptors方法内添加请求拦截器和响应拦截器，实现对所有接口请求的统一处理：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">private</span> <span class="token function">interceptors</span><span class="token punctuation">(</span>instance<span class="token punctuation">:</span> AxiosInstance<span class="token punctuation">,</span> url<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 定义这个函数用于添加全局请求和响应拦截逻辑</span>
+    <span class="token comment">// 在这里添加请求和响应拦截</span>
+    instance<span class="token punctuation">.</span>interceptors<span class="token punctuation">.</span>request<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span><span class="token punctuation">(</span>config<span class="token punctuation">:</span> AxiosRequestConfig<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token comment">// 接口请求的所有配置，都在这个config对象中，他的类型是AxiosRequestConfig，你可以看到他有哪些字段</span>
+      <span class="token comment">// 如果你要修改接口请求配置，需要修改 axios.defaults 上的字段值</span>
+      <span class="token keyword">return</span> config
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">reject</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    instance<span class="token punctuation">.</span>interceptors<span class="token punctuation">.</span>response<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span><span class="token punctuation">(</span>res<span class="token punctuation">:</span> AxiosResponse<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> <span class="token punctuation">{</span> data <span class="token punctuation">}</span> <span class="token operator">=</span> res <span class="token comment">// res的类型是AxiosResponse&lt;any&gt;，包含六个字段，其中data是服务端返回的数据</span>
+      <span class="token keyword">const</span> <span class="token punctuation">{</span> code<span class="token punctuation">,</span> msg <span class="token punctuation">}</span> <span class="token operator">=</span> data <span class="token comment">// 通常服务端会将响应状态码、提示信息、数据等放到返回的数据中</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>code <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">// 这里我们在服务端将正确返回的状态码标为0</span>
+        console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>msg<span class="token punctuation">)</span> <span class="token comment">// 如果不是0，则打印错误信息，我们后面讲到UI组件的时候，这里可以使用消息窗提示</span>
+      <span class="token punctuation">}</span>
+      <span class="token keyword">return</span> res <span class="token comment">// 返回数据</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span> <span class="token comment">// 这里是遇到报错的回调</span>
+      <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">reject</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">请求时的拦截通过给<code>instance.interceptors.request.use</code>传入回调函数来处理，这个回调函数有一个参数，就是这次请求的配置对象。如果你需要修改请求的配置，需要修改<code>axios.defaults</code>上的字段，来修改全局配置。比如你要在header中添加字段"Content-Type"，需要这样添加：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript">axios<span class="token punctuation">.</span>defaults<span class="token punctuation">.</span>headers<span class="token punctuation">.</span>post<span class="token punctuation">[</span><span class="token string">'Content-Type'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'application/x-www-form-urlencoded'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">到这里我们这个axios请求类就封装好了，上面我们讲了一般服务端会将状态码、提示信息和数据封装在一起，然后作为数据返回，所以我们调用所有api请求返回的数据格式都是一样的，那么我们就可以定义一个接口来指定返回的数据的结构，我们在<em>src/utils/axios.ts</em>文件中定义<code>class HttpRequest</code>前加一个接口定义，并且导出：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ResponseData</span> <span class="token punctuation">{</span>
+  code<span class="token punctuation">:</span> <span class="token keyword">number</span>
+  data<span class="token operator">?</span><span class="token punctuation">:</span> <span class="token keyword">any</span>
+  msg<span class="token punctuation">:</span> <span class="token keyword">string</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">你可以根据你服务端实际返回的情况，来定义这个接口ResponseData，我这里data字段设为可选的。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们来简单使用一下。在<em>src</em>文件夹下创建一个<em>api</em>文件夹，然后再这个文件夹创建一个<em>index.ts</em>文件，在这里创建请求实例：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// src/api/index.ts</span>
+<span class="token keyword">import</span> HttpRequest <span class="token keyword">from</span> <span class="token string">'@/utils/axios'</span>
+<span class="token keyword">export</span> <span class="token operator">*</span> <span class="token keyword">from</span> <span class="token string">'@/utils/axios'</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">new</span> <span class="token class-name">HttpRequest</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们把这个请求类引进来，然后默认导出一个这个类的实例。后面我们要进行接口请求的时候，要对接口进行分类，比如和用户相关的，和数据相关的等等。这里我们先添加一个登陆接口的请求，所以在<em>api</em>文件夹下创建一个<em>user.ts</em>文件，在这里创建一个登陆接口请求方法：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// src/api/user.ts</span>
+<span class="token keyword">import</span> axios<span class="token punctuation">,</span> <span class="token punctuation">{</span> ResponseData <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./index'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> AxiosPromise <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'axios'</span>
+
+<span class="token keyword">interface</span> <span class="token class-name">LoginReqArguInterface</span> <span class="token punctuation">{</span>
+  user_name<span class="token punctuation">:</span> <span class="token keyword">string</span><span class="token punctuation">;</span>
+  password<span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token operator">|</span><span class="token keyword">string</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> loginReq <span class="token operator">=</span> <span class="token punctuation">(</span>data<span class="token punctuation">:</span> LoginReqArguInterface<span class="token punctuation">)</span><span class="token punctuation">:</span> AxiosPromise<span class="token operator">&lt;</span>ResponseData<span class="token operator">&gt;</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> axios<span class="token punctuation">.</span><span class="token function">request</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    url<span class="token punctuation">:</span> <span class="token string">'/api/user/login'</span><span class="token punctuation">,</span>
+    data<span class="token punctuation">,</span>
+    method<span class="token punctuation">:</span> <span class="token string">'POST'</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里我们封装登录请求方法<em>loginReq</em>，指定他需要一个参数，参数类型要符合我们定义的<code>LoginReqArguInterface</code>接口指定的结构，这个方法返回一个类型为<code>AxiosPromise</code>的Promise，AxiosPromise这个接口是axios声明文件内置的类型，他可以传入一个泛型变量参数，用于指定api请求返回的结果中data字段的类型。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">为什么我们要这样封装api的请求，而不是直接在需要调用接口的地方使用<code>axios.get</code>或者<code>axios.request</code>这些方法直接请求呢？这是因为我们一个api请求可能多个地方需要用到，这里的登录接口复用性很低，但是一些其他接口比如获取数据的接口，可能多个地方会用到，所以我们封装一下，可以统一管理，以后接口升级，就只需要改一个地方就可以了。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们调用一个这个请求试一下，我们在<em>src/views/Home.vue</em>文件里先调用一下，只是为了先感受一下调用请求的方式，登录接口我们会在下个小节放到登录页实现。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">打开<em>Home.vue</em>文件后，我们首先要引入这个请求方法：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{</span> loginReq <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'@/api/user'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后下面我们在Home这个组件类里添加mounted声明周期钩子函数，在这里调用这个api请求方法：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">class</span> <span class="token class-name">Home</span> <span class="token keyword">extends</span> <span class="token class-name">Vue</span> <span class="token punctuation">{</span>
+  <span class="token keyword">public</span> <span class="token function">mounted</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">loginReq</span><span class="token punctuation">(</span><span class="token punctuation">{</span> user_name<span class="token punctuation">:</span> <span class="token string">'Lison'</span><span class="token punctuation">,</span> password<span class="token punctuation">:</span> <span class="token number">123</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>res<span class="token punctuation">.</span>data<span class="token punctuation">.</span>code<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在编写这些代码的时候，你可以看到，当你书写<code>loginReq()</code>之后，编辑器提示你：<code>Expected 1 arguments, but got 0.</code>，这是因为我们在定义loginReq的时候指定了一个参数，当你传入一个空对象<code>{}</code>的时候，编辑器会提示你：<code>Type '{}' is missing the following properties from type 'LoginReqArguInterface': user_name, password</code>，这是因为我们指定了参数必须包含user_name和password两个字段。这样我们封装好api请求方法后，任何人使用我们的请求方法，都可以得到很好的代码提示。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">调用这个方法后他的返回值是一个Promise，所以我们在返回值上调用then方法，他传入一个回调函数，这个回调函数有一个参数，类型是<code>AxiosResponse</code>，然后你会发现，当我们输入在回调函数中使用console.log()打印东西时，当我们输入<code>res</code>然后输入<code>.</code>之后，编辑器列出了六个可访问的属性：data、status、statusText、headers、config和request，当我们选中<code>data</code>然后输入<code>.</code>后，编辑器列出了三个可访问属性：code、data和msg，这三个是我们自己通过接口<code>ResponseData</code>定义的。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当然现在你调用这个接口肯定会报404错误，因为我们没有后端服务，下个小节我们会使用<strong>mockjs</strong>来拦截请求，用来在前端模拟响应api请求，然后实现一个登录页，根据api接口返回的结果判断是否登录成功。</p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/371">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    搭建基础项目
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/373">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    实现登录页并用Mock响应请求
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div><script language="javascript">
+		self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',50000);
+	</script></div></body></html>

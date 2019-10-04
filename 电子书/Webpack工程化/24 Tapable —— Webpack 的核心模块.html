@@ -1,0 +1,722 @@
+<html><head><meta charset="utf-8"><title>Tapable —— Webpack 的核心模块-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 4-2 Tapable —— Webpack 的核心模块
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                Tapable —— Webpack 的核心模块
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-26 13:30:29
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img1.mukewang.com/5cd9645100016fb206400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">立志是事业的大门，工作是登门入室的的旅途。<p class="author">——巴斯德</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 工程相当庞大，但 Webpack 本质上是一种事件流机制。通过事件流将各种插件串联起来，最终完成 Webpack 的全流程，而实现事件流机制的核心是今天要讲的<a href="https://www.npmjs.com/package/tapable">Tapable 模块</a>。Webpack 负责编译的 Compiler 和创建 Bundle 的 Compilation 都是继承自 Tapable。所以在讲 Webpack 工作流程之前，我们需要先掌握 Tapable。</p>
+</div><div class="cl-preview-section"><h2 id="事件监听和发射器" style="font-size: 30px;">事件监听和发射器</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们都知道 Node.js 特点提到<strong>事件驱动</strong>，这是因为 Node.js 本身利用 JavaScript 的语言特点实现了自定义的事件回调。Node.js 内部一个事件发射器 <code>EventEmitter</code>，通过这个类，可以进行事件监听与发射。这个也是 Node.js 的核心模块，很多 Node.js 内部模块都是继承自它，或者引用了它。</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> EventEmitter <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'events'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>EventEmitter<span class="token punctuation">;</span>
+<span class="token keyword">const</span> event <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">EventEmitter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+event<span class="token punctuation">.</span><span class="token function">on</span><span class="token punctuation">(</span><span class="token string">'event_name'</span><span class="token punctuation">,</span> arg <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'event_name fire'</span><span class="token punctuation">,</span> arg<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    event<span class="token punctuation">.</span><span class="token function">emit</span><span class="token punctuation">(</span><span class="token string">'event_name'</span><span class="token punctuation">,</span> <span class="token string">'hello world'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面代码就是事件发射器的用法。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 核心库 Tapable 的原理和 EventEmitter 类似，但是功能更强大，包括多种类型，通过事件的注册和监听，触发 Webpack 生命周期中的函数方法。在Webpack 中，tapable 都是放到对象的<code>hooks</code>上，所以我们叫它们钩子。翻阅 Webpack 的源码时，会发现很多类似下面的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// webpack 4.29.6</span>
+<span class="token comment">// lib/compiler</span>
+<span class="token keyword">class</span> <span class="token class-name">Compiler</span> <span class="token keyword">extends</span> <span class="token class-name">Tapable</span> <span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span>context<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">super</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>hooks <span class="token operator">=</span> <span class="token punctuation">{</span>
+            shouldEmit<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncBailHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            done<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'stats'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            additionalPass<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            beforeRun<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compiler'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            run<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compiler'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            emit<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            afterEmit<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+            thisCompilation<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">,</span> <span class="token string">'params'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            compilation<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">,</span> <span class="token string">'params'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            normalModuleFactory<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'normalModuleFactory'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            contextModuleFactory<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'contextModulefactory'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+            beforeCompile<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'params'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            compile<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'params'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            make<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncParallelHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            afterCompile<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compilation'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+            watchRun<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">AsyncSeriesHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compiler'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            failed<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'error'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            invalid<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'filename'</span><span class="token punctuation">,</span> <span class="token string">'changeTime'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            watchClose<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+
+            environment<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            afterEnvironment<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            afterPlugins<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'compiler'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            entryOption<span class="token punctuation">:</span> <span class="token keyword">new</span> <span class="token class-name">SyncBailHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'context'</span><span class="token punctuation">,</span> <span class="token string">'entry'</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这些代码就是一个类或者函数完整生命周期需要**「走过的路」**。所有的 Webpack 代码，虽然代码量很大，但是从<code>hook</code>找生命周期事件点，然后通过 Hook 名称，基本就可以猜出大概流程。</p>
+</div><div class="cl-preview-section"><h2 id="tapable-中-hook-的类型" style="font-size: 30px;">Tapable 中 Hook 的类型</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<a href="https://github.com/webpack/tapable/blob/master/README.md">Tapable 的文档</a>中显示了，Tapable 分为以下类型：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// tapable 1.1.1</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span>
+    SyncHook<span class="token punctuation">,</span>
+    SyncBailHook<span class="token punctuation">,</span>
+    SyncWaterfallHook<span class="token punctuation">,</span>
+    SyncLoopHook<span class="token punctuation">,</span>
+    AsyncParallelHook<span class="token punctuation">,</span>
+    AsyncParallelBailHook<span class="token punctuation">,</span>
+    AsyncSeriesHook<span class="token punctuation">,</span>
+    AsyncSeriesBailHook<span class="token punctuation">,</span>
+    AsyncSeriesWaterfallHook
+<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Hook 类型可以分为同步（<code>Sync</code>）和异步（<code>Async</code>），异步又分为并行和串行：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d076a520001811512870187.png" alt="图片描述" data-original="http://img.mukewang.com/5d076a520001811512870187.png" class="" style="cursor: pointer;"><br>
+根据使用方式来分，又可以分为<code>Basic</code>、<code>Waterfal</code>、<code>Bail</code>和<code>Loop</code>四类，每类 Hook 都有自己的使用要点：</p>
+</div><div class="cl-preview-section"><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>使用要点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Basic</code></td>
+<td>基础类型，不关心监听函数的返回值，不根据返回值做事情</td>
+</tr>
+<tr>
+<td><code>Bail</code></td>
+<td>保险式，只要监听函数中有返回值（不为<code>undefined</code>），则跳过之后的监听函数</td>
+</tr>
+<tr>
+<td><code>Waterfal</code></td>
+<td>瀑布式，上一步的返回值继续交给下一步处理和使用</td>
+</tr>
+<tr>
+<td><code>Loop</code></td>
+<td>循环类型，如果该监听函数返回 <code>true</code> 则这个监听函数会反复执行，如果返回 <code>undefined</code> 则退出循环</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="cl-preview-section"><h3 id="basic-类型-hook"><code>Basic</code> 类型 Hook</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">基础类型包括<code>SyncHook</code>、<code>AsyncParallelHook</code>和<code>AsyncSeriesHook</code>，这类 Hook 不关心函数的返回值，会一直执行到底。下面以<code>SyncHook</code>为例来说明下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> <span class="token punctuation">{</span>SyncHook<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 所有的构造函数都接收一个可选的参数，这个参数是一个参数名的字符串数组</span>
+<span class="token comment">// 1. 这里array的字符串随便填写，但是array的长度必须与实际要接受参数个数保持一致；</span>
+<span class="token comment">// 2. 如果回调不接受参数，可以传入空数组。</span>
+<span class="token comment">// 后面类型都是这个规则，不再做过多说明</span>
+<span class="token keyword">const</span> hook <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 添加监听</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'1'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// tap 的第一个参数是用来标识`call`传入的参数</span>
+    <span class="token comment">// 因为new的时候只的array长度为1</span>
+    <span class="token comment">// 所以这里只得到了`call`传入的第一个参数，即Webpack</span>
+    <span class="token comment">// arg1 为 undefined</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token string">'1'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'2'</span><span class="token punctuation">,</span> arg0 <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'3'</span><span class="token punctuation">,</span> arg0 <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 传入参数，触发监听的函数回调</span>
+<span class="token comment">// 这里传入两个参数，但是实际回调函数只得到一个</span>
+hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'Webpack'</span><span class="token punctuation">,</span> <span class="token string">'Tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 执行结果:</span>
+<span class="token comment">/*
+Webpack undefined 1 // 传入的参数需要和new实例的时候保持一致，否则获取不到多传的参数
+Webpack 2
+Webpack 3
+*/</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的代码可以得出结论：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">在实例化<code>SyncHook</code>传入的数组参数实际是只用了长度，跟实际内容没有关系；</li>
+<li style="font-size: 20px; line-height: 38px;">执行<code>call</code>时，入参个数跟实例化时数组长度相关；</li>
+<li style="font-size: 20px; line-height: 38px;">回调栈是按照「先入先出」顺序执行的（这里叫回调队列更合适，队列是先入先出）；</li>
+<li style="font-size: 20px; line-height: 38px;">功能跟 EventEmitter 类似。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">详细的流程图如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d076a8b000157ca02800491.png" alt="图片描述" data-original="http://img.mukewang.com/5d076a8b000157ca02800491.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><h3 id="bail-类型-hook"><code>Bail</code> 类型 Hook</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>Bail</code>类型的 Hook 包括：<code>SyncBailHook</code>、<code>AsyncSeriesBailHook</code>、<code>AsyncParallelBailHook</code>。<code>Bail</code>类型的 Hook 也是按回调栈顺序一次执行回调，但是如果其中一个回调函数返回结果<code>result !== undefined</code> 则退出回调栈调。代码示例如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> <span class="token punctuation">{</span>SyncBailHook<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> hook <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncBailHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'1'</span><span class="token punctuation">,</span> name <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'2'</span><span class="token punctuation">,</span> name <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token string">'stop'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'3'</span><span class="token punctuation">,</span> name <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'hello'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">/* output
+hello 1
+hello 2
+ */</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的代码可以得出结论：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>BailHook</code> 中的回调是顺序执行的；</li>
+<li style="font-size: 20px; line-height: 38px;">调用<code>call</code>传入的参数会被每个回调函数都获取；</li>
+<li style="font-size: 20px; line-height: 38px;">当回调函数返回<strong>非</strong><code>undefined</code> 才会停止回调栈的调用。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">详细的流程图如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d076aae00017a9e05790501.png" alt="图片描述" data-original="http://img.mukewang.com/5d076aae00017a9e05790501.png" class="" style="cursor: pointer;"><br>
+<code>SyncBailHook</code>类似<code>Array.find</code>，找到（或者发生）一件事情就停止执行；<code>AsyncParallelBailHook</code>类似<code>Promise.race</code>这里竞速场景，只要有一个回调解决了一个问题，全部都解决了。</p>
+</div><div class="cl-preview-section"><h3 id="waterfall-类型-hook"><code>Waterfall</code> 类型 Hook</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>Waterfall</code>类型 <code>Hook</code> 包括 <code>SyncWaterfallHook</code>和<code>AsyncSeriesWaterfallHook</code>。类似<code>Array.reduce</code>效果，如果上一个回调函数的结果 <code>result !== undefined</code>，则会被作为下一个回调函数的第一个参数。代码示例如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> <span class="token punctuation">{</span>SyncWaterfallHook<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> hook <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncWaterfallHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'arg0'</span><span class="token punctuation">,</span> <span class="token string">'arg1'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'1'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'2'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">2</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'3'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 这里 arg0 = 2</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 等同于 return undefined</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'4'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 这里 arg0 = 2 还是2</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> arg1<span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'Webpack'</span><span class="token punctuation">,</span> <span class="token string">'Tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">/* console log output
+Webpack Tapable 1
+1 'Tapable' 2
+2 'Tapable' 3
+2 'Tapable' 4 */</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的代码可以得出结论：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>WaterfallHook</code> 的回调函数接受的参数来自于上一个函数结果；</li>
+<li style="font-size: 20px; line-height: 38px;">调用<code>call</code>传入的<strong>第一个参数</strong>会被上一个函数的<strong>非</strong><code>undefined</code>结果给替换；</li>
+<li style="font-size: 20px; line-height: 38px;">当回调函数返回<strong>非</strong><code>undefined</code> <strong>不会</strong>停止回调栈的调用。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">详细的流程图如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d076ad000010a0a06280535.png" alt="图片描述" data-original="http://img.mukewang.com/5d076ad000010a0a06280535.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><h3 id="loop-类型-hook"><code>Loop</code> 类型 Hook</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这类 <code>Hook</code> 只有一个<code>SyncLoopHook</code>（虽然 Tapable 1.1.1版本中存在<code>AsyncSeriesLoopHook</code>，但是并没有将它 export 出来），<code>LoopHook</code>执行特点是不停地循环执行回调函数，直到所有函数结果 <code>result === undefined</code>。为了更加直观地展现 LoopHook 的执行过程，我对示例代码做了一下丰富：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> <span class="token punctuation">{</span>SyncLoopHook<span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> hook <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncLoopHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> callbackCalledCount1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> callbackCalledCount2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> callbackCalledCount3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> intent <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'callback 1'</span><span class="token punctuation">,</span> arg <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    callbackCalledCount1<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>callbackCalledCount1 <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        callbackCalledCount1 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        intent <span class="token operator">-=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;/callback-1&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;callback-1&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        intent <span class="token operator">+=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token string">'callback-1'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'callback 2'</span><span class="token punctuation">,</span> arg <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    callbackCalledCount2<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>callbackCalledCount2 <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        callbackCalledCount2 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        intent <span class="token operator">-=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;/callback-2&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;callback-2&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        intent <span class="token operator">+=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token string">'callback-2'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'callback 3'</span><span class="token punctuation">,</span> arg <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    callbackCalledCount3<span class="token operator">++</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>callbackCalledCount3 <span class="token operator">===</span> <span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        callbackCalledCount3 <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        intent <span class="token operator">-=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;/callback-3&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token string">'&lt;callback-3&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        intent <span class="token operator">+=</span> <span class="token number">4</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> <span class="token string">'callback-3'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'args'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">intentLog</span><span class="token punctuation">(</span><span class="token operator">...</span>text<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Array</span><span class="token punctuation">(</span>intent<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token operator">...</span>text<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">/* output
+ &lt;callback-1&gt;
+ &lt;/callback-1&gt;
+ &lt;callback-2&gt;
+    &lt;callback-1&gt;
+    &lt;/callback-1&gt;
+ &lt;/callback-2&gt;
+ &lt;callback-3&gt;
+    &lt;callback-1&gt;
+    &lt;/callback-1&gt;
+    &lt;callback-2&gt;
+        &lt;callback-1&gt;
+        &lt;/callback-1&gt;
+    &lt;/callback-2&gt;
+ &lt;/callback-3&gt;
+ */</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的代码可以得出结论：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>LoopHook</code> 中的回调返回<code>undefined</code>（没有 return 其实就是<code>undefined</code>）才会跳出循环；</li>
+<li style="font-size: 20px; line-height: 38px;">所说的循环，起点是第一个回调栈的函数。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">详细的流程图如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d076aef000151c908260538.png" alt="图片描述" data-original="http://img.mukewang.com/5d076aef000151c908260538.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><h2 id="tapable-的原理解析" style="font-size: 30px;">Tapable 的原理解析</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Tapable 的执行流程可以分为四步：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">使用<code>tap*</code>对事件进行注册绑定。根据类型不同，提供三种绑定的方式：<code>tap</code>、<code>tapPromise</code>、<code>tapAsync</code>，其中<code>tapPromise</code>、<code>tapAsync</code>为异步类 Hook 的绑定方法；</li>
+<li style="font-size: 20px; line-height: 38px;">使用<code>call*</code>对事件进行触发，根据类型不同，也提供了三种触发的方式：<code>call</code>、<code>promise</code>、<code>callAsync</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">生成对应类型的代码片段（要执行的代码实际是拼字符串拼出来的）；</li>
+<li style="font-size: 20px; line-height: 38px;">生成第三步生成的代码片段。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面以<code>SyncHook</code>源码为例，分析下整个流程。先来看下<code>lib/SyncHook.js</code> 主要代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">SyncHook</span> <span class="token keyword">extends</span> <span class="token class-name">Hook</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 错误处理，防止调用者调用异步钩子</span>
+	<span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"tapAsync is not supported on a SyncHook"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+	<span class="token function">tapPromise</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"tapPromise is not supported on a SyncHook"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+    <span class="token comment">// 实现入口</span>
+	<span class="token function">compile</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		factory<span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> factory<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先所有的 Hook 都是继承自<code>Hook</code>类，针对同步 Hook 的事件绑定，如<code>SyncHook</code>、<code>SyncBailHook</code>、<code>SyncLoopHook</code>、<code>SyncWaterfallHook</code>, 会在子类中覆写基类<code>Hook</code>中 <code>tapAsync</code> 和 <code>tapPromise</code> 方法，这样做可以防止使用者在同步 Hook 中误用异步方法。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面我按照执行流程的四个步骤来分析下源码，看一下一个完整的流程中，都是调用了什么方法和怎么实现的。</p>
+</div><div class="cl-preview-section"><h3 id="绑定事件">绑定事件</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>SyncHook</code>中绑定事件是下面的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'evt1'</span><span class="token punctuation">,</span> arg0 <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'evt2'</span><span class="token punctuation">,</span> arg0 <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面我们来看下<code>tap</code>的实现，因为<code>SyncHook</code>是继承子<code>Hook</code>，所以我们找到<code>lib/Hook.js</code>中 tap 的实现代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">tap</span><span class="token punctuation">(</span>options<span class="token punctuation">,</span> fn<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 实际调用了_tap</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">_tap</span><span class="token punctuation">(</span><span class="token string">"sync"</span><span class="token punctuation">,</span> options<span class="token punctuation">,</span> fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token function">_tap</span><span class="token punctuation">(</span>type<span class="token punctuation">,</span> options<span class="token punctuation">,</span> fn<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 这里主要进行了一些参数的类型判断</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> options <span class="token operator">===</span> <span class="token string">"string"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        options <span class="token operator">=</span> <span class="token punctuation">{</span>
+            name<span class="token punctuation">:</span> options
+        <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> options <span class="token operator">!==</span> <span class="token string">"object"</span> <span class="token operator">||</span> options <span class="token operator">===</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"Invalid tap options"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> options<span class="token punctuation">.</span>name <span class="token operator">!==</span> <span class="token string">"string"</span> <span class="token operator">||</span> options<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">""</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"Missing name for tap"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> options<span class="token punctuation">.</span>context <span class="token operator">!==</span> <span class="token string">"undefined"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">deprecateContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    options <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token punctuation">{</span> type<span class="token punctuation">,</span> fn <span class="token punctuation">}</span><span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 这里是注册了Interceptors(拦截器)</span>
+    options <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">_runRegisterInterceptors</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 参数处理完之后，调用了_insert，这是关键代码</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">_insert</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过查阅<code>Hook.tap</code>和<code>Hook._tap</code>的代码，发现主要是做一些参数处理的工作，而主要的实现是在<code>Hook._insert</code>实现的：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// tapable/lib/Hook.js</span>
+<span class="token function">_insert</span><span class="token punctuation">(</span>item<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">_resetCompilation</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">let</span> before<span class="token punctuation">;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> item<span class="token punctuation">.</span>before <span class="token operator">===</span> <span class="token string">"string"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			before <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span>item<span class="token punctuation">.</span>before<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>Array<span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>item<span class="token punctuation">.</span>before<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			before <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span>item<span class="token punctuation">.</span>before<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token punctuation">}</span>
+		<span class="token keyword">let</span> stage <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+		<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> item<span class="token punctuation">.</span>stage <span class="token operator">===</span> <span class="token string">"number"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			stage <span class="token operator">=</span> item<span class="token punctuation">.</span>stage<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 这里根据 stage 对事件进行一个优先级排序</span>
+		<span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+		<span class="token keyword">while</span> <span class="token punctuation">(</span>i <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			i<span class="token operator">--</span><span class="token punctuation">;</span>
+			<span class="token keyword">const</span> x <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+			<span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">[</span>i <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">=</span> x<span class="token punctuation">;</span>
+			<span class="token keyword">const</span> xStage <span class="token operator">=</span> x<span class="token punctuation">.</span>stage <span class="token operator">||</span> <span class="token number">0</span><span class="token punctuation">;</span>
+			<span class="token keyword">if</span> <span class="token punctuation">(</span>before<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				<span class="token keyword">if</span> <span class="token punctuation">(</span>before<span class="token punctuation">.</span><span class="token function">has</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+					before<span class="token punctuation">.</span><span class="token keyword">delete</span><span class="token punctuation">(</span>x<span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+					<span class="token keyword">continue</span><span class="token punctuation">;</span>
+				<span class="token punctuation">}</span>
+				<span class="token keyword">if</span> <span class="token punctuation">(</span>before<span class="token punctuation">.</span>size <span class="token operator">&gt;</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+					<span class="token keyword">continue</span><span class="token punctuation">;</span>
+				<span class="token punctuation">}</span>
+			<span class="token punctuation">}</span>
+			<span class="token keyword">if</span> <span class="token punctuation">(</span>xStage <span class="token operator">&gt;</span> stage<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+				<span class="token keyword">continue</span><span class="token punctuation">;</span>
+			<span class="token punctuation">}</span>
+			i<span class="token operator">++</span><span class="token punctuation">;</span>
+			<span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 这是找到了回调栈</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> item<span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>_insert</code>的代码主要目的是将传入的事件推入<code>this.taps</code>数组，等同于：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'event'</span><span class="token punctuation">,</span> callback<span class="token punctuation">)</span>
+<span class="token comment">// → 即</span>
+<span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    type<span class="token punctuation">:</span> <span class="token string">'sync'</span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string">'event'</span><span class="token punctuation">,</span>
+    fn<span class="token punctuation">:</span> callback
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在基类<code>lib/Hook.js</code>的<code>constructor</code>中，可以找到一些变量初始化的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">Hook</span> <span class="token punctuation">{</span>
+	<span class="token function">constructor</span><span class="token punctuation">(</span>args <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 这里存入初始化的参数</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>_args <span class="token operator">=</span> args<span class="token punctuation">;</span>
+        <span class="token comment">// 这里就是回调栈用到的数组</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>taps <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token comment">// 拦截器数组</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>interceptors <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>call <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_call<span class="token punctuation">;</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>promise <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_promise<span class="token punctuation">;</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>callAsync <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_callAsync<span class="token punctuation">;</span>
+        <span class="token comment">// 这个比较重要，后面拼代码会用</span>
+		<span class="token keyword">this</span><span class="token punctuation">.</span>_x <span class="token operator">=</span> undefined<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这样绑定回调函数就完成了，下面看下触发回调的时候发生了什么。</p>
+</div><div class="cl-preview-section"><h3 id="事件触发">事件触发</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在事件触发，我们使用同<code>syncHook</code>的<code>call</code>方法触发一个事件：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里的<code>call</code>方法，实际是通过<code>Object.defineProperties</code>添加到<code>Hook.prototype</code>上面的：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// tapable/lib/Hook.js</span>
+<span class="token keyword">function</span> <span class="token function">createCompileDelegate</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">return</span> <span class="token keyword">function</span> <span class="token function">lazyCompileHook</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">this</span><span class="token punctuation">[</span>name<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">_createCall</span><span class="token punctuation">(</span>type<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">[</span>name<span class="token punctuation">]</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+Object<span class="token punctuation">.</span><span class="token function">defineProperties</span><span class="token punctuation">(</span>Hook<span class="token punctuation">.</span>prototype<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+	_call<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+		value<span class="token punctuation">:</span> <span class="token function">createCompileDelegate</span><span class="token punctuation">(</span><span class="token string">"call"</span><span class="token punctuation">,</span> <span class="token string">"sync"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+		configurable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+		writable<span class="token punctuation">:</span> <span class="token boolean">true</span>
+	<span class="token punctuation">}</span><span class="token punctuation">,</span>
+	_promise<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+		value<span class="token punctuation">:</span> <span class="token function">createCompileDelegate</span><span class="token punctuation">(</span><span class="token string">"promise"</span><span class="token punctuation">,</span> <span class="token string">"promise"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+		configurable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+		writable<span class="token punctuation">:</span> <span class="token boolean">true</span>
+	<span class="token punctuation">}</span><span class="token punctuation">,</span>
+	_callAsync<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+		value<span class="token punctuation">:</span> <span class="token function">createCompileDelegate</span><span class="token punctuation">(</span><span class="token string">"callAsync"</span><span class="token punctuation">,</span> <span class="token string">"async"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+		configurable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+		writable<span class="token punctuation">:</span> <span class="token boolean">true</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在上面的代码中，<code>Hook.prototype</code>通过对象定义属性方法<code>Object.defineProperties</code>定义了三个属性方法：<code>_call</code>、<code>_promise</code>、<code>_callAsync</code>。这三个属性的<code>value</code>都是通过 <code>createCompileDelegate</code>返回的一个名为<code>lazyCompileHook</code>的函数，从名字上面来猜测是「懒编译」。当我们真正调用<code>call</code>方法的时候，才会编译出真正的<code>call</code>函数。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>call</code>函数编译用到的是<code>_createCall</code>方法，这个是在 Hook 类定义的时候就定义的方法，<code>_createCall</code>实际最终调用了<code>compile</code>方法，而通过<code>Hook.js</code>代码来看，<code>compile</code>是个需要子类重写实现的方法：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// tapable/lib/Hook.js</span>
+<span class="token function">compile</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"Abstract: should be overriden"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">_createCall</span><span class="token punctuation">(</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">compile</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+        taps<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>taps<span class="token punctuation">,</span>
+        interceptors<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>interceptors<span class="token punctuation">,</span>
+        args<span class="token punctuation">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_args<span class="token punctuation">,</span>
+        type<span class="token punctuation">:</span> type
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以，在 Hook 中绕了一圈，我们又回到了<code>SyncHook</code>的类。我们再看下 SyncHook 的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// lib/SyncHook.js</span>
+<span class="token keyword">const</span> HookCodeFactory <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"./HookCodeFactory"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">SyncHookCodeFactory</span> <span class="token keyword">extends</span> <span class="token class-name">HookCodeFactory</span> <span class="token punctuation">{</span>
+	<span class="token function">content</span><span class="token punctuation">(</span><span class="token punctuation">{</span> onError<span class="token punctuation">,</span> onDone<span class="token punctuation">,</span> rethrowIfPossible <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">callTapsSeries</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+			onError<span class="token punctuation">:</span> <span class="token punctuation">(</span>i<span class="token punctuation">,</span> err<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token function">onError</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">,</span>
+			onDone<span class="token punctuation">,</span>
+			rethrowIfPossible
+		<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> factory <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncHookCodeFactory</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">SyncHook</span> <span class="token keyword">extends</span> <span class="token class-name">Hook</span> <span class="token punctuation">{</span>
+	<span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"tapAsync is not supported on a SyncHook"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token function">tapPromise</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">"tapPromise is not supported on a SyncHook"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token function">compile</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		factory<span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		<span class="token keyword">return</span> factory<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">SyncHook 的<code>compile</code>来自是<code>HookCodeFactory</code>的子类<code>SyncHookCodeFactory</code>。在<code>lib/HookCodeFactory.js</code>找到<code>setup</code>方法：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// lib/HookCodeFactory</span>
+<span class="token function">setup</span><span class="token punctuation">(</span>instance<span class="token punctuation">,</span> options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    instance<span class="token punctuation">.</span>_x <span class="token operator">=</span> options<span class="token punctuation">.</span>taps<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>t <span class="token operator">=&gt;</span> t<span class="token punctuation">.</span>fn<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里的<code>instance</code>实际就是<code>SyncHook</code>的实例，而<code>_x</code>就是我们之前绑定事件时候最后的<code>_x</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后<code>factory.create(options)</code>调用了<code>HookCodeFactory</code>的<code>create</code>方法，这个方法就是实际拼接可执行 JavaScript 代码片段的，具体看下实现：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// lib/HookCodeFactory.js</span>
+<span class="token function">create</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">let</span> fn<span class="token punctuation">;</span>
+    <span class="token keyword">switch</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>options<span class="token punctuation">.</span>type<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">case</span> <span class="token string">"sync"</span><span class="token punctuation">:</span>
+            fn <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Function</span><span class="token punctuation">(</span>
+                <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">args</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token string">'"use strict";\n'</span> <span class="token operator">+</span>
+                    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>
+                    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">content</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+                        onError<span class="token punctuation">:</span> err <span class="token operator">=&gt;</span> <span class="token template-string"><span class="token string">`throw </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>err<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">;\n`</span></span><span class="token punctuation">,</span>
+                        onResult<span class="token punctuation">:</span> result <span class="token operator">=&gt;</span> <span class="token template-string"><span class="token string">`return </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>result<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">;\n`</span></span><span class="token punctuation">,</span>
+                        resultReturns<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+                        onDone<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token string">""</span><span class="token punctuation">,</span>
+                        rethrowIfPossible<span class="token punctuation">:</span> <span class="token boolean">true</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token keyword">case</span> <span class="token string">"async"</span><span class="token punctuation">:</span>
+            fn <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Function</span><span class="token punctuation">(</span>
+                <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">args</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+                    after<span class="token punctuation">:</span> <span class="token string">"_callback"</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                <span class="token string">'"use strict";\n'</span> <span class="token operator">+</span>
+                    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span>
+                    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">content</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+                        onError<span class="token punctuation">:</span> err <span class="token operator">=&gt;</span> <span class="token template-string"><span class="token string">`_callback(</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>err<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">);\n`</span></span><span class="token punctuation">,</span>
+                        onResult<span class="token punctuation">:</span> result <span class="token operator">=&gt;</span> <span class="token template-string"><span class="token string">`_callback(null, </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>result<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">);\n`</span></span><span class="token punctuation">,</span>
+                        onDone<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token string">"_callback();\n"</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+        <span class="token keyword">case</span> <span class="token string">"promise"</span><span class="token punctuation">:</span>
+            <span class="token keyword">let</span> errorHelperUsed <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token keyword">const</span> content <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">content</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+                onError<span class="token punctuation">:</span> err <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                    errorHelperUsed <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+                    <span class="token keyword">return</span> <span class="token template-string"><span class="token string">`_error(</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>err<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">);\n`</span></span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                onResult<span class="token punctuation">:</span> result <span class="token operator">=&gt;</span> <span class="token template-string"><span class="token string">`_resolve(</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>result<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">);\n`</span></span><span class="token punctuation">,</span>
+                onDone<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token string">"_resolve();\n"</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">let</span> code <span class="token operator">=</span> <span class="token string">""</span><span class="token punctuation">;</span>
+            code <span class="token operator">+=</span> <span class="token string">'"use strict";\n'</span><span class="token punctuation">;</span>
+            code <span class="token operator">+=</span> <span class="token string">"return new Promise((_resolve, _reject) =&gt; {\n"</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>errorHelperUsed<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                code <span class="token operator">+=</span> <span class="token string">"var _sync = true;\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"function _error(_err) {\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"if(_sync)\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"_resolve(Promise.resolve().then(() =&gt; { throw _err; }));\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"else\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"_reject(_err);\n"</span><span class="token punctuation">;</span>
+                code <span class="token operator">+=</span> <span class="token string">"};\n"</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            code <span class="token operator">+=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">header</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            code <span class="token operator">+=</span> content<span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>errorHelperUsed<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                code <span class="token operator">+=</span> <span class="token string">"_sync = false;\n"</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            code <span class="token operator">+=</span> <span class="token string">"});\n"</span><span class="token punctuation">;</span>
+            fn <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Function</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">args</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> code<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">break</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">deinit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> fn<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面<code>create</code>代码中的重要参数是<code>type</code>，而<code>type</code>是由 Hook 类在 <code>createCompileDelegate("call", "sync")</code>的时候传入进去的，所以调用 <code>call</code>方法。实际<code>type</code>为<code>sync</code>，在 create 中会进入到<code>case 'sync'</code>的分支，在<code>switch</code>中用到最重要的<code>content</code>实际是在<code>class SyncHookCodeFactory extends HookCodeFactory</code>的时候定义的。这里我们就不继续追踪代码生成的逻辑实现了，我们可以直接在最后将 <code>fn</code>的源码<code>console.log</code>出来：<code>console.log(fn.toString())</code>，大致可以得到下面的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// 调用 call 的代码</span>
+<span class="token keyword">const</span> hook <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">SyncHook</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'argName0'</span><span class="token punctuation">,</span> <span class="token string">'argName1'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'evtName'</span><span class="token punctuation">,</span> arg0 <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>arg0<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+hook<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'Webpack'</span><span class="token punctuation">,</span> <span class="token string">'Tapable'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 最终得到的源码是：</span>
+<span class="token keyword">function</span> <span class="token function">anonymous</span><span class="token punctuation">(</span>argName0<span class="token punctuation">,</span> argName1
+<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+<span class="token string">"use strict"</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> _context<span class="token punctuation">;</span>
+<span class="token keyword">var</span> _x <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_x<span class="token punctuation">;</span>
+<span class="token keyword">var</span> _fn0 <span class="token operator">=</span> _x<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token function">_fn0</span><span class="token punctuation">(</span>argName0<span class="token punctuation">,</span> argName1<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面的<code>_fn0</code>实际就是我们<code>tap</code>绑定的回调函数，<code>argName0</code>和<code>argsName1</code>就是我们实例化<code>SyncHook</code>传入的形参，而我们实际只是在<code>tap</code>的回调中用了<code>arg0</code>一个参数，所以输出的结果是<code>Webpack 1</code>。</p>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Tapable 是 Webpack 的核心模块，Webpack 的所有工作流程都是通过 Tapable 来实现的。Tapable 本质上是提供了多种类型的事件绑定机制，根据不同的流程特点可以选择不同类型的 Hook 来使用。Tapable 的核心实现在绑定事件阶段跟我们平时的自定义 JavaScript事件绑定（例如EventEmitter）没有太大区别，但是在事件触发执行的时候，会临时生成可以执行的函数代码片段。通过这种实现方式，Tapable 实现了强大的事件流程控制能力，也增加了如 <code>waterfall</code>/<code>parallel</code> 系列方法，实现了异步/并行等事件流的控制能力。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">Webpack 的核心模块Tapable 有什么作用，是怎么实现的？</li>
+</ol>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/281">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    怎么调试 Webpack？
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/283">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    Webpack 的 Compiler 和 Compilation
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

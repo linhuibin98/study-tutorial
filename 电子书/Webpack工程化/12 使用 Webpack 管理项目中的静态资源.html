@@ -1,0 +1,492 @@
+<html><head><meta charset="utf-8"><title>12 使用 Webpack 管理项目中的静态资源-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 2-6 12 使用 Webpack 管理项目中的静态资源
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                12 使用 Webpack 管理项目中的静态资源
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-24 09:26:25
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img.mukewang.com/5cd9638b00019dce06400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">低头要有勇气，抬头要有底气。<p class="author">——韩寒</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">前端项目离不开各种静态资源，静态资源指前端中常用的图片、富媒体（Video、Audio 等）、字体文件等。Webpack 中静态资源也是可以作为模块直接使用的，本小节将介绍下 Webpack 中对静态资源的管理。</p>
+</div><div class="cl-preview-section"><h2 id="图片引入方式" style="font-size: 30px;">图片引入方式</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">图片是前端项目必不可少的静态资源，在日常开发中，我们可能会在下面三种情况使用图片：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">HTML 中通过<code>&lt;img&gt;</code>标签等方式引入；</li>
+<li style="font-size: 20px; line-height: 38px;">CSS 中通过<code>src</code>等方式引入；</li>
+<li style="font-size: 20px; line-height: 38px;">JavaScript 中使用图片的 URL 或者内容（比如 Canvas 等）。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最笨最直接的方式就是直接写死线上的地址，例如在页面中，我们引入<code>&lt;img&gt;</code>如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://s.bxstatic.com/foo/bar.png<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面地址的<code>http://s.bxstatic.com</code>是一个 <a href="https://baike.baidu.com/item/CDN">CDN</a> 静态域名，后面是我们完整的路径，这样我们上线的时候地址就可以直接看了，我们线下开发的时候可以提前将静态资源打包好上传到线上。这样操作想想就很费劲，而且 CDN 每次静态资源更新都要需要刷新缓存，如果我们使用 MD5 命名图片的时候就更麻烦了。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在 Webpack 中，则可以使用 loader 的方式完成图片的引入。例如在 CSS 文件中，直接相对路径使用背景图片：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./foo/bar.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 HTML 中也可以直接使用相对路径：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>../../foo/bar.png<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">还记得我们之前学过的<code>resolve.alias</code>方式创建一个目录的<code>alias</code>引用，这种方式不仅仅可以在 JavaScript 中使用，在 HTML 和 CSS 中也可以使用的：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.confg.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    resolve<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        alias<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token string">'@assets'</span><span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">'./src/assets'</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>@assets/img/foo/bar.png<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="使用-loader-来加载图片资源">使用 loader 来加载图片资源</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">怎么使用图片我们了解了，但是怎么让 Webpack 识别图片，并且能够打包输出呢？这时候就需要借助 loader 了，这里有两个 loader 可以使用：<a href="https://www.npmjs.com/package/file-loader">file-loader</a>和<a href="https://www.npmjs.com/package/url-loader">url-loader</a>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>file-loader</code>和<code>url-loader</code>是经常在一些 Webpack 配置中看到的两个 loader，并且两个 loader 在一定应用场景上是可以相互替代的，但是对于两者的区别，很少有人能够说得清楚，下面介绍下两者的区别。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><code>file-loader</code>：能够根据配置项复制使用到的资源（不局限于图片）到构建之后的文件夹，并且能够更改对应的链接；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>url-loader</code>：包含 file-loader 的全部功能，并且能够根据配置将符合配置的文件转换成 Base64 方式引入，将小体积的图片 Base64 引入项目可以减少 http 请求，也是一个前端常用的优化方式。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面以<code>url-loader</code>为例说明下 Webpack 中使用方法。首先是安装对应的 loader：<code>npm install -D url-loader</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面我们创建一个项目，目录结构如下：</p>
+</div><div class="cl-preview-section"><pre><code>├── package.json            # npm package.json
+├── src
+│   ├── assets              # 静态资源
+│   │   └── img             # 图片资源
+│   │       ├── large.png   # 大图图片 超过1M
+│   │       ├── small-02.png # 小图图片
+│   │       ├── small-03.png
+│   │       ├── small-04.png
+│   │       ├── small-05.png
+│   │       └── small.png  # 小图图片
+│   ├── index.css           # css 文件
+│   ├── index.html          # html
+│   └── index.js            # js
+└── webpack.config.js       # webpack 配置
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我们在<code>index.css</code>中引入 <code>small.png</code>，</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./assets/img/small.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后在<code>index.js</code>中引入了<code>index.css</code>和<code>large.png</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">import</span> img <span class="token keyword">from</span> <span class="token string">'./assets/img/large.png'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> style <span class="token keyword">from</span> <span class="token string">'./index.css'</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>img<span class="token punctuation">,</span> style<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后我们在<code>index.html</code>中通过<code>&lt;img&gt;</code>引入<code>large.png</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token doctype">&lt;!DOCTYPE html&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>html</span> <span class="token attr-name">lang</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>en<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>head</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">charset</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>UTF-8<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">name</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>viewport<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>width=device-width, initial-scale=1.0<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>meta</span> <span class="token attr-name">http-equiv</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>X-UA-Compatible<span class="token punctuation">"</span></span> <span class="token attr-name">content</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>ie=edge<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>title</span><span class="token punctuation">&gt;</span></span>Image<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>title</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>head</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>./assets/img/large.png<span class="token punctuation">"</span></span> <span class="token attr-name">alt</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>背景图<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>html</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候我们修改<code>webpack.config.js</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.config.js</span>
+<span class="token keyword">const</span> HTMLPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'html-webpack-plugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./src/index.js'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.html$/</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'html-loader'</span><span class="token punctuation">]</span>
+            <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.css$/</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'style-loader'</span><span class="token punctuation">,</span> <span class="token string">'css-loader'</span><span class="token punctuation">]</span>
+            <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.(png|svg|jpg|gif)$/</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                    loader<span class="token punctuation">:</span> <span class="token string">'url-loader'</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token keyword">new</span> <span class="token class-name">HTMLPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            template<span class="token punctuation">:</span> <span class="token string">'./src/index.html'</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行<code>webpack</code>之后的 log：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cedf2df0001d32a14440552.png" alt="图片描述" data-original="http://img.mukewang.com/5cedf2df0001d32a14440552.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候发现，打包出来的文件都比较大，通过查看内容发现，我们的图片被<code>Base64</code>处理了，然后直接引入了：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cedf2fb00011ac705660410.png" alt="图片描述" data-original="http://img.mukewang.com/5cedf2fb00011ac705660410.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><strong>这是因为<code>url-loader</code>本身优先是将资源<code>Base64</code>引入的</strong>。虽然图片<code>Base64</code>可以减少 http 请求，但是对于<code>1M+</code>这么大的图片都<code>Base64</code>处理，范围增加了 CSS、JavaScript 等文件的大小，而且将这么大的<code>Base64</code>反解成可以使用的图片渲染出来，时间消耗也是很大的。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以这时候需要使用<code>url-loader</code>的<code>limit</code>选项来控制<strong>不超过</strong>一定限制的图片才使用<code>Base64</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.(png|svg|jpg|gif)$/</span><span class="token punctuation">,</span>
+    use<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        loader<span class="token punctuation">:</span> <span class="token string">'url-loader'</span><span class="token punctuation">,</span>
+        options<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            limit<span class="token punctuation">:</span> <span class="token number">3</span><span class="token operator">*</span><span class="token number">1024</span> <span class="token comment">// 3k</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候再执行<code>webpack</code>，发现多打出一个<code>ad19429dc9b3ac2745c760bb1f460892.png</code>的图片，这张图片就是<code>large.png</code>的图片，因为超过了<code>limit=3*1024</code>显示所以没有被处理成<code>Base64</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cedf33000018c1f17240600.png" alt="图片描述" data-original="http://img.mukewang.com/5cedf33000018c1f17240600.png" class="" style="cursor: pointer;"><br>
+继续查看<code>index.html</code>和<code>main.js</code>（<code>index.js</code>打包出来的文件），发现我们使用<code>large.png</code>的地址都被 Webpack 自动替换成了新的路径<code>ad19429dc9b3ac2745c760bb1f460892.png</code>。</p>
+</div><div class="cl-preview-section"><h3 id="配置-cdn-域名">配置 CDN 域名</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">一般静态资源上线的时候都会放到 CDN，假设我们的 CDN 域名和路径为：<code>http://bd.bxstatic.com/img/</code>，这时候只需要修改<code>output.publicPath</code>即可：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">//..</span>
+    output<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        publicPath<span class="token punctuation">:</span> <span class="token string">'http://bd.bxstatic.com/img/'</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">//..</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">修改后执行<code>webpack</code>打包后的结果如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>body</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://bd.bxstatic.com/img/ad19429dc9b3ac2745c760bb1f460892.png<span class="token punctuation">"</span></span> <span class="token attr-name">alt</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>背景图<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>http://bd.bxstatic.com/img/main.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>body</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">说明 Webpack 为我们自动替换了路径，并且加上了 CDN 域名。</p>
+</div><div class="cl-preview-section"><h3 id="html-和-css-中使用-alias">HTML 和 CSS 中使用 alias</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">前面提到过，除了使用相对路径的方式引入静态资源，还可以使用别名（<code>alias</code>）的方式，<code>url-loader</code>也会给我们处理这种情况的引用。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">修改<code>index.html</code>和<code>index.css</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>@assets/img/large.png<span class="token punctuation">"</span></span> <span class="token attr-name">alt</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>背景图<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token function">url</span><span class="token punctuation">(</span><span class="token atrule"><span class="token rule">@assets</span>/img/small.png<span class="token punctuation">)</span> no-repeat<span class="token punctuation">;</span></span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后修改<code>webpack.config.js</code>增加<code>resolve.alias</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">//...</span>
+    resolve<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        alias<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token string">'@assets'</span><span class="token punctuation">:</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>__dirname<span class="token punctuation">,</span> <span class="token string">'./src/assets'</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">//...</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这时候执行<code>webpack</code>发现报错了：</p>
+</div><div class="cl-preview-section"><pre class="  language-log"><code class="prism  language-log">ERROR in ./src/index.css (/webpack-tutorial/node_modules/css-loader/dist/cjs.js!./src/index.css)
+Module not found: Error: Can't resolve './@assets/img/small.png' in '/webpack-tutorial/packages/chapter-02/static/src'
+ @ ./src/index.css (/webpack-tutorial/node_modules/css-loader/dist/cjs.js!./src/index.css) 4:41-75
+ @ ./src/index.css
+ @ ./src/index.js
+
+ERROR in   Error: Child compilation failed:
+  Module not found: Error: Can't resolve './@assets/img/large.png' in '/webpack-tutorial/packages/chapter-02/static/src':
+  Error: Can't resolve './@assets/img/large.png' in '/webpack-tutorial/packages/chapter-02/static/src'
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这是因为在 HTML 和 CSS 使用<code>alias</code>必须要前面添加<code>~</code>，即：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>img</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>~@assets/img/large.png<span class="token punctuation">"</span></span> <span class="token attr-name">alt</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>背景图<span class="token punctuation">"</span></span> <span class="token punctuation">/&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token function">url</span><span class="token punctuation">(</span>~<span class="token atrule"><span class="token rule">@assets</span>/img/small.png<span class="token punctuation">)</span> no-repeat<span class="token punctuation">;</span></span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">修改完后，直接执行<code>webpack</code>既可以看到正确的结果了。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：HTML 中使用<code>&lt;img&gt;</code>引入图片等静态资源的时候，需要添加<code>html-loader</code>配置，不然也不会处理静态资源的路径问题。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><a href="https://www.npmjs.com/package/svg-url-loader">svg-url-loader</a> 的工作原理类似于 <code>url-loader</code>，除了它利用 <a href="https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding">URL encoding</a> 而不是 Base64 对文件编码。对于 SVG 图片这是有效的，因为 SVG 文件恰好是纯文本，这种编码规模效应更加明显，使用方法如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.svg$/</span><span class="token punctuation">,</span>
+                loader<span class="token punctuation">:</span> <span class="token string">'svg-url-loader'</span><span class="token punctuation">,</span>
+                options<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                    <span class="token comment">// 小于 10kB(10240字节）的内联文件</span>
+                    limit<span class="token punctuation">:</span> <span class="token number">10</span> <span class="token operator">*</span> <span class="token number">1024</span><span class="token punctuation">,</span>
+                    <span class="token comment">// 移除 url 中的引号</span>
+                    <span class="token comment">// (在大多数情况下它们都不是必要的)</span>
+                    noquotes<span class="token punctuation">:</span> <span class="token boolean">true</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：svg-url-loader 拥有改善 IE 浏览器支持的选项，但是在其他浏览器中更糟糕。如果你需要兼容 IE 浏览器，设置 <code>iesafe: true</code>选项。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="图片优化" style="font-size: 30px;">图片优化</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">图片体积是个经常诟病的问题，一个页面中，完全一样内容的图片，在肉眼可见的范围内并不一定有差异但是体积却相差甚大，例如下面的图片：<br>
+<img src="https://images.guide/images/book-images/Modern-Image16-large.jpg" alt="" data-original="https://images.guide/images/book-images/Modern-Image16-large.jpg" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以图片优化也是我们在前端项目中经常做的事情，在 Webpack 中可以借助<a href="https://github.com/tcoopman/image-webpack-loader">img-webpack-loader</a>来对使用到的图片进行优化。它支持 JPG、PNG、GIF 和 SVG 格式的图片，因此我们在碰到所有这些类型的图片都会使用它。</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 安装</span>
+<span class="token function">npm</span> <span class="token function">install</span> image-webpack-loader --save-dev
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><a href="https://github.com/tcoopman/image-webpack-loader">image-webpack-loader</a>这个 loader 不能将图片嵌入应用，所以它必须和 <code>url-loader</code> 以及 <code>svg-url-loader</code> 一起使用。为了避免同时将它复制粘贴到两个规则中（一个针对 JPG/PNG/GIF 图片， 另一个针对 SVG ），我们使用 <code>enforce: 'pre'</code> 作为单独的规则涵盖在这个 loader：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.(jpe?g|png|gif|svg)$/</span><span class="token punctuation">,</span>
+                loader<span class="token punctuation">:</span> <span class="token string">'image-webpack-loader'</span><span class="token punctuation">,</span>
+                <span class="token comment">// 这会应用该 loader，在其它之前</span>
+                enforce<span class="token punctuation">:</span> <span class="token string">'pre'</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过<code>enforce: 'pre'</code>我们提高了 img-webpack-loader 的优先级，保证在<code>url-loader</code>和<code>svg-url-loader</code>之前就完成了图片的优化。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">另外<a href="https://github.com/tcoopman/image-webpack-loader">img-webpack-loader</a>默认的配置就已经适用于日常开发图片的压缩优化需求了，但是如果你想更进一步去配置它，参考<a href="https://github.com/tcoopman/image-webpack-loader">插件选项</a>。要选择指定选项，请查看国外牛人写的一个<a href="https://images.guide/">图像优化指南</a>。</p>
+</div><div class="cl-preview-section"><h2 id="css-sprite-雪碧图" style="font-size: 30px;">CSS Sprite 雪碧图</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">CSS 使用小图标图片的时候，我们经常做的优化项目是将小图标的图片合并成<a href="https://developer.mozilla.org/zh-CN/docs/Web/Guide/CSS/CSS_Image_Sprites">雪碧图</a>（CSS Sprite），雪碧图的好处是将页面用到的小图片合并到一张大图中，然后使用<code>background-position</code>重新定位，这样节省了 HTTP 的请求数。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Webpack 中我们可以借助 PostCSS 来给图片做雪碧图，经过简单的配置之后，生成雪碧图就是全自动的过程了。下面来看看怎么操作。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先安装 <a href="https://github.com/2createStudio/postcss-sprites">postcss-sprites</a></p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> <span class="token function">install</span> postcss-sprites -D
+<span class="token comment"># 如果没有安装 postcss-loader 那么也安装它</span>
+<span class="token function">npm</span> <span class="token function">install</span> postcss-loader -D
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：postcss-sprites 安装需要安装<a href="http://phantomjs.org/">phantomjs</a>可能需要正确上网。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后修改 PostCSS 的<code>postcss.config.js</code>，增加插件的调用：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// postcss.config.js</span>
+<span class="token keyword">const</span> postcssSprites <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'postcss-sprites'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token function">postcssSprites</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+            <span class="token comment">// 在这里制定了从哪里加载的图片被主动使用css sprite</span>
+            <span class="token comment">// 可以约定好一个目录名称规范，防止全部图片都被处理</span>
+            spritePath<span class="token punctuation">:</span> <span class="token string">'./src/assets/img/'</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后修改<code>webpack.config.js</code>在<code>css-loader</code>之前配置上<code>postcss-loader</code>（注意 loader 加载顺序，从后往前）：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">//webpack.config.js</span>
+<span class="token comment">// rules</span>
+
+<span class="token punctuation">{</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.css$/</span><span class="token punctuation">,</span>
+    use<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        MiniCssExtractPlugin<span class="token punctuation">.</span>loader<span class="token punctuation">,</span>
+        <span class="token string">'css-loader'</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{</span>
+            loader<span class="token punctuation">:</span> <span class="token string">'postcss-loader'</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">好了，下面我们的 CSS 中使用了<code>spritePath: './src/assets/img/'</code>路径的图片就会被处理了，例如下面的文件：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img02</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./assets/img/small-02.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img03</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./assets/img/small-03.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img04</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./assets/img/small-04.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img05</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background</span><span class="token punctuation">:</span> <span class="token url">url(./assets/img/small-05.png)</span> no-repeat<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">经过打包之后，输出 log 如下，可见生成了一个新的图片文件<code>99b0de3534d3e852ea4ce83b15cbad60.png</code>：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cedf5a30001134516960648.png" alt="图片描述" data-original="http://img.mukewang.com/5cedf5a30001134516960648.png" class="" style="cursor: pointer;"><br>
+打开<code>99b0de3534d3e852ea4ce83b15cbad60.png</code>文件，我们看到图片被合并到了一起：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5cedf5ce0001c49d03670334.png" alt="图片描述" data-original="http://img.mukewang.com/5cedf5ce0001c49d03670334.png" class="" style="cursor: pointer;"><br>
+在打开打包之后的 CSS 文件，发现内容被主动替换成了 CSS Sprite 写法，并且设置了正确的<code>background-position</code>和<code>background-size</code>了：</p>
+</div><div class="cl-preview-section"><pre class="  language-css"><code class="prism  language-css"><span class="token selector"><span class="token class">.bg-img02</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background-image</span><span class="token punctuation">:</span> <span class="token url">url(99b0de3534d3e852ea4ce83b15cbad60.png)</span><span class="token punctuation">;</span>
+    <span class="token property">background-position</span><span class="token punctuation">:</span> <span class="token number">0</span>px <span class="token number">0</span>px<span class="token punctuation">;</span>
+    <span class="token property">background-size</span><span class="token punctuation">:</span> <span class="token number">320</span>px <span class="token number">320</span>px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img03</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background-image</span><span class="token punctuation">:</span> <span class="token url">url(99b0de3534d3e852ea4ce83b15cbad60.png)</span><span class="token punctuation">;</span>
+    <span class="token property">background-position</span><span class="token punctuation">:</span> -<span class="token number">160</span>px <span class="token number">0</span>px<span class="token punctuation">;</span>
+    <span class="token property">background-size</span><span class="token punctuation">:</span> <span class="token number">320</span>px <span class="token number">320</span>px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img04</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background-image</span><span class="token punctuation">:</span> <span class="token url">url(99b0de3534d3e852ea4ce83b15cbad60.png)</span><span class="token punctuation">;</span>
+    <span class="token property">background-position</span><span class="token punctuation">:</span> <span class="token number">0</span>px -<span class="token number">160</span>px<span class="token punctuation">;</span>
+    <span class="token property">background-size</span><span class="token punctuation">:</span> <span class="token number">320</span>px <span class="token number">320</span>px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token selector"><span class="token class">.bg-img05</span> </span><span class="token punctuation">{</span>
+    <span class="token property">background-image</span><span class="token punctuation">:</span> <span class="token url">url(99b0de3534d3e852ea4ce83b15cbad60.png)</span><span class="token punctuation">;</span>
+    <span class="token property">background-position</span><span class="token punctuation">:</span> -<span class="token number">160</span>px -<span class="token number">160</span>px<span class="token punctuation">;</span>
+    <span class="token property">background-size</span><span class="token punctuation">:</span> <span class="token number">320</span>px <span class="token number">320</span>px<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="其他资源处理" style="font-size: 30px;">其他资源处理</h2>
+</div><div class="cl-preview-section"><h3 id="字体、富媒体">字体、富媒体</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">对于字体、富媒体等静态资源，可以直接使用<code>url-loader</code>或者<code>file-loader</code>进行配置即可，不需要额外的操作，具体配置内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+    <span class="token comment">// 文件解析</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.(eot|woff|ttf|woff2|appcache|mp4|pdf)(\?|$)/</span><span class="token punctuation">,</span>
+    loader<span class="token punctuation">:</span> <span class="token string">'file-loader'</span><span class="token punctuation">,</span>
+    query<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 这么多文件，ext不同，所以需要使用[ext]</span>
+        name<span class="token punctuation">:</span> <span class="token string">'assets/[name].[hash:7].[ext]'</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：如果不需要 Base64，那么可以直接使用 file-loader，需要的话就是用<code>url-loader</code>，还需要注意，如果将正则（test）放在一起，那么需要使用<code>[ext]</code>配置输出的文件名。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="数据">数据</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们项目需要加载的类似 JSON、CSV、TSV 和 XML 等数据，那么我们需要单独给它们配置相应的 loader。对 JSON 的支持实际上是内置的，类似于 Node.js，这意味着<code>import Data from'./data.json'</code>导入数据默认情况将起作用。要导入 CSV，TSV 和 XML，可以使用<a href="https://www.npmjs.com/package/csv-loader">csv-loader</a>和<a href="https://www.npmjs.com/package/xml-loader">xml-loader</a>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先是安装它们的 loader：<code>npm i -D xml-loader csv-loader</code>，然后增加文件 loader 配置如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"> <span class="token punctuation">{</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.(csv|tsv)$/</span><span class="token punctuation">,</span>
+    use<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token string">'csv-loader'</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">{</span>
+    test<span class="token punctuation">:</span> <span class="token regex">/\.xml$/</span><span class="token punctuation">,</span>
+    use<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token string">'xml-loader'</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">现在，您可以导入这四种类型的数据中的任何一种（JSON，CSV，TSV，XML），并且导入它的 Data 变量将包含已解析的 JSON 以便于使用。</p>
+</div><div class="cl-preview-section"><h2 id="title小结---" style="font-size: 30px;"><div class="summary"><h5 class="centertitle" style="font-size: 20px; line-height: 38px;">小结 </h5></div><!--title:&#23567;&#32467; --></h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节主要介绍 Webpack 中的图片、字体、富媒体、数据等多种静态资源的管理方式。页面经常用到的图片是页面的重点，Webpack 提供了很多插件和 loader 对图片进行压缩、合并（CSS Sprite）。Webpack 还会使用<code>url-loader</code>等插件，将较小的资源通过 Base64 的方式引入。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当项目足够大了之后，配置太多的静态资源处理流程也会影响 Webpack 的打包速度，想突破压缩和合并这类前端常见优化，我们可以通过让视觉人员提供最优图片格式等方式来人工解决。当然如果项目组一直没有优化的意识，担心一不小心上到线上一个很大的图片，那么使用 Webpack 来兜底也是个很不错的方案。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">Webpack 中怎么给静态资源添加上 CDN 域名？</li>
+<li style="font-size: 20px; line-height: 38px;">url-loader 和 file-loader 有什么区别？</li>
+</ol>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/269">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    11 Webpack 中使用 lint 工具来保证代码风格和质量
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/271">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    13 Webpack 中打包 HTML 和多页面配置
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

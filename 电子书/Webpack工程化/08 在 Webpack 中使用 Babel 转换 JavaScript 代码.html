@@ -1,0 +1,788 @@
+<html><head><meta charset="utf-8"><title>08 在 Webpack 中使用 Babel 转换 JavaScript 代码-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 2-2 08 在 Webpack 中使用 Babel 转换 JavaScript 代码
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                08 在 Webpack 中使用 Babel 转换 JavaScript 代码
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-24 09:25:32
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img3.mukewang.com/5cd9633d0001c94a06400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">世界上最快乐的事，莫过于为理想而奋斗。<p class="author">——苏格拉底</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 webpack 中编写 JavaScript 代码，可以使用最新的 ES 语法，而最终打包的时候，webpack 会借助 Babel 将 ES6+语法转换成在目标浏览器可执行 ES5 语法。所以 Babel 是一个重要的知识点需要掌握。</p>
+</div><div class="cl-preview-section"><h2 id="什么是-babel" style="font-size: 30px;">什么是 Babel</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel 是 JavaScript 的编译器，通过 Babel 可以将我们写的最新 ES 语法的代码轻松转换成任意版本的 JavaScript 语法。随着浏览器逐步支持 ES 标准，我们不需要改变代码，只需要修改 Babel 配置即可以适配新的浏览器。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">举例说明，下面是 ES6 箭头函数语法的代码：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>n <span class="token operator">=&gt;</span> n <span class="token operator">**</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">经过 Babel 处理后，可以转换为普通的 ES5 语法：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="babel-初体验" style="font-size: 30px;">Babel 初体验</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面来介绍下 Babel 的安装和功能及其配置文件。</p>
+</div><div class="cl-preview-section"><h3 id="使用-babel-cli-命令行工具">使用 babel-cli 命令行工具</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel 本身自己带有 CLI（Command-Line Interface，命令行界面） 工具，可以单独安装使用。下面我们在项目中安装 <code>@babel/cli</code> 和 <code>@babel/core</code>。</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token function">npm</span> i -D @babel/core @babel/cli
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后创建一个<code>babel.js</code>文件：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// babel.js</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>n <span class="token operator">=&gt;</span> n <span class="token operator">**</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后执行<code>npx babel babel.js</code>，则会看到输出的内容，<strong>此时可能会看到输出的内容跟源文件内容没有区别</strong>，这是因为没有加转换规则，下面安装<code>@babel/preset-env</code>。然后执行 CLI 的时候添加 <code>--presets</code> flag：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 安装 preset-env</span>
+<span class="token function">npm</span> i -D @babel/preset-env
+<span class="token comment"># 执行 CLI 添加--presets</span>
+npx babel babel.js --presets<span class="token operator">=</span>@babel/preset-env
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最终输出的代码就是转换为 ES5 的代码了：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token string">'use strict'</span><span class="token punctuation">;</span>
+
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">pow</span><span class="token punctuation">(</span>n<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果要输出结果到固定文件，可以使用 <code>--out-file</code> 或 <code>-o</code> 参数：<code>npx babel babel.js -o output.js</code>。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Babel 7 使用了 @babel 命名空间来区分官方包，因此以前的官方包 <code>babel-xxx</code> 改成了 <code>@babel/xxx</code>。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="配置文件">配置文件</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">除了使用命令行配置 flag 之外，Babel 还支持配置文件，配置文件支持两种：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">使用<code>package.json</code>的<code>babel</code>属性；</li>
+<li style="font-size: 20px; line-height: 38px;">在项目根目录单独创建<code>.babelrc</code>或者<code>.babelrc.js</code>文件。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">直接上对应的示例：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// package.json</span>
+<span class="token punctuation">{</span>
+    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"my-package"</span><span class="token punctuation">,</span>
+    <span class="token string">"version"</span><span class="token punctuation">:</span> <span class="token string">"1.0.0"</span><span class="token punctuation">,</span>
+    <span class="token string">"babel"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// .babelrc</span>
+<span class="token punctuation">{</span>
+    <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel会在正在被转义的文件当前目录中查找一个 <code>.babelrc</code> 文件。 如果不存在，它会向<strong>外层目录</strong>遍历目录树，直到找到一个 <code>.babelrc</code> 文件，或一个 <code>package.json</code> 文件中有 <code>"babel": {}</code> 。</p>
+</div><div class="cl-preview-section"><h4 id="env-选项" style="font-size: 26px;">env 选项</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们希望在不同的环境中使用不同的 Babel 配置，那么可以在配置文件中添加<code>env</code>选项：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  <span class="token string">"env"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"production"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+      <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">env 选项的值将从 <code>process.env.BABEL_ENV</code> 获取，如果没有的话，则获取 <code>process.env.NODE_ENV</code> 的值，它也无法获取时会设置为 <code>"development"</code>。</p>
+</div><div class="cl-preview-section"><h3 id="babel-的插件和-preset">Babel 的插件和 Preset</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel 的语法转换是通过强大的插件系统来支持的。<strong>Babel 的插件分为两类：转换插件和语法解析插件</strong>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">不同的语法对应着不同的转换插件，比如我们要将箭头函数转换为 ES5 函数写法，那么可以单独安装<code>@babel/plugin-transform-arrow-functions</code>插件，转换插件主要职责是进行语法转换的，而<strong>解析插件</strong>则是扩展语法的，比如我们要解析<code>jsx</code>这类 React 设计的特殊语法，则需要对应的 jsx 插件。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果不想一个个的添加插件，那么可以使用插件组合 preset（插件预设，插件组合更加好理解一些），最常见的 preset 是<code>@babel/preset-env</code>。之前的<code>preset</code>是按照<code>TC39</code>提案阶段来分的，比如看到<code>babel-preset-stage-1</code>代表，这个插件组合里面是支持 <code>TC39</code> Stage-1 阶段的转换插件集合。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：<code>TC39</code> 指的是技术委员会（Technical Committee）第 39 号。它是 ECMA 的一部分，ECMA 是 「ECMAScript」规范下的 JavaScript 语言标准化的机构。ES6 出来之后，<code>TC39</code>精简了提案的修订过程，新流程设计四个 Stage 阶段：</p>
+<ul>
+<li style="font-size: 20px; line-height: 38px;">Stage 0 - 设想（Strawman）：只是一个想法；</li>
+<li style="font-size: 20px; line-height: 38px;">Stage 1 - 建议（Proposal）：这是值得跟进的；</li>
+<li style="font-size: 20px; line-height: 38px;">Stage 2 - 草案（Draft）：初始规范，应该提供规范初稿；</li>
+<li style="font-size: 20px; line-height: 38px;">Stage 3 - 候选（Candidate）：不会有太大的改变，在对外发布之前只是修正一些问题；</li>
+<li style="font-size: 20px; line-height: 38px;">Stage 4 - 完成（Finished）：当规范的实现至少通过两个验收测试时，进入 Stage 4，会被包含在 ECMAScript 的下一个修订版中。</li>
+</ul>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>@babel/preset-env</code>是 Babel 官方推出的插件预设，它可以根据开发者的配置按需加载对应的插件，通过<code>@babel/preset-env</code>我们可以根据代码执行平台环境和具体浏览器的版本来产出对应的 JavaScript 代码，例如可以设置代码执行在 Node.js 8.9 或者 iOS 12 版本。</p>
+</div><div class="cl-preview-section"><h3 id="babel-polyfill">Babel polyfill</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babel 只负责进行语法转换，即将 ES6 语法转换成 ES5 语法，但是如果在 ES5 中，有些对象、方法实际在浏览器中可能是不支持的，例如：<code>Promise</code>、<code>Array.prototype.includes</code>，这时候就需要用<code>@babel/polyfill</code>来做模拟处理。<code>@babel/polyfill</code>使用方法是先安装依赖，然后在对应的文件内显性的引入：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 安装，注意因为我们代码中引入了 polyfill，所以不再是开发依赖（--save-dev，-D）</span>
+<span class="token function">npm</span> i @babel/polyfill
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在文件内直接<code>import</code>或者<code>require</code>进来：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// polyfill</span>
+<span class="token keyword">import</span> <span class="token string">'@babel/polyfill'</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="bable-runtime">Bable runtime</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>@babel/polyfill</code>虽然可以解决模拟浏览器不存在对象方法的事情，但是有以下两个问题：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">直接修改内置的原型，造成全局污染；</li>
+<li style="font-size: 20px; line-height: 38px;">无法按需引入，Webpack 打包时，会把所有的 Polyfill 都加载进来，导致产出文件过大。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">为了解决这个问题，Babel 社区又提出了<code>@babel/runtime</code>的方案，<code>@babel/runtime</code>不再修改原型，而是采用替换的方式，比如我们用 Promise，使用<code>@babel/polyfill</code>会产生一个<code>window.Promise</code>对象，而<code>@babel/runtime</code>则会生成一个<code>_Promise</code>（示例而已）来替换掉我们代码中用到的<code>Promise</code>。另外<code>@babel/runtime</code>还支持按需引入。下面以转换<code>Object.assign</code>为例，来看下<code>@babel/runtime</code>怎么使用。</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">安装依赖<code>@babel/runtime</code>：<code>npm i @babel/runtime</code> ；</li>
+<li style="font-size: 20px; line-height: 38px;">安装<code>npm i -D @babel/plugin-transform-runtime</code>作为 Babel 插件；</li>
+<li style="font-size: 20px; line-height: 38px;">安装需要转换<code>Object.assign</code>的插件：<code>npm i -D @babel/plugin-transform-object-assign</code></li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">编写一个<code>runtime.js</code>文件，内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js">Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>a<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行<code>npx babel runtime.js --plugins @babel/plugin-transform-runtime,@babel/plugin-transform-object-assign</code>，最终的输出结果是：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">import</span> _extends <span class="token keyword">from</span> <span class="token string">'@babel/runtime/helpers/extends'</span><span class="token punctuation">;</span>
+
+<span class="token function">_extends</span><span class="token punctuation">(</span>
+    <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        a<span class="token punctuation">:</span> <span class="token number">1</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">代码中自动引入了<code>@babel/runtime/helpers/extends</code>这个模块（<strong>所以要添加<code>@babel/runtime</code>依赖啊</strong>）。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>@babel/runtime</code>也不是完美的解决方案，由于<code>@babel/runtime</code>不修改原型，所以类似<code>[].includes()</code>这类使用直接使用原型方法的语法是不能被转换的。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：’@babel/polyfill’实际是<a href="https://github.com/zloirock/core-js"><code>core-js</code></a>和<a href="https://github.com/facebook/regenerator/blob/master/packages/regenerator-runtime/runtime.js"><code>regenerator-runtime</code></a>的合集，所以如果要按需引入’@babel/polyfill’的某个模块，可以直接引入对应的 core-js 模块，但是手动引入的方式还是太费劲。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="babelpreset-env"><code>@babel/preset-env</code></h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">铺垫了这么多，我们继续来讲<code>@babel/preset-env</code>，前面介绍了<code>@babel/preset-env</code>可以零配置的转化 ES6 代码，我们如果要精细化的使用<code>@babel/preset-env</code>，就需要配置对应的选项了，在<code>@babel/preset-env</code>的选项中，<code>useBuiltIns</code>和<code>target</code>是最重要的两个，<code>useBuiltIns</code>用来设置浏览器 polyfill，<code>target</code>是为了目标浏览器或者对应的环境（browser/node）。</p>
+</div><div class="cl-preview-section"><h4 id="preset-env-的-usebuiltins" style="font-size: 26px;"><code>preset-env</code> 的 <code>useBuiltIns</code></h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">前面介绍了<code>@babel/polyfill</code>和<code>@babel/runtime</code>两种方式来实现浏览器 polyfill，两种方式都比较繁琐，而且不够智能，我们可以使用<code>@babel/preset-env</code>的<code>useBuildIn</code>选项做 polyfill，这种方式简单而且智能。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>useBuiltIns</code>默认为 <code>false</code>，可以使用的值有 <code>usage</code> 和 <code>entry</code>：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      <span class="token string">"useBuiltIns"</span><span class="token punctuation">:</span> <span class="token string">"usage|entry|false"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">]</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>usage</code> 表示明确使用到的 Polyfill 引用。在一些 ES2015+ 语法不支持的环境下，每个需要用到 Polyfill 的引用时，会<strong>自动加上</strong>，例如：</li>
+</ol>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token string">'foobar'</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'foo'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">使用<code>useBuiltIns='usage'</code>编译之后，上面代码变成，真正的做到了按需加载，而且类似<code>[].includes()</code>这类直接使用原型方法的语法是能被转换的：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token string">'use strict'</span><span class="token punctuation">;</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'core-js/modules/es.array.includes'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'core-js/modules/es.object.to-string'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'core-js/modules/es.promise'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'core-js/modules/es.string.includes'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> p <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token string">'foobar'</span><span class="token punctuation">.</span><span class="token function">includes</span><span class="token punctuation">(</span><span class="token string">'foo'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><ol start="2">
+<li style="font-size: 20px; line-height: 38px;"><code>entry</code> 表示替换 <code>import "@babel/polyfill";</code> （新版本的 Babel，会提示直接引入 <code>core-js</code>或者<code>regenerator-runtime/runtime</code>来代替<code>@babel/polyfill</code>）的全局声明，然后根据<code>targets</code>中浏览器版本的支持，将 polyfill 拆分引入，仅引入有浏览器不支持的 polyfill，所以<code>entry</code> 相对<code>usage</code>使用起来相对麻烦一些，首先需要手动显性的引入<code>@babel/polyfill</code>，而且根据配置<code>targets</code>来确定输出，这样会导致代码实际用不到的 polyfill 也会被打包到输出文件，导致文件比较大。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><strong>一般情况下，个人建议直接使用<code>usage</code>就满足日常开发了。</strong></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">需要提一下的是，polyfill 用到的<code>core-js</code>是可以指定版本的，比如使用 <code>core-js@3</code>，则首先安装依赖<code>npm i -S core-js@3</code>，然后在 Babel 配置文件<code>.babelrc</code>中写上版本。</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">//.babelrc</span>
+<span class="token punctuation">{</span>
+    <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">[</span>
+            <span class="token string">"@babel/preset-env"</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">"useBuiltIns"</span><span class="token punctuation">:</span> <span class="token string">"usage"</span><span class="token punctuation">,</span>
+                <span class="token string">"corejs"</span><span class="token punctuation">:</span> <span class="token number">3</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h4 id="preset-env-的-target" style="font-size: 26px;"><code>preset-env</code> 的 <code>target</code></h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">假设希望代码中使用 ES6 的模板字面量<code>\``语法，但是实际执行代码的宿主浏览器是 IE 10 却不支持，那么我们可以使用</code>target`指定目标浏览器了。</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">"@babel/preset-env"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      <span class="token string">"targets"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"browsers"</span><span class="token punctuation">:</span> <span class="token string">"IE 10"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">]</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们代码是在 Node.js 环境执行的，则可以指定 Node.js 的版本号：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">"env"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      <span class="token string">"@babel/preset-env"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"node"</span><span class="token punctuation">:</span> <span class="token string">"8.9.3"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">]</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>targets.browsers</code> 需要使用 browserslist 的配置方法，但是其设置会被 <code>targets.[chrome, opera, edge, firefox, safari, ie, ios, android, node, electron]</code> 覆盖；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>targets.node</code> 设置为 <code>true</code> 或 <code>"current"</code> 可以根据当前 Node.js 版本进行动态转换。也可以设置为具体的数字表示需要支持的最低 Node.js 版本；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>targets.esmodules</code> 设置使用 ES Modules 语法，最新浏览器支持，这个在后面 Webpack 插件章节会详细介绍如何实现 Modern Mode。</li>
+</ol>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：browserslist 介绍和配置规则本文最后部分会介绍。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="在-webpack-中使用-babel" style="font-size: 30px;">在 Webpack 中使用 Babel</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的内容，我们已经掌握了 Babel 的基本用法，下面在 webpack 中使用 Babel 就变得很简单了，首先安装 npm 依赖，然后修改 <code>webpack.config.js</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">安装依赖包：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 安装开发依赖</span>
+<span class="token function">npm</span> i webpack babel-loader webpack-cli @babel/core @babel/preset-env @babel/plugin-transform-runtime -D
+<span class="token comment"># 将 runtime 作为依赖</span>
+<span class="token function">npm</span> i @babel/runtime -S
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">第二步创建<code>webpack.config.js</code>文件，内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// webpack.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./babel.js'</span><span class="token punctuation">,</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> <span class="token regex">/\.js$/</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                    <span class="token punctuation">{</span>
+                        loader<span class="token punctuation">:</span> <span class="token string">'babel-loader'</span><span class="token punctuation">,</span>
+                        options<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                            presets<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+                                <span class="token punctuation">[</span>
+                                    <span class="token string">'@babel/preset-env'</span><span class="token punctuation">,</span>
+                                    <span class="token punctuation">{</span>
+                                        useBuiltIns<span class="token punctuation">:</span> <span class="token string">'usage'</span>
+                                    <span class="token punctuation">}</span>
+                                <span class="token punctuation">]</span>
+                            <span class="token punctuation">]</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">]</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面的<code>webpack.config.js</code>文件直接将 Babel 的配置写到了<code>options</code>中，还可以在项目根目录下创建<code>.babelrc</code>或者使用<code>package.json</code>的 babel 字段。</p>
+</div><div class="cl-preview-section"><h2 id="babel-原理" style="font-size: 30px;">Babel 原理</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">了解了 Babel 的使用方法，接下来简单看下 Babel 的原理。Babel 是一个 JavaScript 的静态分析编译器，所谓静态分析指的是在不需要执行代码的前提下对代码进行分析和处理的过程（执行时进行代码分析叫动态分析）。要实现 Babel 从一个语法转换成另外一个语法，需要经过三个主要步骤：解析（Parse），转换（Transform），生成（Generate）。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">解析：指的是首先将代码经过词法解析和语法解析，最终生成一颗 AST（抽象语法树），在 Babel 中，语法解析器是<a href="https://github.com/babel/babylon"><code>Babylon</code></a>；</li>
+<li style="font-size: 20px; line-height: 38px;">转换：得到 AST 之后，可以对其进行遍历，在此过程中对节点进行添加、更新及移除等操作，Babel 中 AST 遍历工具是<a href="https://github.com/babel/babel/tree/master/packages/babel-traverse"><code>@babel/traverse</code></a></li>
+<li style="font-size: 20px; line-height: 38px;">生成：经过一系列转换之后得到的一颗新树，要将树转换成代码，就是生成的过程，Babel 用到的是<a href="https://github.com/babel/babel/tree/master/packages/babel-generator"><code>@babel/generator</code></a></li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5ce24a9c0001422608800228.png" alt="图片描述" data-original="http://img.mukewang.com/5ce24a9c0001422608800228.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：Babel 的语法解析器 Babylon 目前已经放到 <a href="https://github.com/babel/babel/tree/master/packages/babel-parser">@babel/parser</a> 维护，除了 Babylon， JavaScript 解析器比较著名的还有<a href="https://github.com/acornjs/acorn">acorn</a>、<a href="http://esprima.org/">Esprima</a>。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="ast">AST</h3>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">在计算机科学中，抽象语法树（Abstract Syntax Tree，AST），或简称语法树（Syntax tree），是源代码语法结构的一种抽象表示。它以树状的形式表现编程语言的语法结构，树上的每个节点都表示源代码中的一种结构。之所以说语法是“抽象”的，是因为这里的语法并不会表示出真实语法中出现的每个细节。比如，嵌套括号被隐含在树的结构中，并没有以节点的形式呈现；而类似于 <code>if-condition-then</code> 这样的条件跳转语句，可以使用带有两个分支的节点来表示。 ——维基百科</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Babylon 解析 JavaScript 得到的 AST 是符合 <a href="https://github.com/estree/estree">ESTree</a>。AST 是经过<strong>词法解析</strong>和<strong>语法解析</strong>两个步骤解析出来，组织成与程序结构对应的树状结构表示。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">例如下面的代码，可以用下图中的树来表示：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">while</span> <span class="token punctuation">(</span>b <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>a <span class="token operator">&gt;</span> b<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        a <span class="token operator">-=</span> b<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        b <span class="token operator">-=</span> a<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5ce24b340001a15e04000451.png" alt="图片描述" data-original="http://img.mukewang.com/5ce24b340001a15e04000451.png" class="" style="cursor: pointer;"></p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">也可以使用 JavaScript 对象来表示，例如下面代码（放入<code>source.js</code>文件）：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// source.js</span>
+<span class="token keyword">function</span> <span class="token function">square</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> n <span class="token operator">*</span> n<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">对应的 JavaScript 对象为：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  type<span class="token punctuation">:</span> <span class="token string">"FunctionDeclaration"</span><span class="token punctuation">,</span>
+  id<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    type<span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string">"square"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  params<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span>
+    type<span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string">"n"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  body<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    type<span class="token punctuation">:</span> <span class="token string">"BlockStatement"</span><span class="token punctuation">,</span>
+    body<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span>
+      type<span class="token punctuation">:</span> <span class="token string">"ReturnStatement"</span><span class="token punctuation">,</span>
+      argument<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        type<span class="token punctuation">:</span> <span class="token string">"BinaryExpression"</span><span class="token punctuation">,</span>
+        operator<span class="token punctuation">:</span> <span class="token string">"*"</span><span class="token punctuation">,</span>
+        left<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+          type<span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+          name<span class="token punctuation">:</span> <span class="token string">"n"</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        right<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+          type<span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+          name<span class="token punctuation">:</span> <span class="token string">"n"</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在上面的对象中，AST 的每一层都有相同结构的树分支。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：<a href="https://astexplorer.net/">AST Explorer</a> 可以在线解析 JavaScript 代码的 AST 结构，还可以在线编写转换函数，学习 AST 的好帮手。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">现在开始动手使用 <code>@babel/parse</code>来生成下 AST，将<code>square</code>函数代码放入<code>source.js</code>，然后新建一个 js 文件（index.js），内容如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token comment">// index.js</span>
+<span class="token keyword">const</span> fs <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'fs'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> babel <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/core'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> traverse <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/traverse'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token comment">// 读取 source.js内容</span>
+<span class="token keyword">let</span> source <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">readFileSync</span><span class="token punctuation">(</span><span class="token string">'./source.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 使用 babel.parse方法</span>
+babel<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token punctuation">,</span> ast<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ast就是树</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>ast<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后执行<code>node index.js</code>就可以看到对应的 JavaScript 对象表示的 AST 结构了。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Babel 中，除了基本的 JavaScript 语法，还支持扩展支持了很多其他的语法，例如 <a href="https://reactjs.org/docs/introducing-jsx.html">jsx</a>、<a href="https://flow.org/">flow</a> 等。</p>
+</div><div class="cl-preview-section"><h3 id="遍历">遍历</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果想处理 AST 那么我们就需要进行树的遍历，学过算法的应该知道树的遍历包括深度优先和广度优先。。。慢点，这里 Babel 提供了<a href="https://github.com/babel/babel/tree/master/packages/babel-traverse"><code>@babel/traverse</code></a>，可以直接来遍历，不需要我们手动来写遍历代码。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">按照上一小节的代码，继续修改<code>index.js</code>文件：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> fs <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'fs'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> babel <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/core'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> traverse <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/traverse'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">default</span><span class="token punctuation">;</span>
+
+<span class="token keyword">let</span> source <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">readFileSync</span><span class="token punctuation">(</span><span class="token string">'./source.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+babel<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token punctuation">,</span> ast<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// console.log(ast)</span>
+    <span class="token keyword">let</span> indent <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    <span class="token function">traverse</span><span class="token punctuation">(</span>ast<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 进入节点</span>
+        <span class="token function">enter</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>indent <span class="token operator">+</span> <span class="token string">'&lt;'</span> <span class="token operator">+</span> path<span class="token punctuation">.</span>node<span class="token punctuation">.</span>type <span class="token operator">+</span> <span class="token string">'&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            indent <span class="token operator">+=</span> <span class="token string">'  '</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token comment">// 退出节点</span>
+        <span class="token function">exit</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            indent <span class="token operator">=</span> indent<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>indent <span class="token operator">+</span> <span class="token string">'&lt;'</span> <span class="token operator">+</span> <span class="token string">'/'</span> <span class="token operator">+</span> path<span class="token punctuation">.</span>node<span class="token punctuation">.</span>type <span class="token operator">+</span> <span class="token string">'&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行上面代码，最终我们得到一个类似 Html 结构的树形结构：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Program</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>FunctionDeclaration</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Identifier</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Identifier</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Identifier</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Identifier</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>BlockStatement</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>ReturnStatement</span><span class="token punctuation">&gt;</span></span>
+                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>BinaryExpression</span><span class="token punctuation">&gt;</span></span>
+                    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Identifier</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Identifier</span><span class="token punctuation">&gt;</span></span>
+                    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>Identifier</span><span class="token punctuation">&gt;</span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Identifier</span><span class="token punctuation">&gt;</span></span>
+                <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>BinaryExpression</span><span class="token punctuation">&gt;</span></span>
+            <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>ReturnStatement</span><span class="token punctuation">&gt;</span></span>
+        <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>BlockStatement</span><span class="token punctuation">&gt;</span></span>
+    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>FunctionDeclaration</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>Program</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">遍历的时候，我们**进入（Enter）<strong>某个节点时会调用对应的<code>enter</code>函数，当</strong>退出（Exit）<strong>某个节点时，会调用<code>exit</code>函数。当我们谈及“进入”一个节点，实际上是说我们在访问它们， 之所以使用这样的术语是因为有一个</strong>访问者模式（Visitor）**的概念。我们还可以针对某个类型的节点进行遍历，如下面代码：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> vistors <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token function">FunctionDeclaration</span><span class="token punctuation">(</span>path<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> param <span class="token operator">=</span> path<span class="token punctuation">.</span>node<span class="token punctuation">.</span>params<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        paramName <span class="token operator">=</span> param<span class="token punctuation">.</span>name<span class="token punctuation">;</span>
+        param<span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'x'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    Identifier<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token function">enter</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Entered!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token function">exit</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Exited!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token function">traverse</span><span class="token punctuation">(</span>ast<span class="token punctuation">,</span> vistors<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">每次进入和退出函数都会接收一个<code>path</code>的参数，<code>path</code> 是表示两个节点之间连接的对象。例如，如果有下面这样一个节点及其子节点︰</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  type<span class="token punctuation">:</span> <span class="token string">"FunctionDeclaration"</span><span class="token punctuation">,</span>
+  id<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    type<span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+    name<span class="token punctuation">:</span> <span class="token string">"square"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token comment">//...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">将子节点 <code>Identifier</code> 表示为一个路径（Path）的话，看起来是这样的：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+  <span class="token string">"parent"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"FunctionDeclaration"</span><span class="token punctuation">,</span>
+    <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token operator">...</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token operator">...</span><span class="token punctuation">.</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token string">"node"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+    <span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"Identifier"</span><span class="token punctuation">,</span>
+    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"square"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>path.parent</code>为当前节点的父节点信息，<code>path.node</code>则是当前节点的信息。通过操作<code>path</code>对象就可以对 AST 产生影响（对象引用类型）。</p>
+</div><div class="cl-preview-section"><h3 id="生成">生成</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">生成是使用了<code>@babel/generator</code>，比较简单，直接看下面例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> fs <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'fs'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> babel <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/core'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> traverse <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/traverse'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">default</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> gen <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'@babel/generator'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token keyword">default</span><span class="token punctuation">;</span>
+
+<span class="token keyword">let</span> source <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">readFileSync</span><span class="token punctuation">(</span><span class="token string">'./source.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+babel<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token punctuation">,</span> ast<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// console.log(err, ast)</span>
+    <span class="token keyword">let</span> indent <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    <span class="token function">traverse</span><span class="token punctuation">(</span>ast<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 一顿操作猛如虎。。</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 生成新的 ast，然后使用generator生成 code</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">gen</span><span class="token punctuation">(</span>ast<span class="token punctuation">)</span><span class="token punctuation">.</span>code<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="babel-插件编写">Babel 插件编写</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Babel 中，代码会由 Babel 先行解析成 AST，Babel 插件做的事情就是写<code>vistor</code>而已，所以 Babel 插件固定的模板如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js">module<span class="token punctuation">.</span><span class="token function-variable function">exports</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+        name<span class="token punctuation">:</span> <span class="token string">'example-plugin'</span><span class="token punctuation">,</span>
+        visitor<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            <span class="token function">Identifier</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> state<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 一顿操作猛如虎</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：如果想继续深入了解 Babel 的原理和插件编写相关知识，可以查看《<a href="https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/plugin-handbook.md">Babel 插件手册</a>》这个 Github 项目。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="browserslist" style="font-size: 30px;">Browserslist</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在本节内容的最后，介绍下在 Browserslist 相关知识和配置。实际开发项目中，我们肯定知道自己的项目运行在什么浏览器内，比如我们做移动开发，不可能需要兼容 IE10 以下的浏览器，所以如果我们做了很多兼容 IE10 以下浏览器的工作，那么就是无用功。通过设置目标浏览器，可以让我们的代码更有针对性的输出兼容性代码（包括 CSS 前缀、JS 的 Polyfill 等），而不是无脑的全部兼容。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><a href="https://github.com/browserslist/browserslist">Browserslist</a>就是帮助我们来设置目标浏览器的工具。Browserslist 被广泛的应用到 Babel、postcss-preset-env、autoprefixer 等开发工具上。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">browserslist 实际上就是声明了一段浏览器的集合，我们的工具可以根据这段集合描述，针对性的输出兼容性代码。</p>
+</div><div class="cl-preview-section"><h3 id="配置">配置</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Browserslist 的配置可以放在 <code>package.json</code> 中，也可以单独放在配置文件<code>.browserslistrc</code>中。所有的工具都会主动查找 browserslist 的配置文件，根据 browserslist 配置找出对应的目标浏览器集合。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<code>package.json</code> 中的配置是增加一个<code>browserslist</code>数组属性：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"browserslist"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"last 2 version"</span><span class="token punctuation">,</span> <span class="token string">"&gt; 1%"</span><span class="token punctuation">,</span> <span class="token string">"maintained node versions"</span><span class="token punctuation">,</span> <span class="token string">"not ie &lt; 11"</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">或者在项目的根目录下创建一个<code>.browerslistrc</code>文件：</p>
+</div><div class="cl-preview-section"><pre class="  language-bash"><code class="prism  language-bash"><span class="token comment"># 注释是这样写的，以#号开头</span>
+<span class="token comment"># 每行一个浏览器集合描述</span>
+last 2 version
+<span class="token operator">&gt;</span> 1%
+maintained node versions
+not ie <span class="token operator">&lt;</span> 11
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="常见集合范围说明">常见集合范围说明</h3>
+</div><div class="cl-preview-section"><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>范围</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>last 2 versions</code></td>
+<td><a href="https://caniuse.com/">caniuse.com</a>网站跟踪的最新两个版本，假如 iOS 12 是最新版本，那么向后兼容两个版本就是 iOS 11 和 iOS 12</td>
+</tr>
+<tr>
+<td><code>&gt; 1%</code></td>
+<td>全球超过 1%人使用的浏览器，类似<code>&gt; 5% in US</code>则指代美国 5%以上用户</td>
+</tr>
+<tr>
+<td><code>cover 99.5%</code></td>
+<td>覆盖 99.5%主流浏览器</td>
+</tr>
+<tr>
+<td><code>chrome &gt; 50</code> <code>ie 6-8</code></td>
+<td>指定某个浏览器版本范围</td>
+</tr>
+<tr>
+<td><code>unreleased versions</code></td>
+<td>说有浏览器的 beta 版本</td>
+</tr>
+<tr>
+<td><code>not ie &lt; 11</code></td>
+<td>排除 ie11 以下版本不兼容</td>
+</tr>
+<tr>
+<td><code>since 2013</code> <code>last 2 years</code></td>
+<td>某时间范围发布的所有浏览器版本</td>
+</tr>
+<tr>
+<td><code>maintained node versions</code></td>
+<td>所有被 node 基金会维护的 node 版本</td>
+</tr>
+<tr>
+<td><code>current node</code></td>
+<td>当前环境的 node 版本</td>
+</tr>
+<tr>
+<td><code>dead</code></td>
+<td>通过<code>last 2 versions</code>筛选的浏览器中，全球使用率低于<code>0.5%</code>且官方声明不在维护或者事实上已经两年没有再更新的版本</td>
+</tr>
+<tr>
+<td>defaults</td>
+<td>默认配置，<code>&gt; 0.5%</code> <code>last 2 versions</code> <code>Firefox ESR</code> <code>not dead</code></td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="cl-preview-section"><h3 id="浏览器名称列表（大小写不敏感）">浏览器名称列表（大小写不敏感）</h3>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><code>Android</code>：安卓 webview 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Baidu</code>： 百度浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>BlackBerry</code> / <code>bb</code>：黑莓浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Chrome</code>：chrome 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>ChromeAndroid</code>/<code>and_chr</code>：chrome 安卓移动浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Edge</code>：微软 Edge 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Electron</code> ：Electron；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Explorer</code>/<code>ie</code>：ie 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>ExplorerMobile</code>/<code>ie_mob</code>：ie 移动浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Firefox</code>/<code>ff</code>：火狐浏览器； *<code>FirefoxAndroid</code>/<code>and_ff</code>：火狐安卓浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>iOS</code>/<code>ios_saf</code>：iOS Safari 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Node</code>：nodejs；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Opera</code>：opera 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>OperaMini</code>/<code>op_mini</code>：operaMini 浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>OperaMobile</code>/<code>op_mob</code>：opera 移动浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>QQAndroid</code>/<code>and_qq</code>：QQ 安卓浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Samsung</code>：三星浏览器；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>Safari</code>：桌面版本 Safari；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>UCAndroid</code>/<code>and_uc</code>：UC 安卓浏览器</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">整个目标浏览器的集合是取并集，即满足上面的全部条件。</p>
+</div><div class="cl-preview-section"><h3 id="browserslist-的环境变量">Browserslist 的环境变量</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们还可以为不同的环境配置不同的目标浏览器。通过设置<code>BROWSERSLIST_ENV</code> 或者 <code>NODE_ENV</code>可以配置不同的环境变量。默认情况下会优先从 <code>production</code> 对应的配置项加载。在配置文件中，可以通过设置对应的环境目标浏览器：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token comment">// package.json写法</span>
+<span class="token punctuation">{</span>
+    <span class="token string">"browserslist"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token string">"production"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"&gt; 1%"</span><span class="token punctuation">,</span> <span class="token string">"ie 10"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string">"development"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"last 1 chrome version"</span><span class="token punctuation">,</span> <span class="token string">"last 1 firefox version"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">或者使用<code>.browserslistrc</code>：</p>
+</div><div class="cl-preview-section"><pre><code>[production staging]
+&gt; 1%
+ie 10
+
+[development]
+last 1 chrome version
+last 1 firefox version
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：Browserslist 配置不仅仅 Babel 会用到，其他编译工具也可能会用到，例如后面章节介绍 Webpack CSS 相关配置使用到 postcss 的<code>autoprefixer</code>插件也会用到。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="babel-polyfill-的最佳实践" style="font-size: 30px;">Babel Polyfill 的最佳实践</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面的介绍，我们可能觉得<code>useBuiltIns：'usage'</code>可以完美的解决我们的 Polyfill 问题，它是按需引入模块，根据<code>.browserslist</code>+业务实际代码来设置引入 Polyfill，不会多余的引入。但是在我们构建的时候发现实际还是有问题的：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">const</span> asyncFun <span class="token operator">=</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span>setTimeout<span class="token punctuation">,</span> <span class="token number">2e3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token string">'2s之后才返回该字符串'</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> asyncFun<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">根据上述的 useBuiltIns：‘usage’ 配置编译后：</p>
+</div><div class="cl-preview-section"><pre class="  language-js"><code class="prism  language-js"><span class="token keyword">import</span> <span class="token string">'core-js/modules/es6.promise'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token string">'regenerator-runtime/runtime'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">asyncGeneratorStep</span><span class="token punctuation">(</span>gen<span class="token punctuation">,</span> resolve<span class="token punctuation">,</span> reject<span class="token punctuation">,</span> _next<span class="token punctuation">,</span> _throw<span class="token punctuation">,</span> key<span class="token punctuation">,</span> arg<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// asyncGeneratorStep</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">function</span> <span class="token function">_asyncToGenerator</span><span class="token punctuation">(</span>fn<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// _asyncToGenerator 源码</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> asyncFun <span class="token operator">=</span>
+    <span class="token comment">/*#__PURE__*/</span>
+    <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> _ref <span class="token operator">=</span> <span class="token function">_asyncToGenerator</span><span class="token punctuation">(</span>
+            <span class="token comment">/*#__PURE__*/</span>
+            regeneratorRuntime<span class="token punctuation">.</span><span class="token function">mark</span><span class="token punctuation">(</span><span class="token keyword">function</span> <span class="token function">_callee</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> regeneratorRuntime<span class="token punctuation">.</span><span class="token function">wrap</span><span class="token punctuation">(</span>
+                    <span class="token keyword">function</span> <span class="token function">_callee$</span><span class="token punctuation">(</span>_context<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">switch</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>_context<span class="token punctuation">.</span>prev <span class="token operator">=</span> _context<span class="token punctuation">.</span>next<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                                <span class="token keyword">case</span> <span class="token number">0</span><span class="token punctuation">:</span>
+                                    _context<span class="token punctuation">.</span>next <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">;</span>
+                                    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span>setTimeout<span class="token punctuation">,</span> <span class="token number">2000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                                <span class="token keyword">case</span> <span class="token number">2</span><span class="token punctuation">:</span>
+                                    <span class="token keyword">return</span> _context<span class="token punctuation">.</span><span class="token function">abrupt</span><span class="token punctuation">(</span><span class="token string">'return'</span><span class="token punctuation">,</span> <span class="token string">'2s之后才返回该字符串'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                                <span class="token keyword">case</span> <span class="token number">3</span><span class="token punctuation">:</span>
+                                <span class="token keyword">case</span> <span class="token string">'end'</span><span class="token punctuation">:</span>
+                                    <span class="token keyword">return</span> _context<span class="token punctuation">.</span><span class="token function">stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token punctuation">}</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                    _callee<span class="token punctuation">,</span>
+                    <span class="token keyword">this</span>
+                <span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">return</span> <span class="token keyword">function</span> <span class="token function">asyncFun</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> _ref<span class="token punctuation">.</span><span class="token function">apply</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> arguments<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> asyncFun<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上述的构建之后的代码，我们发现<code>asyncGeneratorStep</code>和 <code>_asyncToGenerator</code> 这两个函数是被内联进来，而不是 <code>import</code> 进来的。如果这样的话，在多个文件中用到了<code>async</code>和<code>await</code>关键字，那么每个文件都会编译出一遍<code>asyncGeneratorStep</code>和 <code>_asyncToGenerator</code>函数。这样的代码明显是重复了，我们再解决了这个问题，Babel polyfill 的方案就完美了，要解决这个问题，需要用到<code>@babel/plugin-transform-runtime</code>这个 Babel 插件。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们知道 Babel 在每个需要转换的代码前面都会插入一些<code>helpers</code>代码，这可能会导致多个文件都会有重复的 <code>helpers</code> 代码。 <code>@babel/plugin-transform-runtime</code> 的 <code>helpers</code> 选项就可以把这些代码抽离出来。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以 Babel 的 Polyfill 的最佳实践是如下的 Babel 配置：</p>
+</div><div class="cl-preview-section"><pre class="  language-json"><code class="prism  language-json"><span class="token comment">// .babelrc</span>
+<span class="token punctuation">{</span>
+    <span class="token string">"plugins"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">[</span>
+            <span class="token string">"@babel/plugin-transform-runtime"</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">"corejs"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 默认值，可以不写</span>
+                <span class="token string">"helpers"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 默认，可以不写</span>
+                <span class="token string">"regenerator"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 通过 preset-env 已经使用了全局的 regeneratorRuntime, 不再需要 transform-runtime 提供的 不污染全局的 regeneratorRuntime</span>
+                <span class="token string">"useESModules"</span><span class="token punctuation">:</span> <span class="token boolean">true</span> <span class="token comment">// 使用 es modules helpers, 减少 commonJS 语法代码</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"presets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">[</span>
+            <span class="token string">"@babel/preset-env"</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span>
+                <span class="token string">"targets"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token comment">// 这里是targets的配置，根据实际browserslist设置</span>
+                <span class="token string">"corejs"</span><span class="token punctuation">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token comment">// 添加core-js版本</span>
+                <span class="token string">"modules"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 模块使用 es modules ，不使用 commonJS 规范</span>
+                <span class="token string">"useBuiltIns"</span><span class="token punctuation">:</span> <span class="token string">"usage"</span> <span class="token comment">// 默认 false, 可选 entry , usage</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="title小结---" style="font-size: 30px;"><div class="summary"><h5 class="centertitle" style="font-size: 20px; line-height: 38px;">小结 </h5></div><!--title:&#23567;&#32467; --></h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在本小节中，我们不仅仅学习了 Webpack 怎么配置 Babel，还介绍了 Babel 的实现原理，Babel 是先使用Babylon的解释器，将 JavaScript 语法解析成 AST，然后通过遍历处理这颗树实现代码转换的。在 Babel 中，我们可以通过配置 Browserslist 来针对不同的浏览器组合，生成不同的适配代码。在文章最后，介绍了Babel Polyfill 的最佳实践，这个最佳实践可以直接在我们现有的项目中使用。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">Babel 的 preset-env 是什么？</li>
+<li style="font-size: 20px; line-height: 38px;">懂得 Babel 的原理吗？你会手写 Babel 插件吗？</li>
+<li style="font-size: 20px; line-height: 38px;">Babel 怎么做 Polyfill，Polyfill 的最佳实践是什么？</li>
+<li style="font-size: 20px; line-height: 38px;">Babel 怎么针对不同的浏览器打包不同的适配代码</li>
+</ol>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">专栏代码已经整理好给大家共享出来：<br>
+<a href="https://github.com/ksky521/webpack-tutorial">https://github.com/ksky521/webpack-tutorial</a></p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/265">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    07 Webpack 中的模块化开发
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/267">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    09 Webpack 中使用 TypeScript 开发项目
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

@@ -1,0 +1,159 @@
+<html><head><meta charset="utf-8"><title>附录：项目中常用的插件-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 6-3 附录：项目中常用的插件
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                附录：项目中常用的插件
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-22 15:36:11
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img.mukewang.com/5cd965230001d80706400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">困难只能吓倒懦夫懒汉，而胜利永远属于敢于等科学高峰的人。<p class="author">——茅以升</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节列出项目中常用的 Webpack 插件，大家在实际项目中有类似需求的可以直接通过本小节的介绍来快速查找使用。</p>
+</div><div class="cl-preview-section"><h2 id="webpack-内置的插件" style="font-size: 30px;">Webpack 内置的插件</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 本身就内置了很多强大的插件：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/define-plugin">webpack.DefinePlugin</a>：定义全局常量插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/environment-plugin">webpack.EnvironmentPlugin</a>：定义环境变量插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/banner-plugin">webpack.BannerPlugin</a>：在代码中添加版权注释等；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/dll-plugin">webpack.DllPlugin</a>：使用 DLL 思想来加快编译速度的插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/hashed-module-ids-plugin">webpack.HashedModuleIdsPlugin</a>：可以修改文件 Hash 算法的插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/split-chunks-plugin">webpack.optimize.SplitChunksPlugin</a>：代码拆分优化插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/hot-module-replacement-plugin">webpack.HotModuleReplacementPlugin</a>：开启模块热替换功能，通过监听文件变化并自动加载被修改的文件来减少烦人的浏览器手动重新加载；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/progress-plugin">webpack.ProgressPlugin</a>：构建进度插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/provide-plugin">webpack.ProvidePlugin</a>：自动加载模块，例如出现<code>$</code>则加载 jQuery 等常用库；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://webpack.js.org/plugins/ignore-plugin">webpack.IgnorePlugin</a>：用于忽略部分文件</li>
+</ul>
+</div><div class="cl-preview-section"><h2 id="非内置的插件" style="font-size: 30px;">非内置的插件</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面是常用的非内置插件。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/webpack-contrib/mini-css-extract-plugin">mini-css-extract-plugin</a>：CSS 文件提取，并且在生产环境构建是可以用于优化 CSS 文件大小；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/NMFR/optimize-css-assets-webpack-plugin">optimize-css-assets-webpack-plugin</a>：压缩 CSS 文件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/johnagan/clean-webpack-plugin">clean-webpack-plugin</a>：在编译之前清理指定目录指定内容；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/jantimon/html-webpack-plugin">html-webpack-plugin</a>：html 插件，可以根据 JavaScript 模板文件生成 HTML；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/GoogleChromeLabs/preload-webpack-plugin">preload-webpack-plugin</a>：html-webpack-plugin 的插件，给页面添加<code>&lt;link rel="preload"&gt;</code>资源；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/webpack-contrib/i18n-webpack-plugin">i18n-webpack-plugin</a>：帮助网页做国际化的插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/danethurber/webpack-manifest-plugin">webpack-manifest-plugin</a>：生成 Webpack 打包文件清单的插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/DustinJackson/html-webpack-inline-source-plugin">html-webpack-inline-source-plugin</a>：在 HTML 中内联打包出来的资源；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/webpack-contrib/webpack-bundle-analyzer">webpack-bundle-analyzer</a>：webpack bundle 分析插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/webpack-contrib/copy-webpack-plugin">copy-webpack-plugin</a>：文件拷贝插件，可以指定文件夹的文件复制到 output 文件夹，方便打包上线；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/webpack-contrib/terser-webpack-plugin">terser-webpack-plugin</a>：JavaScript 代码压缩插件，这个插件兼容 ES6 语法，推荐使用这个插件，而不是用 uglifyjs；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/oliviertassinari/serviceworker-webpack-plugin">serviceworker-webpack-plugin</a>：生成 PWA service worker 插件；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/mzgoddard/hard-source-webpack-plugin">hard-source-webpack-plugin</a>：通过缓存提升非首次编译速度；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://github.com/geowarin/friendly-errors-webpack-plugin">friendly-errors-webpack-plugin</a>：减少 Webpack 无用的构建 log；</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.npmjs.com/package/stylelint-webpack-plugin">stylelint-webpack-plugin</a>：StyleLint 的插件。</li>
+</ul>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/294">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    课程总结
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/295">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    附录：项目中常用的 loader
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

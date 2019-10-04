@@ -1,0 +1,236 @@
+<html><head><meta charset="utf-8"><title>书写声明文件之砍柴：为不同类型库书写声明文件-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/35" target="_blank">零基础学透 TypeScript</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 5-3 书写声明文件之砍柴：为不同类型库书写声明文件
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                书写声明文件之砍柴：为不同类型库书写声明文件
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-22 10:24:18
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img3.mukewang.com/5d2fe6ac0001260f06400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">与有肝胆人共事，从无字句处读书。<p class="author">——周恩来</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><h3 id="模块插件或-umd-插件">5.3.1 模块插件或 UMD 插件</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">一些模块和插件是支持插件机制的，比如我们常见的 jQuery，它的插件有非常多。我们可以为库书写声明文件的同时，为库的插件定义声明文件，可以参考官方模板 module-plugin.d.ts。</p>
+</div><div class="cl-preview-section"><h3 id="全局插件">5.3.2 全局插件</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">全局插件往往会修改全局中一些对象，在这些对象上添加或修改属性方法，比如下面的示例：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript"><span class="token comment">// add-methods-to-string.js</span>
+String<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span><span class="token function-variable function">getFirstLetter</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这段代码在 String 构造函数的原型对象上添加一个 getFirstLetter 方法，这个方法可以返回字符串的第一个字符。我们创建一个字符串，就可以调用这个方法。来讲下这个原理，我们在 String 构造函数原型对象上添加一个方法，这个方法就会被 String 创建的实例继承，如果我们使用<code>new String(‘Lison’)</code>的方式创建一个实例 name，那么这个 name 将是一个对象类型的值，它的属性是 0 开始到 n 的数字，属性值对应字符串的第 1 个、第 n 个字符；但是像例子中这样使用<code>const name = 'Lison’</code>字面量的形式定义的 name，其实是个字符串类型的值，字符串就不会继承构造函数的方法了，以为它不是对象，但事实是它可以调用<code>getFirstLetter</code>方法。这是因为它在调用方法的时候，会先将这个字符串包装成一个封装对象，在内部即使用 String 构造函数，所以它依然可以调用原型对象上的方法。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在 html 文件里引入这个 js 文件后创建一个字符串，这个字符串就可以调用 getFirstLetter 方法：</p>
+</div><div class="cl-preview-section"><pre class="  language-html"><code class="prism  language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>text/javascript<span class="token punctuation">"</span></span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>./add-methods-to-string.js<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">type</span><span class="token attr-value"><span class="token punctuation">=</span><span class="token punctuation">"</span>text/javascript<span class="token punctuation">"</span></span><span class="token punctuation">&gt;</span></span><span class="token script language-javascript">
+  <span class="token keyword">var</span> str <span class="token operator">=</span> <span class="token string">"Lison"</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>str<span class="token punctuation">.</span><span class="token function">getFirstLetter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// "L"</span>
+</span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们在 TS 中使用，就需要为这个创建声明文件，我们创建一个声明文件 global-plugin.d.ts：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// global-plugin.d.ts</span>
+<span class="token keyword">interface</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+  <span class="token function">getFirstLetter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token comment">// index.ts</span>
+<span class="token keyword">var</span> str <span class="token operator">=</span> <span class="token string">"Lison"</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>str<span class="token punctuation">.</span><span class="token function">getFirstLetter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// "L"</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">遇到这类情景，你可以参考官方的 global-plugin.d.ts 模板来书写声明文件。</p>
+</div><div class="cl-preview-section"><h3 id="修改全局的模块">5.3.3 修改全局的模块</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">还有一些影响全局的全局模块，这些模块除了导出一些东西，还会直接修改全局的一些对象，我们还是使用上面例子的代码，只不过这次我们使用引入模块的形式来引入，：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript"><span class="token comment">// add-methods-to-string模块</span>
+String<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span><span class="token function-variable function">getFirstLetter</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token comment">// index.js</span>
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"add-methods-to-string"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token string">"Lison"</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">.</span><span class="token function">getFirstLetter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// "L"</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过这个例子我们知道一些全局模块是做什么事了，你大概知道怎么为它们定义声明文件了。我们新建一个声明文件 global-modifying-module.d.ts，在声明文件中如下声明：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">declare</span> global <span class="token punctuation">{</span>
+  <span class="token keyword">interface</span> <span class="token class-name">String</span> <span class="token punctuation">{</span>
+    <span class="token function">getFirstLetter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">number</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">export</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">注意如果我们这个声明文件没有需要导出的东西，这里必须在末尾加上<code>export {}</code>，这样才能让 TS 编译器把这个声明文件当做一个模块声明。我们加了这个声明文件后，就可以在 TS 中引入这个模块，再在 TS 中调用字符串的 getFirstLetter 方法就不会报错了。这类全局模块，你可以参考官方的 global-modifying-module.d.ts 模板。</p>
+</div><div class="cl-preview-section"><h3 id="使用依赖">5.3.4 使用依赖</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">库多数会依赖其它库，所以可以在定义库声明文件的时候，声明对其它库的依赖，从而加载其它库的内容。如果是依赖全局库，可以使用<code>///&lt;reference types=“UMDModuleName” /&gt;</code>三斜线指令来指定加载了某个全局库：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">/// &lt;reference types="globalLib" /&gt;</span>
+<span class="token keyword">function</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> globalLib<span class="token punctuation">.</span>someName<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果依赖的是模块库，可以使用 import 语句：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> moment <span class="token keyword">from</span> <span class="token string">"moment"</span><span class="token punctuation">;</span>
+<span class="token keyword">function</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> moment<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">因为有些库是没有 default 默认输出的，所以如果你在使用<code>import xxx from 'xxx’</code>语句引入一个库报错时，可以使用<code>import * as xxx from 'xxx’</code>的形式引入。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果是全局库依赖于某个 UMD 模块，也可以使用<code>///&lt;reference types=“UMDModuleName” /&gt;</code>三斜线指令来指定对某个 UMD 模块的依赖：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// globals.d.ts</span>
+<span class="token comment">/// &lt;reference types="moment"/&gt;</span>
+<span class="token keyword">function</span> <span class="token function">getMoment</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span> moment<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果模块或一个 UMD 库依赖于一个 UMD 库，使用<code>import * as</code>语句引入模块：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// module.d.ts</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> moment <span class="token keyword">from</span> <span class="token string">"moment"</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span><span class="token punctuation">(</span>m<span class="token punctuation">:</span> <span class="token keyword">typeof</span> moment<span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后有三点要注意的：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">防止命名冲突</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在写全局声明时，在全局范围定义大量类型，有时会导致命名冲突。所以建议相关的定义放到命名空间内。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">ES6 模块插件影响</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">一些开发者为一些库开发了插件，用在原有库的基础上添加更多功能，这往往需要修改原有库导出的模块。我们在讲模块的时候说过，ES6 模块标准中，导出的模块是不允许修改的；但是在 CommonJS 和其它一些加载器里是允许的，所以要使用 ES6 模块的话要注意这一点。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">ES6 模块调用</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在使用一些库的时候，引入的模块可以作为函数直接调用。ES6 的模块顶层对象是一个对象，它不能作为函数调用，比如我们直接用 export 导出几个内容：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript"><span class="token comment">// moduleB.js</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> age <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">let</span> name <span class="token operator">=</span> <span class="token string">"lison"</span><span class="token punctuation">;</span>
+<span class="token comment">// main.js</span>
+<span class="token keyword">import</span> info <span class="token keyword">from</span> <span class="token string">"./moduleB.js"</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>info<span class="token punctuation">.</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'lison'</span>
+<span class="token comment">// index.js</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> name<span class="token punctuation">,</span> age <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"./moduleB.js"</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'lison'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们想导出一个直接可以调用的函数，又要使用 ES6 模块，则可以用 export default 来导出一个函数，这个我们在讲模块的时候也讲过了。</p>
+</div><div class="cl-preview-section"><h3 id="快捷外部模块声明">5.3.5 快捷外部模块声明</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们使用一个新模块不想花时间精力为这个模块写声明，TS 在 2.0 版本支持了快捷外部模块声明，比如我们使用 moment 模块，就可以在 typings 创建一个 moment 文件夹，并在这个 moment 文件夹创建一个 index.d.ts 文件，写如下内容：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// index.d.ts</span>
+<span class="token keyword">declare</span> <span class="token keyword">module</span> <span class="token string">"moment"</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这样就可以正常使用这个 moment 模块了。</p>
+</div><div class="cl-preview-section"><h3 id="本节小结">本节小结</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节我们学习了如何为各种类型的库书写声明文件，官方提供了各种类型库的声明文件的模板，总结如下：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/global-modifying-module-d-ts.html">global-modifying-module.d.ts</a>：适合修改全局的模块。</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/global-plugin-d-ts.html">global-plugin.d.ts</a>：适合全局插件。</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/global-d-ts.html">global.d.ts</a>：适合全局库。</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/module-class-d-ts.html">module-class.d.ts</a>：适合引入后可以直接当做类使用new关键字创建实例的模块。</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/module-function-d-ts.html">module-function.d.ts</a>：适合引入后可以直接当做函数的模块，</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/module-plugin-d-ts.html">module-plugin.d.ts</a>：适合模块插件或UMD插件。</li>
+<li style="font-size: 20px; line-height: 38px;"><a href="https://www.tslang.cn/docs/handbook/declaration-files/templates/module-d-ts.html">module.d.ts</a>：适合引入后既不能当做类直接使用，也不能直接当做函数调用的模块。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">后面我们的实战章节还会运用到书写声明文件的知识，我们可以再在实际开发中体验一下。到这里本章就学习完了，我们的语法和基础知识部分就学习完了，接下来的一章内容将是实战章节，我们将结合使用Vue+TypeScript开发一个实际的项目，来更好地学习如何运用TypeScript进行项目开发。<br>
+<img src="http://img.mukewang.com/5d22b9f0000104b316000695.jpg" alt="图片描述" data-original="http://img.mukewang.com/5d22b9f0000104b316000695.jpg" class="" style="cursor: pointer;"></p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/369">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    书写声明文件之磨刀：识别库类型
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/371">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    搭建基础项目
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">     <div class="number">精选留言 <span class="js-number">0</span></div>     <div class="comments">         <div class="input-fake js-showcommentModal">             欢迎在这里发表留言，作者筛选后可公开显示         </div>                      <div class="noData">                 <p>                     <i class="imv2-error_c"></i>                 </p>                 <p>目前暂无任何讨论</p>             </div>              </div>  </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div><script language="javascript">
+		self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',50000);
+	</script></div></body></html>

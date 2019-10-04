@@ -1,0 +1,334 @@
+<html><head><meta charset="utf-8"><title>07 深入学习枚举-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/35" target="_blank">零基础学透 TypeScript</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 2-4 07 深入学习枚举
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                07 深入学习枚举
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-12 16:36:54
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img4.mukewang.com/5cf3c49f0001467906400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">立志是事业的大门，工作是登堂入室的旅程。<p class="author">——巴斯德</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">枚举是 TypeScript 新增加的一种数据类型，这在其他很多语言中很常见，但是 JavaScript 却没有。使用枚举，我们可以给一些难以理解的常量赋予一组具有意义的直观的名字，使其更为直观，你可以理解枚举就是一个字典。枚举使用 <code>enum</code> 关键字定义，TypeScript 支持数字和字符串的枚举。</p>
+</div><div class="cl-preview-section"><h3 id="数字枚举">2.4.1. 数字枚举</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们先来通过数字枚举的简单例子，来看下枚举是做什么的：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Status <span class="token punctuation">{</span><span class="token comment">// 这里你的TSLint可能会报一个：枚举声明只能与命名空间或其他枚举声明合并。这样的错误，这个不影响编译，声明合并的问题我们在后面的小节会讲。</span>
+  Uploading<span class="token punctuation">,</span>
+  Success<span class="token punctuation">,</span>
+  Failed
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">.</span>Uploading<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 0</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span><span class="token string">"Success"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 1</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">.</span>Failed<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 2</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们使用<code>enum</code>关键字定义了一个枚举值 Status，它包含三个字段，每个字段间用逗号隔开。我们使用枚举值的元素值时，就像访问对象的属性一样，你可以使用’.‘操作符和’[]'两种形式访问里面的值，这和对象一样。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">再来看输出的结果，<code>Status.Uploading</code> 是 0，<code>Status['Success']</code>是 1，<code>Status.Failed</code> 是 2，我们在定义枚举 Status 的时候，并没有指定索引号，是因为这是默认的编号，我们也可以自己指定：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token comment">// 修改起始编号</span>
+<span class="token keyword">enum</span> Color <span class="token punctuation">{</span>
+  Red <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  Blue<span class="token punctuation">,</span>
+  Yellow
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Color<span class="token punctuation">.</span>Red<span class="token punctuation">,</span> Color<span class="token punctuation">.</span>Blue<span class="token punctuation">,</span> Color<span class="token punctuation">.</span>Yellow<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 2 3 4</span>
+<span class="token comment">// 指定任意字段的索引值</span>
+<span class="token keyword">enum</span> Status <span class="token punctuation">{</span>
+  Success <span class="token operator">=</span> <span class="token number">200</span><span class="token punctuation">,</span>
+  NotFound <span class="token operator">=</span> <span class="token number">404</span><span class="token punctuation">,</span>
+  Error <span class="token operator">=</span> <span class="token number">500</span>
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">.</span>Success<span class="token punctuation">,</span> Status<span class="token punctuation">.</span>NotFound<span class="token punctuation">,</span> Status<span class="token punctuation">.</span>Error<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 200 404 500</span>
+<span class="token comment">// 指定部分字段，其他使用默认递增索引</span>
+<span class="token keyword">enum</span> Status <span class="token punctuation">{</span>
+  Ok <span class="token operator">=</span> <span class="token number">200</span><span class="token punctuation">,</span>
+  Created<span class="token punctuation">,</span>
+  Accepted<span class="token punctuation">,</span>
+  BadRequest <span class="token operator">=</span> <span class="token number">400</span><span class="token punctuation">,</span>
+  Unauthorized
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">.</span>Created<span class="token punctuation">,</span> Status<span class="token punctuation">.</span>Accepted<span class="token punctuation">,</span> Status<span class="token punctuation">.</span>Unauthorized<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 201 202 401</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><strong>数字枚举</strong>在定义值的时候，可以使用计算值和常量。但是要注意，如果某个字段使用了计算值或常量，那么该字段后面紧接着的字段必须设置初始值，这里不能使用默认的递增值了，来看例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">const</span> <span class="token function-variable function">getValue</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">enum</span> ErrorIndex <span class="token punctuation">{</span>
+  a <span class="token operator">=</span> <span class="token function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  b<span class="token punctuation">,</span> <span class="token comment">// error 枚举成员必须具有初始化的值</span>
+  c
+<span class="token punctuation">}</span>
+<span class="token keyword">enum</span> RightIndex <span class="token punctuation">{</span>
+  a <span class="token operator">=</span> <span class="token function">getValue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  b <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  c
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> Start <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+<span class="token keyword">enum</span> Index <span class="token punctuation">{</span>
+  a <span class="token operator">=</span> Start<span class="token punctuation">,</span>
+  b<span class="token punctuation">,</span> <span class="token comment">// error 枚举成员必须具有初始化的值</span>
+  c
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="反向映射">2.4.2. 反向映射</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们定义一个枚举值的时候，可以通过 Enum[‘key’]或者 Enum.key 的形式获取到对应的值 value。TypeScript 还支持反向映射，但是反向映射只支持数字枚举，我们后面要讲的字符串枚举是不支持的。来看下反向映射的例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Status <span class="token punctuation">{</span>
+  Success <span class="token operator">=</span> <span class="token number">200</span><span class="token punctuation">,</span>
+  NotFound <span class="token operator">=</span> <span class="token number">404</span><span class="token punctuation">,</span>
+  Error <span class="token operator">=</span> <span class="token number">500</span>
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span><span class="token string">"Success"</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 200</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span><span class="token number">200</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'Success'</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span>Status<span class="token punctuation">[</span><span class="token string">"Success"</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'Success'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">TypeScript 中定义的枚举，编译之后其实是对象，我们来看下上面这个例子中的枚举值 Status 编译后的样子：</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">我们可以直接使用tsc指定某个文件或者不指定文件直接编译整个目录，运行后就会产生相应的编译后的JavaScript文件，你也可以到TypeScript官方文档提供的<a href="http://www.typescriptlang.org/play/index.html">在线练习场</a>，在这里你可以编写TypeScript代码，它会同步进行编译。实时编译为JavaScript代码，是你了解编译后结果的好方式。</p>
+</blockquote>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token punctuation">{</span>
+    <span class="token number">200</span><span class="token punctuation">:</span> <span class="token string">"Success"</span><span class="token punctuation">,</span>
+    <span class="token number">404</span><span class="token punctuation">:</span> <span class="token string">"NotFound"</span><span class="token punctuation">,</span>
+    <span class="token number">500</span><span class="token punctuation">:</span> <span class="token string">"Error"</span><span class="token punctuation">,</span>
+    Error<span class="token punctuation">:</span> <span class="token number">500</span><span class="token punctuation">,</span>
+    NotFound<span class="token punctuation">:</span> <span class="token number">404</span><span class="token punctuation">,</span>
+    Success<span class="token punctuation">:</span> <span class="token number">200</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">可以看到，TypeScript 会把我们定义的枚举值的字段名分别作为对象的属性名和值，把枚举值的字段值分别作为对象的值和属性名，同时添加到对象中。这样我们既可以通过枚举值的字段名得到值，也可以通过枚举值的值得到字段名。</p>
+</div><div class="cl-preview-section"><h3 id="字符串枚举">2.4.3. 字符串枚举</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">TypeScript2.4 版本新增了字符串枚举，字符串枚举值要求每个字段的值都必须是字符串字面量，或者是该枚举值中另一个字符串枚举成员，先来看个简单例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Message <span class="token punctuation">{</span>
+  Error <span class="token operator">=</span> <span class="token string">"Sorry, error"</span><span class="token punctuation">,</span>
+  Success <span class="token operator">=</span> <span class="token string">"Hoho, success"</span>
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Message<span class="token punctuation">.</span>Error<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'Sorry, error'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">再来看我们使用枚举值中其他枚举成员的例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Message <span class="token punctuation">{</span>
+  Error <span class="token operator">=</span> <span class="token string">"error message"</span><span class="token punctuation">,</span>
+  ServerError <span class="token operator">=</span> Error<span class="token punctuation">,</span>
+  ClientError <span class="token operator">=</span> Error
+<span class="token punctuation">}</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Message<span class="token punctuation">.</span>Error<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'error message'</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Message<span class="token punctuation">.</span>ServerError<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 'error message'</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">注意，这里的其他枚举成员指的是同一个枚举值中的枚举成员，因为字符串枚举不能使用常量或者计算值，所以也不能使用其他枚举值中的成员。</p>
+</div><div class="cl-preview-section"><h3 id="异构枚举">2.4.4. 异构枚举</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">简单来说异构枚举就是枚举值中成员值既有数字类型又有字符串类型，如下：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Result <span class="token punctuation">{</span>
+  Faild <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  Success <span class="token operator">=</span> <span class="token string">"Success"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">但是这种如果不是真的需要，不建议使用。因为往往我们将一类值整理为一个枚举值的时候，它们的特点是相似的。比如我们在做接口请求时的返回状态码，如果是状态码都是数值，如果是提示信息，都是字符串，所以在使用枚举的时候，往往是可以避免使用异构枚举的，重点是做好类型的整理。</p>
+</div><div class="cl-preview-section"><h3 id="枚举成员类型和联合枚举类型">2.4.5. 枚举成员类型和联合枚举类型</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果枚举值里所有成员的值都是字面量类型的值，那么这个枚举的每个成员和枚举值本身都可以作为类型来使用，先来看下满足条件的枚举成员的值有哪些：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">不带初始值的枚举成员，例如<code>enum E { A }</code></li>
+<li style="font-size: 20px; line-height: 38px;">值为字符串字面量，例如<code>enum E { A = ‘a’ }</code></li>
+<li style="font-size: 20px; line-height: 38px;">值为数值字面量，或者带有<code>-</code>符号的数值字面量，例如<code>enum E { A = 1 }</code>、<code>enum E { A = -1 }</code></li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当我们的枚举值的所有成员的值都是上面这三种情况的时候，枚举值和成员就可以作为类型来用：</p>
+</div><div class="cl-preview-section"><h4 id="枚举成员类型" style="font-size: 26px;">(1) 枚举成员类型</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们可以把符合条件的枚举值的成员作为类型来使用，来看例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Animal <span class="token punctuation">{</span>
+  Dog <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  Cat <span class="token operator">=</span> <span class="token number">2</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">interface</span> <span class="token class-name">Dog</span> <span class="token punctuation">{</span>
+  <span class="token keyword">type</span><span class="token punctuation">:</span> Animal<span class="token punctuation">.</span>Dog<span class="token punctuation">;</span> <span class="token comment">// 这里使用Animal.Dog作为类型，指定接口Dog的必须有一个type字段，且类型为Animal.Dog</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">interface</span> <span class="token class-name">Cat</span> <span class="token punctuation">{</span>
+  <span class="token keyword">type</span><span class="token punctuation">:</span> Animal<span class="token punctuation">.</span>Cat<span class="token punctuation">;</span> <span class="token comment">// 这里同上</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">let</span> cat1<span class="token punctuation">:</span> Cat <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token keyword">type</span><span class="token punctuation">:</span> Animal<span class="token punctuation">.</span>Dog <span class="token comment">// error [ts] 不能将类型“Animal.Dog”分配给类型“Animal.Cat”</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">let</span> dog<span class="token punctuation">:</span> Dog <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token keyword">type</span><span class="token punctuation">:</span> Animal<span class="token punctuation">.</span>Dog
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h4 id="联合枚举类型" style="font-size: 26px;">(2) 联合枚举类型</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当我们的枚举值符合条件时，这个枚举值就可以看做是一个包含所有成员的联合类型，先来看例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Status <span class="token punctuation">{</span>
+  Off<span class="token punctuation">,</span>
+  On
+<span class="token punctuation">}</span>
+<span class="token keyword">interface</span> <span class="token class-name">Light</span> <span class="token punctuation">{</span>
+  status<span class="token punctuation">:</span> Status<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">enum</span> Animal <span class="token punctuation">{</span>
+  Dog <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  Cat <span class="token operator">=</span> <span class="token number">2</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> light1<span class="token punctuation">:</span> Light <span class="token operator">=</span> <span class="token punctuation">{</span>
+  status<span class="token punctuation">:</span> Animal<span class="token punctuation">.</span>Dog <span class="token comment">// error 不能将类型“Animal.Dog”分配给类型“Status”</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> light2<span class="token punctuation">:</span> Light <span class="token operator">=</span> <span class="token punctuation">{</span>
+  status<span class="token punctuation">:</span> Status<span class="token punctuation">.</span>Off
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> light3<span class="token punctuation">:</span> Light <span class="token operator">=</span> <span class="token punctuation">{</span>
+  status<span class="token punctuation">:</span> Status<span class="token punctuation">.</span>On
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面例子定义接口 Light 的 status 字段的类型为枚举值 Status，那么此时 status 的属性值必须为 Status.Off 和 Status.On 中的一个，也就是相当于<code>status: Status.Off | Status.On</code>。</p>
+</div><div class="cl-preview-section"><h3 id="运行时的枚举">2.4.6. 运行时的枚举</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">枚举在编译成 JavaScript 之后实际是一个对象。这个我们前面讲过了，既然是对象，那么就可以当成对象来使用，我们来看个例子：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> E <span class="token punctuation">{</span>
+  A<span class="token punctuation">,</span>
+  B
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> getIndex <span class="token operator">=</span> <span class="token punctuation">(</span>enumObj<span class="token punctuation">:</span> <span class="token punctuation">{</span> A<span class="token punctuation">:</span> <span class="token keyword">number</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">:</span> <span class="token keyword">number</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> enumObj<span class="token punctuation">.</span>A<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">getIndex</span><span class="token punctuation">(</span>E<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 0</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面这个例子要求 getIndex 的参数为一个对象，且必须包含一个属性名为’A’的属性，其值为数值类型，只要有这个属性即可。当我们调用这个函数，把枚举值 E 作为实参传入是可以的，因为它在运行的时候是一个对象，包含’A’这个属性，因为它在运行的时候相当于下面这个对象：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token punctuation">{</span>
+    <span class="token number">0</span><span class="token punctuation">:</span> <span class="token string">"A"</span><span class="token punctuation">,</span>
+    <span class="token number">1</span><span class="token punctuation">:</span> <span class="token string">"B"</span><span class="token punctuation">,</span>
+    A<span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+    B<span class="token punctuation">:</span> <span class="token number">1</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="const-enum">2.4.7. const enum</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们定义了枚举值之后，编译成 JavaScript 的代码会创建一个对应的对象，这个对象我们可以在程序运行的时候使用。但是如果我们使用枚举只是为了让程序可读性好，并不需要编译后的对象呢？这样会增加一些编译后的代码量。所以 TypeScript 在 1.4 新增 const enum*(完全嵌入的枚举)*，在之前讲的定义枚举的语句之前加上<code>const</code>关键字，这样编译后的代码不会创建这个对象，只是会从枚举里拿到相应的值进行替换，来看我们下面的定义：</p>
+</div><div class="cl-preview-section"><pre class="  language-typescript"><code class="prism  language-typescript"><span class="token keyword">enum</span> Status <span class="token punctuation">{</span>
+  Off<span class="token punctuation">,</span>
+  On
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> <span class="token keyword">enum</span> Animal <span class="token punctuation">{</span>
+  Dog<span class="token punctuation">,</span>
+  Cat
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> status <span class="token operator">=</span> Status<span class="token punctuation">.</span>On<span class="token punctuation">;</span>
+<span class="token keyword">const</span> animal <span class="token operator">=</span> Animal<span class="token punctuation">.</span>Dog<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面的例子编译成 JavaScript 之后是这样的：</p>
+</div><div class="cl-preview-section"><pre class="  language-javascript"><code class="prism  language-javascript"><span class="token keyword">var</span> Status<span class="token punctuation">;</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>Status<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  Status<span class="token punctuation">[</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span><span class="token string">"Off"</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"Off"</span><span class="token punctuation">;</span>
+  Status<span class="token punctuation">[</span><span class="token punctuation">(</span>Status<span class="token punctuation">[</span><span class="token string">"On"</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">"On"</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span>Status <span class="token operator">||</span> <span class="token punctuation">(</span>Status <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> status <span class="token operator">=</span> Status<span class="token punctuation">.</span>On<span class="token punctuation">;</span>
+<span class="token keyword">var</span> animal <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> <span class="token comment">/* Dog */</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们来看下 Status 的处理，先是定义一个变量 Status，然后定义一个立即执行函数，在函数内给 Status 添加对应属性，首先<code>Status[“Off”] = 0</code>是给<code>Status</code>对象设置<code>Off</code>属性，并且值设为 0，这个赋值表达式的返回值是等号右边的值，也就是 0，所以<code>Status[Status[“Off”] = 0] = "Off"</code>相当于<code>Status[0] = “Off”</code>。创建了这个对象之后，将 Status 的 On 属性值赋值给 status；再来看下 animal 的处理，我们看到编译后的代码并没有像<code>Status</code>创建一个<code>Animal</code>对象，而是直接把<code>Animal.Dog</code>的值<code>0</code>替换到了<code>const animal = Animal.Dog</code>表达式的<code>Animal.Dog</code>位置，这就是<strong>const enum</strong>的用法了。</p>
+</div><div class="cl-preview-section"><h3 id="小结">小结</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节我们学习了两种基本的枚举：数字枚举和字符串枚举，它俩的最主要的区别就是枚举成员值的类型了，数字枚举成员的值必须都是数值类型，而字符串枚举成员的值必须都是字符串。枚举还有一个概念叫反向映射，就是当我们定义了枚举值后，不仅定义了字段到值的映射，同时编译器根据反向映射定义了值到字段的映射。我们还学习了数字枚举和字符串枚举的杂交体——异构枚举，但是很少用，原因也解释过了；枚举值和枚举成员在作为值使用的同时，还可以作为类型使用，但是有三个条件，可以回顾下；最后我们还学习了枚举值在编译后是一个对象，可以在运行时使用，如果我们在运行时用不到，可以在定义枚举时在前面加上<code>const</code>来选择不生成对象，而是直接将值替换到响应位置。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下个小节我们将学习类型断言，通过类型断言，可以在一些情况告诉 TypeScript 编译器，我们的逻辑是对的，不是类型错误，从而达到预期。<br>
+<img src="http://img.mukewang.com/5cf4bfb10001c98d16000222.jpg" alt="图片描述" data-original="http://img.mukewang.com/5cf4bfb10001c98d16000222.jpg" class="" style="cursor: pointer;"></p>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/343">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    06 Symbol-ES6新基础类型
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/35/article/345">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    08 使用类型断言达到预期
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div><div><script language="javascript">
+		self.setTimeout('alert("\u672c\u8d44\u6e90\u7531\u0020\u0069\u0074\u006a\u0063\u0038\u002e\u0063\u006f\u006d\u0020\u6536\u96c6\u6574\u7406")',50000);
+	</script></div></body></html>

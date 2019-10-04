@@ -1,0 +1,822 @@
+<html><head><meta charset="utf-8"><title>Webpack 的 Compiler 和 Compilation-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 4-3 Webpack 的 Compiler 和 Compilation
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                Webpack 的 Compiler 和 Compilation
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-06-27 09:57:45
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img.mukewang.com/5cd9645f000128e506400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">与有肝胆人共事，从无字句处读书。<p class="author">——周恩来</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 <a href="TODO">Webpack 工作流程</a> 文章中已经提到过，Compiler 和 Compilation 都是继承自<a href="https://github.com/webpack/tapable">Tapable</a> ，不同点是<code>Compiler</code>是每个 Webpack 的配置，对应一个<code>Compiler</code>对象，记录着整个 Webpack 的生命周期；在构建的过程中，每次构建都会产生一次<code>Compilation</code>，<code>Compilation</code>则是构建周期的产物。本文将进一步介绍<code>Compiler</code>和<code>Compilation</code>，通过本章节的学习，将会对 Webpack 构建过程有一个更加宏观的掌握。</p>
+</div><div class="cl-preview-section"><h2 id="compiler" style="font-size: 30px;">Compiler</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>Compiler</code> 模块是 Webpack 最核心的模块。每次执行 Webpack 构建的时候，在 Webpack 内部，会首先实例化一个 Compiler 对象，然后调用它的 run 方法来开始一次完整的编译过程。我们直接使用 Webpack API <code>webpack(options)</code>的方式得到的就是一个<code>Compiler</code>实例化的对象，这时候 Webpack 并不会立即开始构建，需要我们手动执行<code>comipler.run()</code>才可以。</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> webpack <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'webpack'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> webpackConfig <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./webpack.config.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 只传入 config</span>
+<span class="token keyword">const</span> compiler <span class="token operator">=</span> <span class="token function">webpack</span><span class="token punctuation">(</span>webpackConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 开始执行</span>
+compiler<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span>callback<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 上面两句等价于</span>
+<span class="token function">webpack</span><span class="token punctuation">(</span>webpackConfig<span class="token punctuation">,</span> callback<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：使用 webpack-dev-server API 方式时，只需要传入 compiler 对象给 dev server 即可，不需要手动执行<code>compiler.run()</code>。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们如果要手动实例化一个<code>Compiler</code>对象，可以通过<code>const Compiler = webpack.Compiler</code>来获取它的类，一般只有一个父 <code>Compiler</code>，而子 <code>Compiler</code> 可以用来处理一些特殊的事件。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 webpack plugin 中，每个插件都有个<code>apply</code>方法。这个方法接收到的参数就是<code>Compiler</code>对象，我们可以通过在对应的钩子时机绑定处理函数来编写插件，下面主要介绍下<code>Compiler</code>对象的钩子。</p>
+</div><div class="cl-preview-section"><h3 id="compiler-钩子">Compiler 钩子</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<a href="TODO">Webpack 工作流程</a>中，我们通过下面的代码，获取了对应的钩子名称：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> compiler <span class="token operator">=</span> <span class="token function">webpack</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 遍历hooks，添加回调，输出`hookName`</span>
+Object<span class="token punctuation">.</span><span class="token function">keys</span><span class="token punctuation">(</span>compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>hookName <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">[</span>hookName<span class="token punctuation">]</span><span class="token punctuation">.</span>tap<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">[</span>hookName<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'anyString'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`run -&gt; </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>hookName<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 触发webpack的编译流程</span>
+compiler<span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">得到<code>compiler.run()</code>之后的工作流程：</p>
+</div><div class="cl-preview-section"><pre><code>run -&gt; beforeRun
+run -&gt; run
+run -&gt; normalModuleFactory
+run -&gt; contextModuleFactory
+run -&gt; beforeCompile
+run -&gt; compile
+run -&gt; thisCompilation
+run -&gt; compilation
+run -&gt; make
+run -&gt; afterCompile
+run -&gt; shouldEmit
+run -&gt; emit
+run -&gt; afterEmit
+run -&gt; done
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面的方式只是输出<code>compiler.run()</code>之后的一部分钩子，<code>Compiler</code> 还有好多钩子。比如在 watch 模式下，还会有 <code>watchRun</code>、<code>watchClose</code> 和 <code>invalid</code>。我们如果要绑定某个钩子，则可以使用下面的方法来绑定：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>someHook<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'MyPlugin'</span><span class="token punctuation">,</span> params <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">/* ... */</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面通过一个表格来说明下对应的关系：</p>
+</div><div class="cl-preview-section"><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>钩子名</th>
+<th>Tapable 类型</th>
+<th>触发时机</th>
+<th>传入 callback 的参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>entryOption</td>
+<td>SyncBailHook</td>
+<td>在 webpack 中的 entry 配置处理过之后</td>
+<td><code>context</code>，<code>entry</code></td>
+</tr>
+<tr>
+<td>afterPlugins</td>
+<td>SyncHook</td>
+<td>初始化完内置插件之后</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>afterResolvers</td>
+<td>SyncHook</td>
+<td>resolver 完成之后（后面解释resolver是什么）</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>environment</td>
+<td>SyncHook</td>
+<td>准备编译环境，webpack plugins配置初始化完成之后</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>afterEnvironment</td>
+<td>SyncHook</td>
+<td>编译环境准备好之后</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>beforeRun</td>
+<td>AsyncSeriesHook</td>
+<td>开始正式编译之前</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>run</td>
+<td>AsyncSeriesHook</td>
+<td>开始编译之后，读取 records 之前；监听模式触发<code>watch-run</code></td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>watchRun</td>
+<td>AsyncSeriesHook</td>
+<td>监听模式下，一个新的编译触发之后</td>
+<td><code>compiler</code></td>
+</tr>
+<tr>
+<td>normalModuleFactory</td>
+<td>SyncHook</td>
+<td>NormalModuleFactory 创建之后</td>
+<td><code>normalModuleFactory</code>实例</td>
+</tr>
+<tr>
+<td>contextModuleFactory</td>
+<td>SyncHook</td>
+<td>ContextModuleFactory 创建之后</td>
+<td><code>contextModuleFactory</code>实例</td>
+</tr>
+<tr>
+<td>beforeCompile</td>
+<td>AsyncSeriesHook</td>
+<td>compilation 实例化需要的参数创建完毕之后</td>
+<td><code>compilationParams</code></td>
+</tr>
+<tr>
+<td>compile</td>
+<td>SyncHook</td>
+<td>一次 compilation 编译创建之前</td>
+<td><code>compilationParams</code></td>
+</tr>
+<tr>
+<td>thisCompilation</td>
+<td>SyncHook</td>
+<td>触发 compilation 事件之前执行</td>
+<td><code>compilation</code>，<code>compilationParams</code></td>
+</tr>
+<tr>
+<td>compilation</td>
+<td>SyncHook</td>
+<td>compilation创建成功之后</td>
+<td><code>compilation</code>，<code>compilationParams</code></td>
+</tr>
+<tr>
+<td>make</td>
+<td>AsyncParallelHook</td>
+<td>完成编译之前</td>
+<td><code>compilation</code></td>
+</tr>
+<tr>
+<td>afterCompile</td>
+<td>AsyncSeriesHook</td>
+<td>完成编译和封存（seal）编译产出之后</td>
+<td><code>compilation</code></td>
+</tr>
+<tr>
+<td>shouldEmit</td>
+<td>SyncBailHook</td>
+<td>发布构建后资源之前触发，回调必须返回<code>true</code>/<code>false</code>，<code>true</code>则继续</td>
+<td><code>compilation</code></td>
+</tr>
+<tr>
+<td>emit</td>
+<td>AsyncSeriesHook</td>
+<td>生成资源到 output 目录之前</td>
+<td><code>compilation</code></td>
+</tr>
+<tr>
+<td>afterEmit</td>
+<td>AsyncSeriesHook</td>
+<td>生成资源到 output 目录之后</td>
+<td><code>compilation</code></td>
+</tr>
+<tr>
+<td>done</td>
+<td>AsyncSeriesHook</td>
+<td>compilation完成之后</td>
+<td><code>stats</code></td>
+</tr>
+<tr>
+<td>failed</td>
+<td>SyncHook</td>
+<td>compilation失败</td>
+<td><code>error</code></td>
+</tr>
+<tr>
+<td>invalid</td>
+<td>SyncHook</td>
+<td>监听模式下，编译无效时</td>
+<td><code>fileName</code>，<code>changeTime</code></td>
+</tr>
+<tr>
+<td>watchClose</td>
+<td>SyncHook</td>
+<td>监听模式停止</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：整个<code>Compiler</code>完整地展现了 Webpack 的构建流程：</p>
+<ul>
+<li style="font-size: 20px; line-height: 38px;">准备阶段：<code>make</code>之前做的事情都属于准备阶段，这阶段的<code>calback</code>入参以<code>compiler</code>为主；</li>
+<li style="font-size: 20px; line-height: 38px;">编译阶段：这阶段以<code>compilation</code>的钩子为主，<code>calback</code>入参以<code>compilation</code>为主；</li>
+<li style="font-size: 20px; line-height: 38px;">产出阶段：这阶段从<code>compilation</code>开始，最后回到<code>Compiler</code>钩子上，<code>calback</code>传入参数是跟结果相关的数据，包括<code>stats</code>、<code>error</code>。</li>
+</ul>
+</blockquote>
+</div><div class="cl-preview-section"><h4 id="注解1：resolver" style="font-size: 26px;">注解1：Resolver</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Compiler 的 Resolver 是指来自于<a href="https://github.com/webpack/enhanced-resolve">enhanced-resolve</a>模块，它主要功能是一个提供异步<code>require.resolve()</code>，即从哪里去查找文件的路径，可以通过Webpack的<code>resolve</code>和<code>resolveLoader</code>来配置。Compiler类有三种类型的内置 Resolver：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">Normal：通过绝对路径或相对路径，解析一个模块；</li>
+<li style="font-size: 20px; line-height: 38px;">Context：通过给定的上下文（context）解析一个模块；</li>
+<li style="font-size: 20px; line-height: 38px;">Loader：解析一个 webpack loader。</li>
+</ul>
+</div><div class="cl-preview-section"><h4 id="注解2：thiscompilation和compilation" style="font-size: 26px;">注解2：<code>thisCompilation</code>和<code>compilation</code></h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里为什么会有 <code>thisCompilation</code>和<code>compilation</code> 两个钩子呢？其实是跟子编译（child compiler）有关， Compiler 实例通过 <code>createChildCompiler</code> 方法可以创建子编译实例 <code>childCompiler</code>。创建<code>childCompiler</code>时，<code>childCompiler</code>会复制 compiler 实例的任务点监听器。<strong><code>compilation</code>的钩子会被复制，而<code>thisCompilation</code> 钩子则不会被复制</strong>。</p>
+</div><div class="cl-preview-section"><h2 id="compilation" style="font-size: 30px;">Compilation</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Compilation 阶段，模块会被加载(loaded)、封存(sealed)、优化(optimized)、分块(chunked)、哈希(hashed)和重新创建(restored)，Compilation 对象包含了当前的模块资源、编译生成资源、变化的文件等。当 Webpack 以监听（watch）模式运行时，每当检测到一个文件变化，一次新的 Compilation 将被创建。Compilation 对象也提供了很多事件回调供插件做扩展，通过 Compilation 也能读取到 Compiler 对象。</p>
+</div><div class="cl-preview-section"><h3 id="compilation-钩子">Compilation 钩子</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Compilation 中处理的对象分别是<code>module</code>、<code>chunk</code>、<code>asset</code>，由 modules 组成<code>chunks</code>，由<code>chunks</code>生成<code>assets</code>，处理顺序是：<code>module → modules → chunks → assets</code>，先从单个 module 开始处理，查找依赖关系，最后完成单个 module 处理，完成全部modules 之后，开始 chunks 阶段处理，最后在根据优化配置，按需生成 assets。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以整个 Compilation 的生命周期钩子虽然比较多，但是大规律上是围绕这个顺序进行的，下面是大部分钩子表格如下，其中带<code>★</code>的是比较重要的钩子：</p>
+</div><div class="cl-preview-section"><div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>钩子名</th>
+<th>Tapable 类型</th>
+<th>触发时机</th>
+<th>传入 callback 的参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>buildModule</td>
+<td>SyncHook</td>
+<td>在模块构建开始之前触发</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>rebuildModule</td>
+<td>SyncHook</td>
+<td>在重新构建一个模块之前触发</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>failedModule</td>
+<td>SyncHook</td>
+<td>模块构建失败时执行</td>
+<td><code>module</code>，<code>error</code></td>
+</tr>
+<tr>
+<td>succeedModule</td>
+<td>SyncHook</td>
+<td>模块构建成功时执行</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>finishModules</td>
+<td>SyncHook</td>
+<td>所有模块都完成构建</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>finishRebuildingModule</td>
+<td>SyncHook</td>
+<td>一个模块完成重新构建</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>seal</td>
+<td>SyncHook</td>
+<td>★编译（compilation）停止接收新模块时触发</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>unseal</td>
+<td>SyncHook</td>
+<td>编译（compilation）开始接收新模块时触发</td>
+<td><code>module</code></td>
+</tr>
+<tr>
+<td>optimizeDependencies</td>
+<td>SyncBailHook</td>
+<td>依赖优化开始时触发</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>afterOptimizeDependencies</td>
+<td>SyncHook</td>
+<td>依赖优化结束时触发</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>optimize</td>
+<td>SyncHook</td>
+<td>★优化阶段开始时触发</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>optimizeModules</td>
+<td>SyncBailHook</td>
+<td>★模块的优化</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>afterOptimizeModules</td>
+<td>SyncHook</td>
+<td>模块优化结束时触发</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>optimizeChunks</td>
+<td>SyncBailHook</td>
+<td>★优化 chunks</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>afterOptimizeChunks</td>
+<td>SyncHook</td>
+<td>chunk 优化完成之后触发</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>optimizeTree</td>
+<td>AsyncSeriesHook</td>
+<td>异步优化依赖树</td>
+<td><code>chunks</code>，<code>modules</code></td>
+</tr>
+<tr>
+<td>afterOptimizeTree</td>
+<td>SyncHook</td>
+<td>异步优化依赖树完成时</td>
+<td><code>chunks</code>，<code>modules</code></td>
+</tr>
+<tr>
+<td>optimizeChunkModules</td>
+<td>SyncBailHook</td>
+<td>优化单个chunk中的 modules 开始</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>afterOptimizeChunkModules</td>
+<td>SyncHook</td>
+<td>优化单个chunk中的 modules 结束</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>shouldRecord</td>
+<td>SyncHook</td>
+<td></td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>reviveModules</td>
+<td>SyncHook</td>
+<td>从 records 中恢复模块信息</td>
+<td><code>modules</code>，<code>records</code></td>
+</tr>
+<tr>
+<td>optimizeModuleOrder</td>
+<td>SyncHook</td>
+<td>将模块从最重要的到最不重要的进行排序</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>beforeModuleIds</td>
+<td>SyncHook</td>
+<td>处理 modulesId 之前</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>moduleIds</td>
+<td>SyncHook</td>
+<td>处理 modulesId</td>
+<td><code>modules</code></td>
+</tr>
+<tr>
+<td>optimizeModuleIds</td>
+<td>SyncHook</td>
+<td>优化 modulesId</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>afterOptimizeModuleIds</td>
+<td>SyncHook</td>
+<td>优化 modulesId之后</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>reviveChunks</td>
+<td>SyncHook</td>
+<td>从 records 中恢复 chunk 信息</td>
+<td><code>modules</code>，<code>records</code></td>
+</tr>
+<tr>
+<td>optimizeChunkOrder</td>
+<td>SyncHook</td>
+<td>将 chunk 从最重要的到最不重要的进行排序</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>beforeOptimizeChunkIds</td>
+<td>SyncHook</td>
+<td>chunk id 优化之前触发</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>optimizeChunkIds</td>
+<td>SyncHook</td>
+<td>chunk id 优化开始触发</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>afterOptimizeChunkIds</td>
+<td>SyncHook</td>
+<td>chunk id 优化结束触发</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>recordModules</td>
+<td>SyncHook</td>
+<td>将模块信息存储到 records</td>
+<td><code>modules</code>，<code>records</code></td>
+</tr>
+<tr>
+<td>recordChunks</td>
+<td>SyncHook</td>
+<td>将 chunk 信息存储到 records</td>
+<td><code>chunks</code>，<code>records</code></td>
+</tr>
+<tr>
+<td>beforeHash</td>
+<td>SyncHook</td>
+<td>在编译被哈希（hashed）之前</td>
+<td>-</td>
+</tr>
+<tr>
+<td>afterHash</td>
+<td>SyncHook</td>
+<td>在编译被哈希（hashed）之后</td>
+<td>-</td>
+</tr>
+<tr>
+<td>record</td>
+<td>SyncHook</td>
+<td>将 compilation 相关信息存储到 records 中</td>
+<td><code>compilation</code>，<code>records</code></td>
+</tr>
+<tr>
+<td>beforeChunkAssets</td>
+<td>SyncHook</td>
+<td>在创建 chunk 资源（asset）之前</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>additionalChunkAssets</td>
+<td>SyncHook</td>
+<td>为 chunk 创建附加资源（asset）</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>additionalAssets</td>
+<td>AsyncSeriesHook</td>
+<td>★为编译（compilation）创建附加资源（asset）</td>
+<td>-</td>
+</tr>
+<tr>
+<td>optimizeChunkAssets</td>
+<td>AsyncSeriesHook</td>
+<td>★优化所有 chunk 资源（asset）</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>afterOptimizeChunkAssets</td>
+<td>SyncHook</td>
+<td>chunk 资源（asset）已经被优化</td>
+<td><code>chunks</code></td>
+</tr>
+<tr>
+<td>optimizeAssets</td>
+<td>AsyncSeriesHook</td>
+<td>★优化存储在 compilation.assets 中的所有资源（asset）</td>
+<td><code>assets</code></td>
+</tr>
+<tr>
+<td>afterOptimizeAssets</td>
+<td>SyncHook</td>
+<td>优化compilation.assets 中的所有资源（asset）之后</td>
+<td><code>assets</code></td>
+</tr>
+<tr>
+<td>moduleAsset</td>
+<td>SyncHook</td>
+<td>一个模块中的一个资源被添加到编译中</td>
+<td><code>module</code>，<code>filename</code></td>
+</tr>
+<tr>
+<td>chunkAsset</td>
+<td>SyncHook</td>
+<td>一个 chunk 中的一个资源被添加到编译中</td>
+<td><code>chunk</code>，<code>filename</code></td>
+</tr>
+<tr>
+<td>assetPath</td>
+<td>SyncWaterfallHook</td>
+<td>asset 路径确认之后</td>
+<td><code>filename</code>，<code>data</code></td>
+</tr>
+<tr>
+<td>childCompiler</td>
+<td>SyncHook</td>
+<td>子编译（compiler）触发</td>
+<td><code>childCompiler</code>，<code>compilerName</code>，<code>compilerIndex</code></td>
+</tr>
+<tr>
+<td>normalModuleLoader</td>
+<td>SyncHook</td>
+<td>★普通模块 loader，真正（一个接一个地）加载模块图（graph）中所有模块的函数</td>
+<td><code>loaderContext</code>，<code>module</code></td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="cl-preview-section"><h3 id="compilation-和-stats-对象">Compilation 和 Stats 对象</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在 Webpack 的回调函数中会得到<code>stats</code>对象。这个对象实际来自于<code>Compilation.getStats()</code>，返回的是主要含有<code>modules</code>、<code>chunks</code>和<code>assets</code>三个属性值的对象。</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">modules：记录了所有解析后的模块；</li>
+<li style="font-size: 20px; line-height: 38px;">chunks：记录了所有chunk；</li>
+<li style="font-size: 20px; line-height: 38px;">assets：记录了所有要生成的文件。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Stats对象本质上来自于<code>lib/Stats.js</code>的类实例，常用的方法<code>stats.hasWarnings()</code>、<code>stats.hasErrors()</code>、<code>stats.toJson()</code>和<code>stats.toString()</code>都可以在这个类里面找到对应的实现。</p>
+</div><div class="cl-preview-section"><h4 id="stats-对象数据结构" style="font-size: 26px;">Stats 对象数据结构</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Stats 对象的 JSON 数据结构，除了通过<code>Compilation.getStats()</code>获得，还可以在 webpack 回调中，通过 callback 参数获得：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">webpack</span><span class="token punctuation">(</span>config<span class="token punctuation">,</span> <span class="token punctuation">(</span>err<span class="token punctuation">,</span> stats<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>stats<span class="token punctuation">.</span><span class="token function">toJson</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">还可以通过 webpack-cli 的选项将本次打包的 stats 存入一个 json 文件：<code>webpack --profile --json &gt; compilation-stats.json</code>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>stats.toJson()</code>得到的数据结构格式如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"version"</span><span class="token punctuation">:</span> <span class="token string">"4.29.6"</span><span class="token punctuation">,</span> <span class="token comment">// 用来编译的 webpack 的版本</span>
+    <span class="token string">"hash"</span><span class="token punctuation">:</span> <span class="token string">"11593e3b3ac85436984a"</span><span class="token punctuation">,</span> <span class="token comment">// 编译使用的 hash</span>
+    <span class="token string">"time"</span><span class="token punctuation">:</span> <span class="token number">2469</span><span class="token punctuation">,</span> <span class="token comment">// 编译耗时 (ms)</span>
+    <span class="token string">"filteredModules"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 当 `exclude`传入`toJson` 函数时，统计被无视的模块的数量</span>
+    <span class="token string">"outputPath"</span><span class="token punctuation">:</span> <span class="token string">"/"</span><span class="token punctuation">,</span> <span class="token comment">// path to webpack 输出目录的 path 路径</span>
+    <span class="token string">"assetsByChunkName"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 用作映射的 chunk 的名称</span>
+        <span class="token string">"main"</span><span class="token punctuation">:</span> <span class="token string">"web.js?h=11593e3b3ac85436984a"</span><span class="token punctuation">,</span>
+        <span class="token string">"named-chunk"</span><span class="token punctuation">:</span> <span class="token string">"named-chunk.web.js"</span><span class="token punctuation">,</span>
+        <span class="token string">"other-chunk"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">"other-chunk.js"</span><span class="token punctuation">,</span> <span class="token string">"other-chunk.css"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"assets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// asset 对象 (asset objects) 的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"chunks"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// chunk 对象 (chunk objects) 的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"modules"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 模块对象 (module objects) 的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"errors"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 错误字符串 (error string) 的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"warnings"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 警告字符串 (warning string) 的数组</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里面除了编译基本信息、报错和 warnings 之外，就是<code>modules</code>、<code>chunks</code>和<code>assets</code>三个对应的数组，里面是单个的<code>module</code>、<code>chunk</code>和<code>asset</code>。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：<code>stats.toJson</code>可以指定要不要输出对应的数据。例如不想输出 <code>modules</code> 和 <code>chunks</code>，可以使用<code>stats.toJson({modules: false, chunks: false})</code>。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h4 id="module" style="font-size: 26px;">module</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在每个 module 中，我们可以得到它的所有信息，这些信息可以分为四大类：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">基本信息：包括最基本的内容、大小、id；</li>
+<li style="font-size: 20px; line-height: 38px;">依赖关系：<code>module.reasons</code>对象描述了这个模块被加入依赖图表的理由，包含了引入的方式、引入的 module 信息及其对应代码在第几行第几列等，可以通过这个计算出 module 之间的依赖关系图表（graph）；</li>
+<li style="font-size: 20px; line-height: 38px;">chunks 和 assets 关系：<code>module.chunks</code>和<code>module.assets</code>包含到 chunks 和 assets 中的对应 id 等；</li>
+<li style="font-size: 20px; line-height: 38px;">被 webpack 处理的后的信息：包含<code>module.failed</code>、<code>module.errors</code>、<code>module.warnings</code>等。</li>
+</ol>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"assets"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// asset对象 (asset objects)的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"built"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个模块会参与 Loaders , 解析, 并被编译</span>
+    <span class="token string">"cacheable"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个模块是否会被缓存</span>
+    <span class="token string">"chunks"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 包含这个模块的 chunks 的 id</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"errors"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 处理这个模块发现的错误的数量</span>
+    <span class="token string">"failed"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 编译是否失败</span>
+    <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 这个模块的ID (类似于 `module.id`)</span>
+    <span class="token string">"identifier"</span><span class="token punctuation">:</span> <span class="token string">"(webpack)\\test\\browsertest\\lib\\index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// webpack内部使用的唯一的标识</span>
+    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"./lib/index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 实际文件的地址</span>
+    <span class="token string">"optional"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 每一个对这个模块的请求都会包裹在 `try... catch` 内 (与ESM无关)</span>
+    <span class="token string">"prefetched"</span><span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个模块是否会被 prefetched</span>
+    <span class="token string">"profile"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 有关 `--profile` flag 的这个模块特有的编译数据 (ms)</span>
+        <span class="token string">"building"</span><span class="token punctuation">:</span> <span class="token number">73</span><span class="token punctuation">,</span> <span class="token comment">// 载入和解析</span>
+        <span class="token string">"dependencies"</span><span class="token punctuation">:</span> <span class="token number">242</span><span class="token punctuation">,</span> <span class="token comment">// 编译依赖</span>
+        <span class="token string">"factory"</span><span class="token punctuation">:</span> <span class="token number">11</span> <span class="token comment">// 解决依赖</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"reasons"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 见下文描述</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"size"</span><span class="token punctuation">:</span> <span class="token number">3593</span><span class="token punctuation">,</span> <span class="token comment">// 预估模块的大小 (byte)</span>
+    <span class="token string">"source"</span><span class="token punctuation">:</span> <span class="token string">"// Should not break it...\r\nif(typeof..."</span><span class="token punctuation">,</span> <span class="token comment">// 字符串化的输入</span>
+    <span class="token string">"warnings"</span><span class="token punctuation">:</span> <span class="token number">0</span> <span class="token comment">// 处理模块时警告的数量</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">其中<code>module.reasons</code>数据结构如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"loc"</span><span class="token punctuation">:</span> <span class="token string">"33:24-93"</span><span class="token punctuation">,</span> <span class="token comment">// 导致这个被加入依赖图标的代码行数</span>
+    <span class="token string">"module"</span><span class="token punctuation">:</span> <span class="token string">"./lib/index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 所基于模块的相对地址 context</span>
+    <span class="token string">"moduleId"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 模块的 ID</span>
+    <span class="token string">"moduleIdentifier"</span><span class="token punctuation">:</span> <span class="token string">"(webpack)\\test\\browsertest\\lib\\index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 模块的地址</span>
+    <span class="token string">"moduleName"</span><span class="token punctuation">:</span> <span class="token string">"./lib/index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 可读性更好的模块名称 (用于 "更好的打印 (pretty-printing)")</span>
+    <span class="token string">"type"</span><span class="token punctuation">:</span> <span class="token string">"require.context"</span><span class="token punctuation">,</span> <span class="token comment">// 使用的请求的种类 (type of request)</span>
+    <span class="token string">"userRequest"</span><span class="token punctuation">:</span> <span class="token string">"../../cases"</span> <span class="token comment">// 用来 `import` 或者 `require` 的源字符串</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h4 id="chunk" style="font-size: 26px;">chunk</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在每个 chunk 中，信息也可以分为四大类：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">基本信息：包括最基本的内容、大小、id；</li>
+<li style="font-size: 20px; line-height: 38px;">来源：<code>chunk.origins</code>对象描述了这个模块被加入的理由，包含了引入的方式、引入的 module 信息及其对应代码在第几行第几列等，可以通过这个计算出 module 之间的依赖关系图表（graph）；</li>
+<li style="font-size: 20px; line-height: 38px;">引用关系：<code>chunk.parents</code>和<code>chunk.children</code>被引用和引用的 ids；</li>
+<li style="font-size: 20px; line-height: 38px;">包含和被包含：<code>chunk.files</code>和<code>chunk.modules</code>包含到 assets 和自己包含 modules 中信息等。</li>
+</ol>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"entry"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个 chunk 是否包含 webpack 的运行时</span>
+    <span class="token string">"files"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 一个包含这个 chunk 的文件名的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"filteredModules"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 见上文的 结构</span>
+    <span class="token string">"id"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 这个 chunk 的id</span>
+    <span class="token string">"initial"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个 chunk 是开始就要加载还是 懒加载(lazy-loading)</span>
+    <span class="token string">"modules"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 模块对象 (module objects)的数组</span>
+        <span class="token string">"web.js?h=11593e3b3ac85436984a"</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"names"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 包含在这个 chunk 内的 chunk 的名字的数组</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"origins"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 下文详述</span>
+    <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"parents"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 父 chunk 的 ids</span>
+    <span class="token comment">// 生成 assets 的原因</span>
+    <span class="token string">"reason"</span><span class="token punctuation">:</span> <span class="token string">"split chunk (cache group: asyncVendors) (name: async)"</span><span class="token punctuation">,</span>
+    <span class="token string">"hash"</span><span class="token punctuation">:</span> <span class="token string">"170746935298270ad813"</span><span class="token punctuation">,</span>
+    <span class="token comment">// 自己引用谁</span>
+    <span class="token string">"children"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token comment">// 引用的顺序</span>
+    <span class="token string">"childrenByOrder"</span><span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">"modules"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token string">"rendered"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个 chunk 是否会参与进编译</span>
+    <span class="token string">"size"</span><span class="token punctuation">:</span> <span class="token number">188057</span> <span class="token comment">// chunk 的大小(byte)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>chunk.origins</code>对应的格式如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"loc"</span><span class="token punctuation">:</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token comment">// 具体是哪行生成了这个chunk</span>
+    <span class="token string">"module"</span><span class="token punctuation">:</span> <span class="token string">"(webpack)\\test\\browsertest\\lib\\index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 模块的位置</span>
+    <span class="token string">"moduleId"</span><span class="token punctuation">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token comment">// 模块的ID</span>
+    <span class="token string">"moduleIdentifier"</span><span class="token punctuation">:</span> <span class="token string">"(webpack)\\test\\browsertest\\lib\\index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 模块的地址</span>
+    <span class="token string">"moduleName"</span><span class="token punctuation">:</span> <span class="token string">"./lib/index.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 模块的相对地址</span>
+    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"main"</span><span class="token punctuation">,</span> <span class="token comment">// chunk的名称</span>
+    <span class="token string">"reasons"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 模块对象中`reason`的数组</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h4 id="asset" style="font-size: 26px;">asset</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>asset</code>相对简单一些，内容如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-json"><code class="prism  language-json"><span class="token punctuation">{</span>
+    <span class="token string">"chunkNames"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 这个 asset 包含的 chunk</span>
+    <span class="token string">"chunks"</span><span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">6</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 这个 asset 包含的 chunk 的 id</span>
+    <span class="token string">"emitted"</span><span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token comment">// 表示这个 asset 是否会让它输出到 output 目录</span>
+    <span class="token string">"name"</span><span class="token punctuation">:</span> <span class="token string">"10.web.js"</span><span class="token punctuation">,</span> <span class="token comment">// 输出的文件名</span>
+    <span class="token string">"size"</span><span class="token punctuation">:</span> <span class="token number">1058</span> <span class="token comment">// 文件的大小</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节主要介绍 Webpack 中两个核心的类 Compiler 和 Compilation。Compiler 是每次 Webpack 全部生命周期的对象，而 Compilation 是 Webpack 中每次构建过程的生命周期对象，Compilation 是通过 Compiler 创建的实例。两个类都有自己生命周期，即有自己不同的 Hook，通过添加对应 Hook 事件，可以拿到各自生命周期关键数据和对象。Compilation 有个很重要的对象是 Stats 对象，通过这个对象可以得到 Webpack 打包后的所有module、chunk 和 assets 信息，通过分析Stats 对象可以得到很多有用的信息，比如 webpack-bundle-analyzer这类分析打包结果的插件都是通过分析 Stats 对象来得到分析报告的。另外 Webpack 中<code>lib/Stats.js</code>的源码也可以看下，对于分析打包结果和编写插件都有很大的启发。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">Webpack 的 Compiler 和 Compilation 对象有什么区别？</li>
+<li style="font-size: 20px; line-height: 38px;">Webpack 的 Compiler 和 Compilation 对象有哪些重要的 Hooks？</li>
+<li style="font-size: 20px; line-height: 38px;">怎么获取 Webpack 的 Compiler 和 Compilation 对象？</li>
+<li style="font-size: 20px; line-height: 38px;">Webpack 的 Stats 对象可以做什么？有什么用？怎么获取？</li>
+</ol>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/282">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    Tapable —— Webpack 的核心模块
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="http://www.itjc8.com">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    Webpack 工作流程
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">     <div class="number">精选留言 <span class="js-number">0</span></div>     <div class="comments">         <div class="input-fake js-showcommentModal">             欢迎在这里发表留言，作者筛选后可公开显示         </div>                      <div class="noData">                 <p>                     <i class="imv2-error_c"></i>                 </p>                 <p>目前暂无任何讨论</p>             </div>              </div>  </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

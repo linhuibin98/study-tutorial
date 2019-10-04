@@ -1,0 +1,558 @@
+<html><head><meta charset="utf-8"><title>实战：手写一个 prefetch-webpack-plugin 插件-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 5-3 实战：手写一个 prefetch-webpack-plugin 插件
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                实战：手写一个 prefetch-webpack-plugin 插件
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-10 14:31:25
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img3.mukewang.com/5cd964bf00013cec06400360.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">人生太短，要干的事太多，我要争分夺秒。<p class="author">——爱迪生</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">Webpack 的<code>plugin</code>是 Webpack 的核心概念，可以说整个 Webpack 都是由插件组成的。本章节讨论的内容是我们在配置文件配置的 plugin。这个是在整个工作流程的后半部分，Webpack 将整个模块的依赖关系都处理完毕，最终生成 bundle 的时候，然后扔给内置的插件和用户配置的插件依次处理。与<code>loader</code>只操作单个模块不同，<code>plugin</code>关注得是打包后的 bundle 整体，即所有模块组成的 bundle。所以跟产出相关的都是需要插件来实现的，比如压缩、拆分公共代码。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">一句话：本质上来说，<code>plugin</code>就是通过监听 compiler 的某些 hook 特定时机，然后处理 stats。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在本章节中我们将讨论 Webpack 中不同插件的类型与区别。</p>
+</div><div class="cl-preview-section"><h2 id="插件开发必备的知识" style="font-size: 30px;">插件开发必备的知识</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我们来看下 Webpack 插件需要包含的几个条件：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;">Webapck 的插件必须要是一个类；</li>
+<li style="font-size: 20px; line-height: 38px;">该类必须包含一个<code>apply</code>的函数，该函数接收<code>compiler</code>对象参数；</li>
+<li style="font-size: 20px; line-height: 38px;">该类可以使用 Webpack 的 compiler 和 Compilation 对象的钩子；</li>
+<li style="font-size: 20px; line-height: 38px;">也可以自定义自己的钩子系统。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">比如下面的函数就具备了上面的条件，所以它是可以作为一个 Webpack 插件的，下面是一个例子：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">MyPlugin</span> <span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span>options<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 自定义配置</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>options <span class="token operator">=</span> options<span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>options<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>done<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token string">'my-plugin'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello World!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> MyPlugin<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们在 webpack.config.js 中使用刚刚编写的插件，则可以直接<code>require</code>进去，然后使用<code>new</code>关键字来实例化我们的插件：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> MyPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./myplugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token keyword">new</span> <span class="token class-name">MyPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>options<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：webpack 的插件实际是上一个包含<code>apply</code>方法的类。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">如果我们想在指定 compiler 钩子时机执行某些脚本，自然可以在对应的事件钩子上添加回调方法，在回调里执行你所需的操作。由于 webpack 的钩子都是来自于<code>Tapable</code>类，所以一些特殊类型的钩子需要特殊的<code>tap</code>方法，例如 compiler 的<code>emit</code> 钩子是支持<code>tap</code>、<code>tapPromise</code>和<code>tapAsync</code>多种类型的 tap 方式，但是不管哪种方式的 tap，都需要按照<code>Tapable</code>的规范来返回对应的值，下面的例子是使用了<code>emit.tapPromise</code>，则需要返回一个<code>Promise</code>对象。</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">HelloWorldPlugin</span> <span class="token punctuation">{</span>
+    <span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>emit<span class="token punctuation">.</span><span class="token function">tapPromise</span><span class="token punctuation">(</span><span class="token string">'HelloAsyncPlugin'</span><span class="token punctuation">,</span> compilation <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 返回一个 Promise，在我们的异步任务完成时 resolve……</span>
+            <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'异步工作完成……'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token function">resolve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> HelloWorldPlugin<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过上面最简单的 Plugin，结合之前讲解的 Compiler 和 Compilation 对象的部分内容，相信大家已经大概明白了 Plugin 的工作原理。一旦我们深入理解了 webpack compiler 和每个独立的 compilation，我们就能通过 Webpack 引擎本身做到无穷无尽的事情。我们可以重新格式化已有的文件，创建衍生的文件，或者制作全新的生成文件。</p>
+</div><div class="cl-preview-section"><h2 id="官方插件分析：filelistplugin" style="font-size: 30px;">官方插件分析：FileListPlugin</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面我们来看下 Webpack 官方给的插件 demo 源码，源码很简单。首先这里使用了异步的<code>emit.tapAsync</code>钩子，然后在<code>Compilation</code>对象上增加了一个<code>assets</code>文件<code>filelist.md</code>，内容就是我们获取到的<code>compilation.assets</code>的文件名（filename）：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">FileListPlugin</span> <span class="token punctuation">{</span>
+    <span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// emit 是异步 hook，使用 tapAsync 触及它，还可以使用 tapPromise/tap(同步)</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>emit<span class="token punctuation">.</span><span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token string">'FileListPlugin'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>compilation<span class="token punctuation">,</span> callback<span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 在生成文件中，创建一个头部字符串：</span>
+            <span class="token keyword">var</span> filelist <span class="token operator">=</span> <span class="token string">'In this build:\n\n'</span><span class="token punctuation">;</span>
+
+            <span class="token comment">// 遍历所有编译过的资源文件，</span>
+            <span class="token comment">// 对于每个文件名称，都添加一行内容。</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> filename <span class="token keyword">in</span> compilation<span class="token punctuation">.</span>assets<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                filelist <span class="token operator">+=</span> <span class="token string">'- '</span> <span class="token operator">+</span> filename <span class="token operator">+</span> <span class="token string">'\n'</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+
+            <span class="token comment">// 将这个列表作为一个新的文件资源，插入到 webpack 构建中：</span>
+            compilation<span class="token punctuation">.</span>assets<span class="token punctuation">[</span><span class="token string">'filelist.md'</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+                source<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">return</span> filelist<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                size<span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">return</span> filelist<span class="token punctuation">.</span>length<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+            <span class="token function">callback</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> FileListPlugin<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们将编写的代码放到了 webpack.config.js 配置中，直接执行后得到的命令行输出内容为：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d078516000138b914420648.png" alt="图片描述" data-original="http://img.mukewang.com/5d078516000138b914420648.png" class="" style="cursor: pointer;"><br>
+通过 log 发现多输出了一个<code>filelist.md</code>的文件，然后我们打开<code>dist</code>文件夹中的这个文件下看内容是否符合我们的预期：</p>
+</div><div class="cl-preview-section"><pre class=" language-markdown"><code class="prism  language-markdown">In this build:
+
+<span class="token list punctuation">-</span>   main.js
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">看到内容后，符合我们的预期！</p>
+</div><div class="cl-preview-section"><h2 id="编写一个插件：prefetch-webpack-plugin" style="font-size: 30px;">编写一个插件：prefetch-webpack-plugin</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面我们来编写个<code>prefetch-webpack-plugin</code>插件，这个插件的作用是将打包中遇见的<code>import()</code>或者<code>require.ensure()</code>这类异步懒加载的模块使用<code>&lt;link&gt;</code>标签的 <code>rel=prefetch</code>进行预加载，原理<a href="https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Link_prefetching_FAQ">参考文档</a>，这里不再就原理做深入介绍，简单来说就是将需要异步加载的模块，提前放到页面的 HTML 中进行预加载（需要浏览器支持）。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在写一个插件之前，我们需要了解这个插件需要用到的钩子有哪些。这里我们其实用到的是<code>compiler.compilation</code>和<code>html-webpack-plugin</code>的钩子，其实这个插件可以理解成是 <a href="https://github.com/jantimon/html-webpack-plugin">html-webpack-plugin</a>的插件，即一个 Webpack 插件的插件，这是因为 html-webpack-plugin 是处理 HTML 文件的插件，而且它本身也提供了钩子，我们可以从这些钩子中得到 HTML 的内容，从而修改 HTML 的页面结构。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在开始之前，继续介绍下 Webpack 的魔法注释，因为这个插件需要依赖魔法注释来标注一个模块是预取模块。</p>
+</div><div class="cl-preview-section"><h3 id="webpack-的魔法注释-prefetch">Webpack 的魔法注释 Prefetch</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们之前介绍过使用<code>/* webpackChunkName: 'name' */</code> 这样的魔法注释给一个异步加载的模块添加名称，其实在 Webpack 4.6+ 版本中如果要实现 Prefetch 或者 Preload 标注，我们只需要使用魔法注释即可标注一个模块是否需要预取/预加载。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">假如我们有个<code>lazy.js</code>模块需要 Prefetch，那么可以直接使用如下配置：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// 下面是魔法注释 （magic comments）</span>
+<span class="token keyword">import</span><span class="token punctuation">(</span><span class="token comment">/* webpackPrefetch: true */</span> <span class="token string">'./lazy'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">有了这个注释，在获取 chunk 对象的时候，就可以拿到它的这个标注，从而根据这个注释给页面增加<code>&lt;link rel="prefetch"&gt;</code>标签。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：</p>
+<ul>
+<li style="font-size: 20px; line-height: 38px;"><code>/* webpackPrefetch: true */</code>：把主加载流程加载完毕，在<strong>空闲时</strong>在加载其它，等再点击其他时，只需要从缓存中读取即可，性能更好，<strong>推荐使用</strong>；能够提高代码利用率，把一些交互后才能用到的代码写到异步组件里，通过懒加载的形式，去把这块的代码逻辑加载进来，性能提升，页面访问速度更快；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>/* webpackPreload: true */</code>: 和主加载流程一起并行加载。</li>
+</ul>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="prefetch-webpack-plugin-代码实现">prefetch-webpack-plugin 代码实现</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面简单说下原理和实现步骤：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">首先我们应该利用<code>compiler.compilation</code>这个钩子，得到<code>Compilation</code>对象；</li>
+<li style="font-size: 20px; line-height: 38px;">然后在<code>Compilation</code>对象中监听 html-webpack-plugin 的钩子，拿到 HTML 对象，这里需要区分 html-webpack-plugin 的版本：
+<ol>
+<li style="font-size: 20px; line-height: 38px;">在<code>3.x</code>版本，html-webpack-plugin 的钩子是直接挂在 Compilation 对象上的，我们使用的是<code>compilation.hooks.htmlWebpackPluginAfterHtmlProcessing</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">在<code>4.x</code>版本（截稿最新版本是 4.0-beta.3）中，html-webpack-plugin 自己使用<code>Tapable</code>实现了自定义钩子，需要使用<code>HtmlWebpackPlugin.getHooks(compilation)</code>的方式获取自定义的钩子。</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">然后我们从<code>Compilation</code>对象中读取当前 HTML 页面的所有<code>chunks</code>，筛选异步加载的 chunk 模块，这里有两种情况：
+<ol>
+<li style="font-size: 20px; line-height: 38px;">生成多个 HTML 页面，那么 html-webpack-plugin 插件会设置<code>chunks</code>选项，我们需要从 <code>Compilation.chunks</code>来选取 HTML 页面真正用到的 chunks，然后在从 chunks 中过滤出 Prefetch chunk；</li>
+<li style="font-size: 20px; line-height: 38px;">如果是单页应用，那么不存在<code>chunks</code>选项，这时候默认<code>chunks='all'</code>，我们需要从全部 <code>Compilation.chunks</code> 中过滤出 Prefetch chunk。</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">最后结合 Webpack 配置的<code>publicPath</code>得到异步 chunk 的实际线上地址，然后修改 html-webpack-plugin 钩子得到的 HTML 对象，给 HTML 的<code>&lt;head&gt;</code>添加<code>&lt;link rel="prefetch"&gt;</code>内容。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我们创建一个具有<code>apply</code>方法的类作为插件的结构，在<code>apply</code>中我们 tap <code>compiler</code>的<code>compilation</code>钩子获取<code>Compilation</code>对象：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">class</span> <span class="token class-name">PrefetchPlugin</span> <span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'prefetch-plugin'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>compilation<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> compilation <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 得到 Compilation 对象了！</span>
+            console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>compilation<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们需要结合<a href="https://github.com/jantimon/html-webpack-plugin">html-webpack-plugin</a>文档，获取页面 HTML 数据对象，这里我们根据步骤二，编写代码如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>compilation<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> compilation <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> run <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>run<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> compilation<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>compilation<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>htmlWebpackPluginAfterHtmlProcessing<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// html-webpack-plugin v3 插件</span>
+            compilation<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>htmlWebpackPluginAfterHtmlProcessing<span class="token punctuation">.</span><span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> run<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token comment">// html-webpack-plugin v4</span>
+            HtmlWebpackPlugin<span class="token punctuation">.</span><span class="token function">getHooks</span><span class="token punctuation">(</span>compilation<span class="token punctuation">)</span><span class="token punctuation">.</span>beforeEmit<span class="token punctuation">.</span><span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> run<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面代码，我们将实际处理的 HTML 数据的逻辑，扔给了 PreloadPlugin 这个类的<code>run</code>方法，在这里我使用了<code>bind</code>方式，保证了<code>this</code>的指向和第一个<code>compilation</code>参数的传入。而 html-webpack-plugin 的<code>htmlWebpackPluginAfterHtmlProcessing</code>和<code>beforeEmit</code>钩子实际是个<code>AsyncSeriesWaterfallHook</code>类型的钩子，所以需要使用<code>tapAsync</code>来绑定，然后需要执行异步回调的<code>callback</code>。下面来看下<code>run</code>函数的代码，在<code>run</code>函数中主要做了三件事情：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">我们需要获取 html-webpack-plugin 的配置，然后根据<code>chunks</code>的值从<code>Compilation.chunks</code>筛选当前 HTML 页面真正用到的<code>chunks</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">从当前页面获取<code>chunks</code>中需要预取的 chunk；</li>
+<li style="font-size: 20px; line-height: 38px;">生成 prefetch link 标签，添加到 HTML 片段。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<code>tapAsync</code>Hook 的 <code>run</code>中会得到三个参数：</p>
+</div><div class="cl-preview-section"><ul>
+<li style="font-size: 20px; line-height: 38px;"><code>compilation</code>：本次编译的 Compilation 对象；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>data</code>：是 html-webpack-plugin 创建的一个给其插件使用的对象，里面包含页面的 HTML 判断和 html-webpack-plugin 插件实例化后的实例本身；
+<ul>
+<li style="font-size: 20px; line-height: 38px;"><code>data.html</code>：这个是生成 HTML 页面的 HTML 片段字符串；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>data.plugin</code>：这个是 html-webpack-plugin 的实例，可以从<code>data.plugin.options</code>读取 html-webpack-plugin 插件的参数。</li>
+</ul>
+</li>
+<li style="font-size: 20px; line-height: 38px;"><code>callback</code>：<code>tapAsync</code>的回调函数，应该将<code>data</code>处理后的结果通过<code>callback</code>传递给下一个处理回调。</li>
+</ul>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先第一步，获取当前 HTML 页面真正用到的<code>chunks</code>：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">run</span><span class="token punctuation">(</span>compilation<span class="token punctuation">,</span> data<span class="token punctuation">,</span> callback<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 获取 chunks，默认不指定就是 all</span>
+    <span class="token keyword">const</span> chunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>chunks <span class="token operator">||</span> <span class="token string">'all'</span><span class="token punctuation">;</span>
+    <span class="token comment">// 排除需要排除的 chunks</span>
+    <span class="token keyword">const</span> excludeChunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>excludeChunks <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 所有 chunks 的 Map，用于根据 ID 查找 chunk</span>
+    <span class="token keyword">const</span> chunks <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 预取的 id</span>
+    <span class="token keyword">const</span> prefetchIds <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> curPageChunks <span class="token operator">=</span> compilation<span class="token punctuation">.</span>chunks
+        <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>chunk <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> <span class="token punctuation">{</span>id<span class="token punctuation">,</span> name<span class="token punctuation">}</span> <span class="token operator">=</span> chunk<span class="token punctuation">;</span>
+            <span class="token comment">// 添加到 map</span>
+            chunks<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>chunkNames <span class="token operator">===</span> <span class="token string">'all'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 全部的 chunks 都要过滤</span>
+                <span class="token comment">// 按照 exclude 过滤</span>
+                <span class="token keyword">return</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// 过滤想要的chunks</span>
+            <span class="token keyword">return</span> chunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>curPageChunks<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">然后第二步是将 chunks 遍历，获取每个 chunk 的子模块（children），根据<code>chunk.getChildIdsByOrders</code>得到的<code>childIdByOrder</code>对象中的<code>prefetch</code>来判断有没有预取的模块，如果 chunk 中存在<code>/*webpackPrefetch: true*/</code>的模块，则可以得到<code>childIdByOrder.prefetch</code>数组，该数组中包含 chunk 中包含的 prefetch 的 chunkId，具体 run 部分的代码实现如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">run</span><span class="token punctuation">(</span>compilation<span class="token punctuation">,</span> data<span class="token punctuation">,</span> callback<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 获取 chunks，默认不指定就是 all</span>
+    <span class="token keyword">const</span> chunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>chunks <span class="token operator">||</span> <span class="token string">'all'</span><span class="token punctuation">;</span>
+    <span class="token comment">// 排除需要排除的 chunks</span>
+    <span class="token keyword">const</span> excludeChunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>excludeChunks <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 所有 chunks 的 Map，用于根据 ID 查找 chunk</span>
+    <span class="token keyword">const</span> chunks <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 预取的 id</span>
+    <span class="token keyword">const</span> prefetchIds <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    compilation<span class="token punctuation">.</span>chunks
+        <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>chunk <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> <span class="token punctuation">{</span>id<span class="token punctuation">,</span> name<span class="token punctuation">}</span> <span class="token operator">=</span> chunk<span class="token punctuation">;</span>
+            <span class="token comment">// 添加到 map</span>
+            chunks<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>chunkNames <span class="token operator">===</span> <span class="token string">'all'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 全部的 chunks 都要过滤</span>
+                <span class="token comment">// 按照 exclude 过滤</span>
+                <span class="token keyword">return</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// 过滤想要的chunks</span>
+            <span class="token keyword">return</span> chunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>chunk <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> children <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 预取的内容只存在 children 内，不能 entry 就预取吧</span>
+            <span class="token keyword">const</span> childIdByOrder <span class="token operator">=</span> chunk<span class="token punctuation">.</span><span class="token function">getChildIdsByOrders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunkGroup <span class="token keyword">of</span> chunk<span class="token punctuation">.</span>groupsIterable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> childGroup <span class="token keyword">of</span> chunkGroup<span class="token punctuation">.</span>childrenIterable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> childGroup<span class="token punctuation">.</span>chunks<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        children<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>chunk<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>Array<span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                prefetchIds<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token operator">...</span>childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 这里就是获取的 prefetch id 了</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>prefetchIds<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后，我们就需要处理 <code>data.html</code>，在 HTML 页面<code>&lt;head&gt;</code>标签添加<code>link</code>标签了：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">run</span><span class="token punctuation">(</span>compilation<span class="token punctuation">,</span> data<span class="token punctuation">,</span> callback<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ... 忽略上面部分代码</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>prefetchIds<span class="token punctuation">)</span>
+    <span class="token comment">// 获取 publicPath，保证路径正确</span>
+    <span class="token keyword">const</span> publicPath <span class="token operator">=</span> compilation<span class="token punctuation">.</span>outputOptions<span class="token punctuation">.</span>publicPath <span class="token operator">||</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>prefetchIds<span class="token punctuation">.</span>size<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> prefetchTags <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> id <span class="token keyword">of</span> prefetchIds<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> chunk <span class="token operator">=</span> chunks<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">const</span> files <span class="token operator">=</span> chunk<span class="token punctuation">.</span>files<span class="token punctuation">;</span>
+            files<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>filename <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                prefetchTags<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`&lt;link rel="prefetch" href="</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>publicPath<span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>filename<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">"&gt;`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 开始生成 prefetch html片段</span>
+        <span class="token keyword">const</span> prefetchTagHtml <span class="token operator">=</span> prefetchTags<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 有 head，就在 head 结束前添加 prefetch link</span>
+            data<span class="token punctuation">.</span>html <span class="token operator">=</span> data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">,</span> prefetchTagHtml <span class="token operator">+</span> <span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 没有 head 就加上个 head</span>
+            data<span class="token punctuation">.</span>html <span class="token operator">=</span> data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">'&lt;body&gt;'</span><span class="token punctuation">,</span> <span class="token string">'&lt;head&gt;'</span> <span class="token operator">+</span> prefetchTagHtml <span class="token operator">+</span> <span class="token string">'&lt;/head&gt;&lt;body&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">callback</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">整个<code>PrefetchPlugin</code>的代码如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> HtmlWebpackPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'html-webpack-plugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">PrefetchPlugin</span> <span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> <span class="token string">'prefetch-plugin'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">apply</span><span class="token punctuation">(</span>compiler<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        compiler<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>compilation<span class="token punctuation">.</span><span class="token function">tap</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> compilation <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> run <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>run<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> compilation<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>compilation<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>htmlWebpackPluginAfterHtmlProcessing<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// html-webpack-plugin v3 插件</span>
+                compilation<span class="token punctuation">.</span>hooks<span class="token punctuation">.</span>htmlWebpackPluginAfterHtmlProcessing<span class="token punctuation">.</span><span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> run<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token comment">// html-webpack-plugin v4</span>
+                HtmlWebpackPlugin<span class="token punctuation">.</span><span class="token function">getHooks</span><span class="token punctuation">(</span>compilation<span class="token punctuation">)</span><span class="token punctuation">.</span>beforeEmit<span class="token punctuation">.</span><span class="token function">tapAsync</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> run<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">run</span><span class="token punctuation">(</span>compilation<span class="token punctuation">,</span> data<span class="token punctuation">,</span> callback<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 获取 chunks，默认不指定就是 all</span>
+        <span class="token keyword">const</span> chunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>chunks <span class="token operator">||</span> <span class="token string">'all'</span><span class="token punctuation">;</span>
+        <span class="token comment">// 排除需要排除的 chunks</span>
+        <span class="token keyword">const</span> excludeChunkNames <span class="token operator">=</span> data<span class="token punctuation">.</span>plugin<span class="token punctuation">.</span>options<span class="token punctuation">.</span>excludeChunks <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// 所有 chunks 的 Map，用于根据 ID 查找 chunk</span>
+        <span class="token keyword">const</span> chunks <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// 预取的 id</span>
+        <span class="token keyword">const</span> prefetchIds <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        compilation<span class="token punctuation">.</span>chunks
+            <span class="token punctuation">.</span><span class="token function">filter</span><span class="token punctuation">(</span>chunk <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                <span class="token keyword">const</span> <span class="token punctuation">{</span>id<span class="token punctuation">,</span> name<span class="token punctuation">}</span> <span class="token operator">=</span> chunk<span class="token punctuation">;</span>
+                <span class="token comment">// 添加到 map</span>
+                chunks<span class="token punctuation">.</span><span class="token keyword">set</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> chunk<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>chunkNames <span class="token operator">===</span> <span class="token string">'all'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token comment">// 全部的 chunks 都要过滤</span>
+                    <span class="token comment">// 按照 exclude 过滤</span>
+                    <span class="token keyword">return</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+                <span class="token comment">// 过滤想要的chunks</span>
+                <span class="token keyword">return</span> chunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">&amp;&amp;</span> excludeChunkNames<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>chunk <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                <span class="token keyword">const</span> children <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token comment">// 预取的内容只存在 children 内，不能 entry 就预取吧</span>
+                <span class="token keyword">const</span> childIdByOrder <span class="token operator">=</span> chunk<span class="token punctuation">.</span><span class="token function">getChildIdsByOrders</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunkGroup <span class="token keyword">of</span> chunk<span class="token punctuation">.</span>groupsIterable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> childGroup <span class="token keyword">of</span> chunkGroup<span class="token punctuation">.</span>childrenIterable<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> childGroup<span class="token punctuation">.</span>chunks<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            children<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>chunk<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>Array<span class="token punctuation">.</span><span class="token function">isArray</span><span class="token punctuation">(</span>childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span> childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    prefetchIds<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token operator">...</span>childIdByOrder<span class="token punctuation">.</span>prefetch<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// 获取 publicPath，保证路径正确</span>
+        <span class="token keyword">const</span> publicPath <span class="token operator">=</span> compilation<span class="token punctuation">.</span>outputOptions<span class="token punctuation">.</span>publicPath <span class="token operator">||</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>prefetchIds<span class="token punctuation">.</span>size<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> prefetchTags <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> id <span class="token keyword">of</span> prefetchIds<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">const</span> chunk <span class="token operator">=</span> chunks<span class="token punctuation">.</span><span class="token keyword">get</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">const</span> files <span class="token operator">=</span> chunk<span class="token punctuation">.</span>files<span class="token punctuation">;</span>
+                files<span class="token punctuation">.</span><span class="token function">forEach</span><span class="token punctuation">(</span>filename <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                    prefetchTags<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token template-string"><span class="token string">`&lt;link rel="prefetch" href="</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>publicPath<span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>filename<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">"&gt;`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// 开始生成 prefetch html片段</span>
+            <span class="token keyword">const</span> prefetchTagHtml <span class="token operator">=</span> prefetchTags<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">indexOf</span><span class="token punctuation">(</span><span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">)</span> <span class="token operator">!==</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 有 head，就在 head 结束前添加 prefetch link</span>
+                data<span class="token punctuation">.</span>html <span class="token operator">=</span> data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">,</span> prefetchTagHtml <span class="token operator">+</span> <span class="token string">'&lt;/head&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 没有 head 就加上个 head</span>
+                data<span class="token punctuation">.</span>html <span class="token operator">=</span> data<span class="token punctuation">.</span>html<span class="token punctuation">.</span><span class="token function">replace</span><span class="token punctuation">(</span><span class="token string">'&lt;body&gt;'</span><span class="token punctuation">,</span> <span class="token string">'&lt;head&gt;'</span> <span class="token operator">+</span> prefetchTagHtml <span class="token operator">+</span> <span class="token string">'&lt;/head&gt;&lt;body&gt;'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token function">callback</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> PrefetchPlugin<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">写完了插件之后，我们写个 entry 和 webpack.config.js 来测试下插件：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// entry.js</span>
+<span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./lazy'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>name <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// webpack.config.js</span>
+<span class="token keyword">const</span> PrefetchPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'../PrefetchPlugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> HTMLWebpackPlugin <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'html-webpack-plugin'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./index.js'</span><span class="token punctuation">,</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token keyword">new</span> <span class="token class-name">HTMLWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">PrefetchPlugin</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">打包之后，我们看到 log 输出了<code>0.js</code>这个异步加载的 chunk 文件，然后打开<code>index.html</code>看到内容中添加了<code>prefetch</code>内容：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span>html<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>head<span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>meta charset<span class="token operator">=</span><span class="token string">"UTF-8"</span><span class="token operator">&gt;</span>
+    <span class="token operator">&lt;</span>title<span class="token operator">&gt;</span>Webpack App<span class="token operator">&lt;</span><span class="token operator">/</span>title<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>link rel<span class="token operator">=</span><span class="token string">"prefetch"</span> href<span class="token operator">=</span><span class="token string">"0.js"</span><span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>head<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>body<span class="token operator">&gt;</span>
+  <span class="token operator">&lt;</span>script type<span class="token operator">=</span><span class="token string">"text/javascript"</span> src<span class="token operator">=</span><span class="token string">"main.js"</span><span class="token operator">&gt;</span><span class="token operator">&lt;</span><span class="token operator">/</span>script<span class="token operator">&gt;</span><span class="token operator">&lt;</span><span class="token operator">/</span>body<span class="token operator">&gt;</span>
+<span class="token operator">&lt;</span><span class="token operator">/</span>html<span class="token operator">&gt;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">为了验证我们的插件可用，我们通过注释给<code>import()</code>异步加载进来的模块命名为<code>lazy</code>，然后修改 webpack.config.js 的<code>output.publicPath</code>，看下输出的 HTML 中 prefetch 地址是否是正确的地址：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// index.js</span>
+<span class="token keyword">import</span><span class="token punctuation">(</span><span class="token comment">/* webpackChunkName: "lazy", webpackPrefetch: true */</span> <span class="token string">'./lazy'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>name <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// test.js，为了对比我们添加一个test entry，用于多页面的对比</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'test file'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">//webpack.config.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    <span class="token comment">// ...</span>
+    <span class="token comment">// 多 entry 入口</span>
+    entry<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        index<span class="token punctuation">:</span> <span class="token string">'./index.js'</span><span class="token punctuation">,</span>
+        test<span class="token punctuation">:</span> <span class="token string">'./test.js'</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    output<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        publicPath<span class="token punctuation">:</span> <span class="token string">'http://www.example.com/js/'</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    plugins<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+        <span class="token comment">// 使用 chunks，index 中有引入 index -&gt; prefetch lazy.js</span>
+        <span class="token keyword">new</span> <span class="token class-name">HTMLWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>chunks<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'index'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> filename<span class="token punctuation">:</span> <span class="token string">'index.html'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token comment">// 没有 chunk 测试，chunks='all'，test 和 index 都会被包含，index -&gt; prefetch lazy.js</span>
+        <span class="token keyword">new</span> <span class="token class-name">HTMLWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>filename<span class="token punctuation">:</span> <span class="token string">'no-chunk.html'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token comment">// chunks=[test]，test 中没有 prefetch 的内容，所以 html 应该不会包含 prefetch link</span>
+        <span class="token keyword">new</span> <span class="token class-name">HTMLWebpackPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>chunks<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'test'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> filename<span class="token punctuation">:</span> <span class="token string">'test.html'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        <span class="token keyword">new</span> <span class="token class-name">PrefetchPlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>options<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">最后我们发现修改之后的代码，得到正确的内容：<code>&lt;link rel="prefetch" href="http://www.example.com/js/lazy.js"&gt;</code>，说明我们的插件没有问题。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：这里插件只处理了<code>/*webpackPrefetch:true*/</code>的情况，<code>/*webpackPreload:true*/</code>的情况请读者自己动手来实现吧！</p>
+</blockquote>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本小节主要介绍了 Webpack 的插件编写时候涉及到的知识点，最后剖析了 Webpack 官方的 FilelistPlugin 的插件，最后我们动手实现了一个将异步加载模块给 HTML 添加<code>prefetch</code>实现预加载内容的插件。编写插件之前应该先理解插件需要做的事情，然后根据前边介绍的 Compiler 和 Compilation 对象的钩子章节，寻找合适的事件注入时机，然后得到对应的钩子回调参数，最后处理数据。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">编写过 Webpack 插件吗？</li>
+</ol>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/288">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    实战：手写一个 markdown-loader
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/290">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    实战：使用 Express 和中间件来实现 Webpack-dev-server
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">
+        </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>

@@ -1,0 +1,1140 @@
+<html><head><meta charset="utf-8"><title>从 Webpack 的产出代码来看 Webpack 是怎么执行的-慕课专栏</title>
+			<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+			<meta name="renderer" content="webkit">
+			<meta property="qc:admins" content="77103107776157736375">
+			<meta property="wb:webmaster" content="c4f857219bfae3cb">
+			<meta http-equiv="Access-Control-Allow-Origin" content="*">
+			<meta http-equiv="Cache-Control" content="no-transform ">
+			<meta http-equiv="Cache-Control" content="no-siteapp">
+			<link rel="apple-touch-icon" sizes="76x76" href="https://www.imooc.com/static/img/common/touch-icon-ipad.png">
+			<link rel="apple-touch-icon" sizes="120x120" href="https://www.imooc.com/static/img/common/touch-icon-iphone-retina.png">
+			<link rel="apple-touch-icon" sizes="152x152" href="https://www.imooc.com/static/img/common/touch-icon-ipad-retina.png">
+			<link href="https://moco.imooc.com/captcha/style/captcha.min.css" rel="stylesheet">
+			<link rel="stylesheet" href="https://www.imooc.com/static/moco/v1.0/dist/css/moco.min.css?t=201907021539" type="text/css">
+			<link rel="stylesheet" href="https://www.imooc.com/static/lib/swiper/swiper-3.4.2.min.css?t=201907021539">
+			<link rel="stylesheet" href="https://static.mukewang.com/static/css/??base.css,common/common-less.css?t=2.5,column/zhuanlanChapter-less.css?t=2.5,course/inc/course_tipoff-less.css?t=2.5?v=201907051055" type="text/css">
+			<link charset="utf-8" rel="stylesheet" href="https://www.imooc.com/static/lib/ueditor/themes/imooc/css/ueditor.css?v=201907021539"><link rel="stylesheet" href="https://www.imooc.com/static/lib/baiduShare/api/css/share_style0_16.css?v=6aba13f0.css"></head>
+			<body><div id="main">
+
+<div class="container clearfix" id="top" style="display: block; width: 1134px;">
+    
+    <div class="center_con js-center_con l" style="width: 1134px;">
+        <div class="article-con">
+                            <!-- 买过的阅读 -->
+                <div class="map">
+                    <a href="/read" target="_blank"><i class="imv2-feather-o"></i></a>
+                    <a href="/read/29" target="_blank">Webpack 从零入门到工程化实战</a>
+                    <a href="" target="_blank">
+                        <span>
+                            / 4-5 从 Webpack 的产出代码来看 Webpack 是怎么执行的
+                        </span>
+                    </a>
+                </div>
+
+            
+
+
+            <div class="art-title" style="margin-top: 0px;">
+                从 Webpack 的产出代码来看 Webpack 是怎么执行的
+            </div>
+            <div class="art-info">
+                
+                <span>
+                    更新时间：2019-07-01 12:09:35
+                </span>
+            </div>
+            <div class="art-top">
+                                <img src="https://img2.mukewang.com/5cd9648000019c9706400359.jpg" alt="">
+                                                <div class="famous-word-box">
+                    <img src="https://www.imooc.com/static/img/column/bg-l.png" alt="" class="bg1 bg">
+                    <img src="https://www.imooc.com/static/img/column/bg-r.png" alt="" class="bg2 bg">
+                    <div class="famous-word">老骥伏枥，志在千里； 烈士暮年，壮心不已。 <p class="author">——曹操</p></div>
+                </div>
+                            </div>
+            <div class="art-content js-lookimg">
+                <div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过之前的章节内容，我们已经了解了 Webpack 的整个打包流程，并且针对源码做了分析。这篇文章，来分析下 Webpack 打包产出物是怎样执行的。本文基于 Webpack@4.29.6 版本来分析产出物，Webpack 版本不同产出物可能有差异，但是基本原理是一致的。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先我使用下面两个 js 文件：<code>app.js</code>和<code>name.js</code>，其中<code>name.js</code>内容如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// name.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">而<code>app.js</code>中直接使用 <code>require</code> 引入了<code>name.js</code>：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// app.js</span>
+<span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">对应的<code>webpack.config.js</code>也是相当简单，使用<code>mode="development"</code>让 js 不压缩，<code>devtool=false</code> 保证不输出<code>sourcemap</code>，然后指定下<code>entry</code>：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">const</span> config <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span> <span class="token comment">// 采用dev模式，不会压缩代码</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token comment">// 不用sourcemap</span>
+    <span class="token comment">// 没有output则默认输出是到dist的main</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./src/app.js'</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">执行<code>npx webpack --config webpack.config.js</code> 后，在<code>dist</code>文件夹下找到了打包后的代码（去掉部分不必要的注释）：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>modules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// webpackBootstrap</span>
+    <span class="token comment">// The module cache</span>
+    <span class="token keyword">var</span> installedModules <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// The require function</span>
+    <span class="token keyword">function</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// Check if module is in cache</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// Create a new module (and put it into the cache)</span>
+        <span class="token keyword">var</span> module <span class="token operator">=</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+            i<span class="token punctuation">:</span> moduleId<span class="token punctuation">,</span>
+            l<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+            exports<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Execute the module function</span>
+        modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> module<span class="token punctuation">,</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Flag the module as loaded</span>
+        module<span class="token punctuation">.</span>l <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// Return the exports of the module</span>
+        <span class="token keyword">return</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// expose the modules object (__webpack_modules__)</span>
+    __webpack_require__<span class="token punctuation">.</span>m <span class="token operator">=</span> modules<span class="token punctuation">;</span>
+
+    <span class="token comment">// expose the module cache</span>
+    __webpack_require__<span class="token punctuation">.</span>c <span class="token operator">=</span> installedModules<span class="token punctuation">;</span>
+
+    <span class="token comment">// define getter function for harmony exports</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">d</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> name<span class="token punctuation">,</span> getter<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>__webpack_require__<span class="token punctuation">.</span><span class="token function">o</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> name<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> name<span class="token punctuation">,</span> <span class="token punctuation">{</span>enumerable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token keyword">get</span><span class="token punctuation">:</span> getter<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// define __esModule on exports</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">r</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> Symbol <span class="token operator">!==</span> <span class="token string">'undefined'</span> <span class="token operator">&amp;&amp;</span> Symbol<span class="token punctuation">.</span>toStringTag<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> Symbol<span class="token punctuation">.</span>toStringTag<span class="token punctuation">,</span> <span class="token punctuation">{</span>value<span class="token punctuation">:</span> <span class="token string">'Module'</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> <span class="token string">'__esModule'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>value<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// create a fake namespace object</span>
+    <span class="token comment">// mode &amp; 1: value is a module id, require it</span>
+    <span class="token comment">// mode &amp; 2: merge all properties of value into the ns</span>
+    <span class="token comment">// mode &amp; 4: return value when already ns object</span>
+    <span class="token comment">// mode &amp; 8|1: behave like require</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">t</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> mode<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>mode <span class="token operator">&amp;</span> <span class="token number">1</span><span class="token punctuation">)</span> value <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>mode <span class="token operator">&amp;</span> <span class="token number">8</span><span class="token punctuation">)</span> <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>mode <span class="token operator">&amp;</span> <span class="token number">4</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> value <span class="token operator">===</span> <span class="token string">'object'</span> <span class="token operator">&amp;&amp;</span> value <span class="token operator">&amp;&amp;</span> value<span class="token punctuation">.</span>__esModule<span class="token punctuation">)</span> <span class="token keyword">return</span> value<span class="token punctuation">;</span>
+        <span class="token keyword">var</span> ns <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        __webpack_require__<span class="token punctuation">.</span><span class="token function">r</span><span class="token punctuation">(</span>ns<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>ns<span class="token punctuation">,</span> <span class="token string">'default'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>enumerable<span class="token punctuation">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> value<span class="token punctuation">:</span> value<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>mode <span class="token operator">&amp;</span> <span class="token number">2</span> <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> value <span class="token operator">!=</span> <span class="token string">'string'</span><span class="token punctuation">)</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> key <span class="token keyword">in</span> value<span class="token punctuation">)</span>
+                __webpack_require__<span class="token punctuation">.</span><span class="token function">d</span><span class="token punctuation">(</span>
+                    ns<span class="token punctuation">,</span>
+                    key<span class="token punctuation">,</span>
+                    <span class="token keyword">function</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">return</span> value<span class="token punctuation">[</span>key<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> key<span class="token punctuation">)</span>
+                <span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> ns<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// getDefaultExport function for compatibility with non-harmony modules</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">n</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> getter <span class="token operator">=</span>
+            module <span class="token operator">&amp;&amp;</span> module<span class="token punctuation">.</span>__esModule
+                <span class="token operator">?</span> <span class="token keyword">function</span> <span class="token function">getDefault</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                      <span class="token keyword">return</span> module<span class="token punctuation">[</span><span class="token string">'default'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+                  <span class="token punctuation">}</span>
+                <span class="token punctuation">:</span> <span class="token keyword">function</span> <span class="token function">getModuleExports</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                      <span class="token keyword">return</span> module<span class="token punctuation">;</span>
+                  <span class="token punctuation">}</span><span class="token punctuation">;</span>
+        __webpack_require__<span class="token punctuation">.</span><span class="token function">d</span><span class="token punctuation">(</span>getter<span class="token punctuation">,</span> <span class="token string">'a'</span><span class="token punctuation">,</span> getter<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> getter<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Object.prototype.hasOwnProperty.call</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">o</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>object<span class="token punctuation">,</span> property<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>hasOwnProperty<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>object<span class="token punctuation">,</span> property<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// __webpack_public_path__</span>
+    __webpack_require__<span class="token punctuation">.</span>p <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Load entry module and return exports</span>
+    <span class="token keyword">return</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> <span class="token string">'./src/app.js'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token string">'./src/app.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token comment">/*! ./name.js */</span> <span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">'./src/name.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// name.js</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="分析打包后的代码结构" style="font-size: 30px;">分析打包后的代码结构</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面代码可以看出 ，整个 Webpack 的打包产物是一个<strong>立即执行函数表达式</strong>（IIFE），函数外部结构如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>modules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 内部内容忽略</span>
+    <span class="token comment">// 加载 entry 模块，并且 return 他的 exports</span>
+    <span class="token keyword">return</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> <span class="token string">'./src/app.js'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token string">'./src/app.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token comment">/*! ./name.js */</span> <span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">'./src/name.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// name.js</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">即将下面对象当成一个参数传入立即执行函数，该函数唯一参数是<code>modules</code>，所以称这个对象为<code>modules</code>吧，<code>modules</code>格式如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">{</span>
+    <span class="token string">'./src/app.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token comment">/*! ./name.js */</span> <span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token string">'./src/name.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// name.js</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在这里我们看到了，<code>modules</code>对象是的<code>key</code>是文件的路径，<code>value</code>则是函数的类似 AMD factory 格式的函数，整个 IIFE 函数的核心是四步：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">定义一个对象 <code>installedModules</code> ，用来保存已经注册成功的模块；</li>
+<li style="font-size: 20px; line-height: 38px;">定义<code>__webpack_require__</code> 函数来实现模块的加载，这是整个模块管理的核心；</li>
+<li style="font-size: 20px; line-height: 38px;">定义<code>__webpack_require__</code> 的一些属性；</li>
+<li style="font-size: 20px; line-height: 38px;">传入 <code>entry</code> 模块，执行<code>__webpack_require__</code> ，并且返回执行结果，即 <code>entry</code> 的<code>exports</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><h2 id="webpack_require__-函数" style="font-size: 30px;"><code>__webpack_require__</code> 函数</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>__webpack_require__</code> 函数是 Webpack 的核心，它主要作用是调用并且注册模块，整个代码如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// 接受一个模块id</span>
+<span class="token keyword">function</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 1. 判断是否已经注册过，注册过的模块都在installedModules可以找到</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 如果注册过，则直接返回</span>
+        <span class="token keyword">return</span> installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 2. 没有注册的模块，就注册一个，并且放入`installedModules` 缓存起来</span>
+    <span class="token keyword">var</span> module <span class="token operator">=</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+        i<span class="token punctuation">:</span> moduleId<span class="token punctuation">,</span>
+        l<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+        exports<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 3. 执行模块的 factory 函数</span>
+    modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> module<span class="token punctuation">,</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 4. 打个 flag 表示下模块已经加载了</span>
+    module<span class="token punctuation">.</span>l <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 5. 返回模块的输出 exports</span>
+    <span class="token keyword">return</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>__webpack_require__</code>函数接收<code>moduleId</code>（模块 ID）作为参数，然后开始执行，整个过程如下：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">根据<code>moduleId</code>在<code>installedModules</code>中判断是否已经注册过，注册过则直接返回<code>exports</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">没有注册的模块，就注册一个，并且放入<code>installedModules</code>缓存起来，这里有三个属性：
+<ol>
+<li style="font-size: 20px; line-height: 38px;"><code>i</code>：是模块 id，即 moduleId</li>
+<li style="font-size: 20px; line-height: 38px;"><code>l</code>：默认是 false，即有没有被注册执行过（应该是<code>loaded</code>简写）</li>
+<li style="font-size: 20px; line-height: 38px;"><code>exports</code>：模块的输出对象</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">使用<code>call</code>方法执行模块的 <code>factory</code> 函数，其中<code>call</code>上下文是<code>module.exports</code>，同时传入 3 个参数：
+<ol>
+<li style="font-size: 20px; line-height: 38px;"><code>module</code>：模块本身</li>
+<li style="font-size: 20px; line-height: 38px;"><code>module.exports</code>：模块 <code>exports</code> 对象</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__</code>函数</li>
+</ol>
+</li>
+<li style="font-size: 20px; line-height: 38px;">修改模块的<code>l</code>属性，标识已经注册完成；</li>
+<li style="font-size: 20px; line-height: 38px;">返回模块的 <code>exports</code>对象。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这里我们继续看下<code>app.js</code>处理后的<code>factory</code>函数内容：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们可以看到，<code>factory</code>的 3 个参数，分别对应的是<code>__webpack_require__</code>函数内执行<code>call</code>传入的 3 个参数，即：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>module</code>：模块本身</li>
+<li style="font-size: 20px; line-height: 38px;"><code>module.exports</code>：模块 <code>exports</code> 对象</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__</code>函数</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">而<code>factory</code>的上下文，即<code>this</code>，则应该是<code>call</code>传入的<code>module.exports</code>，即<code>exports</code>对象。</p>
+</div><div class="cl-preview-section"><h3 id="webpack_require__-的属性"><code>__webpack_require__</code> 的属性</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">研究完<code>__webpack_require__</code>函数，在继续看下 IIFE 中添加<code>__webpack_require__</code> 属性：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.s</code>：记录入口文件的 moduleId；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.m</code>: 为<code>modules</code>对象，即传入的所有模块对象；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.c</code>：即<code>cache</code> 对象，所有已注册的对象缓存，即<code>installedModules</code>对象；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.d</code>：用于 ES modules，输出的是值的引用；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.r</code>：给<code>exports</code>定义一个 <code>__esModule</code>属性；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.t</code>：根据传入的<code>moduleId</code>的模块做 ES module <code>default</code>和 CommonJS module 兼容；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.n</code>：解决 <code>ES module</code> 和 <code>CommonJS module</code> 导出不一致的问题，即 <code>ES</code>模块，则返回 <code>module['default']</code>；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.o</code>：判断是否一个<code>Object</code>有没有<code>property</code>属性；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.p</code>：这个属性的取值来自于我们配置中的<code>output.publicPath</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>__webpack_require__.p</code>跟<code>output.publicPath</code>有关系，如果修改下 <code>webpack.config.js</code>的内容，增加<code>output.publicPath</code>：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./src/app.js'</span><span class="token punctuation">,</span>
+    output<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        publicPath<span class="token punctuation">:</span> <span class="token string">'http://baidu.com/'</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">则<code>__webpack_require__.p</code>的内容就发生了变化：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">__webpack_require__<span class="token punctuation">.</span>p <span class="token operator">=</span> <span class="token string">'http://baidu.com/'</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">上面是在普通的方式打包产出的分析。还有其他几种情况，得到的<code>__webpack_require__</code>属性会不同，这里可以直接在<code>webpack/lib/MainTemplate.js</code>中找到的定义说明。</p>
+</div><div class="cl-preview-section"><h2 id="chunks-split-产出分析" style="font-size: 30px;">Chunks Split 产出分析</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来我们再来看下配置了<code>splitChunks</code>的产出差异，为了更好的理解入口文件不同对打包结果的影响，我们将入口文件增加到两个：<code>app.js</code>和<code>name.js</code>，内容分别如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// app.js</span>
+<span class="token keyword">const</span> $ <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'zepto'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>$<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// name.js</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>zepto</code>是通过 NPM 安装的<code>npm i zepto</code>，在修改下<code>webpack.config.js</code>：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">增加<code>splitChunks</code>的内容；</li>
+<li style="font-size: 20px; line-height: 38px;">entry 由只有一个字符串形式的单一 entry，换成数组<code>[string]</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    <span class="token comment">// 注意这里，entry为数组形式</span>
+    entry<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'./src/app.js'</span><span class="token punctuation">,</span> <span class="token string">'./src/name.js'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token comment">// 增加 splitChunks</span>
+    optimization<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        splitChunks<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            chunks<span class="token punctuation">:</span> <span class="token string">'all'</span><span class="token punctuation">,</span>
+            minSize<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">,</span>
+            minChunks<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+            name<span class="token punctuation">:</span> <span class="token string">'vendors.main'</span><span class="token punctuation">,</span>
+            cacheGroups<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                vendors<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                    test<span class="token punctuation">:</span> <span class="token regex">/[\\/]node_modules[\\/]/</span><span class="token punctuation">,</span>
+                    priority<span class="token punctuation">:</span> <span class="token operator">-</span><span class="token number">10</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">根据之前的<a href="TODO">常见配置项小结的内容</a>，我们知道 entry 无论是<code>string</code>还是<code>[string]</code>的形式，都是单一文件入口，即打包产出上会生成一个 bundle，我们来看下打包后的结果：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">//main.js</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>modules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// webpackBootstrap</span>
+    <span class="token comment">// install a JSONP callback for chunk loading</span>
+    <span class="token comment">// 新增内容</span>
+    <span class="token keyword">function</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> chunkIds <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">var</span> moreModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">var</span> executeModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">var</span> moduleId<span class="token punctuation">,</span>
+            chunkId<span class="token punctuation">,</span>
+            i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            resolves <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> chunkIds<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            chunkId <span class="token operator">=</span> chunkIds<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token comment">// 这里代码在`import()`/`require.ensure`会有用，后面会详细介绍</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                resolves<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>moduleId <span class="token keyword">in</span> moreModules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>hasOwnProperty<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>moreModules<span class="token punctuation">,</span> moduleId<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> moreModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>parentJsonpFunction<span class="token punctuation">)</span> <span class="token function">parentJsonpFunction</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>resolves<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            resolves<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token comment">// add entry modules from loaded chunk to deferred list</span>
+        deferredModules<span class="token punctuation">.</span>push<span class="token punctuation">.</span><span class="token function">apply</span><span class="token punctuation">(</span>deferredModules<span class="token punctuation">,</span> executeModules <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// run deferred modules when all chunks ready</span>
+        <span class="token keyword">return</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 遍历deferredModules数组，依次调用__webpack_require__完成模块注册</span>
+    <span class="token keyword">function</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> result<span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> deferredModules<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> deferredModule <span class="token operator">=</span> deferredModules<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">var</span> fulfilled <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+            <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> j <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> deferredModule<span class="token punctuation">.</span>length<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">var</span> depId <span class="token operator">=</span> deferredModule<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>depId<span class="token punctuation">]</span> <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> fulfilled <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>fulfilled<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                deferredModules<span class="token punctuation">.</span><span class="token function">splice</span><span class="token punctuation">(</span>i<span class="token operator">--</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                result <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> deferredModule<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// 一样，注册过的 module 缓存</span>
+    <span class="token keyword">var</span> installedModules <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// installedChunks是一个存储对象，用于存储 Chunks的状态</span>
+    <span class="token comment">// 在splitChunk，没有使用 import()/require.ensure 的情况下，状态只有两种：</span>
+    <span class="token comment">// 1. undefined：没有加载</span>
+    <span class="token comment">// 2. 0 加载成功</span>
+    <span class="token comment">// undefined = chunk not loaded, null = chunk preloaded/prefetched</span>
+    <span class="token comment">// Promise = chunk loading, 0 = chunk loaded</span>
+    <span class="token comment">// 只在 SplitChunk 方式，状态只有0</span>
+    <span class="token keyword">var</span> installedChunks <span class="token operator">=</span> <span class="token punctuation">{</span>
+        main<span class="token punctuation">:</span> <span class="token number">0</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token comment">// 存储定义后的 module</span>
+    <span class="token keyword">var</span> deferredModules <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// __webpack_require__方法和属性部分代码都没变化</span>
+    <span class="token keyword">function</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    __webpack_require__<span class="token punctuation">.</span>m <span class="token operator">=</span> modules<span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span>c <span class="token operator">=</span> installedModules<span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">d</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> name<span class="token punctuation">,</span> getter<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">r</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>exports<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">t</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> mode<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">n</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">o</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>object<span class="token punctuation">,</span> property<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    __webpack_require__<span class="token punctuation">.</span>p <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 新增内容</span>
+    <span class="token keyword">var</span> jsonpArray <span class="token operator">=</span> <span class="token punctuation">(</span>window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">=</span> window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">var</span> oldJsonpFunction <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span>push<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    jsonpArray<span class="token punctuation">.</span>push <span class="token operator">=</span> webpackJsonpCallback<span class="token punctuation">;</span>
+    jsonpArray <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> jsonpArray<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">var</span> parentJsonpFunction <span class="token operator">=</span> oldJsonpFunction<span class="token punctuation">;</span>
+
+    <span class="token comment">// 将entry 等模块添加到deferredModules</span>
+    deferredModules<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'vendors.main'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 检测已经注册到deferredModules的模块，并且触发 factory</span>
+    <span class="token keyword">return</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token string">'./src/name.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+    <span class="token string">'./src/app.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./node_modules/zepto/dist/zepto.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+    <span class="token number">0</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./src/app.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面是拆出来的<code>vendors.main.js</code>文件：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">(</span>window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">=</span> window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">'vendors.main'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token string">'./node_modules/zepto/dist/zepto.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">;</span>
+            <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>global<span class="token punctuation">,</span> factory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+                    <span class="token operator">!</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token function-variable function">__WEBPACK_AMD_DEFINE_RESULT__</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">return</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> module<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                    __WEBPACK_AMD_DEFINE_RESULT__ <span class="token operator">!==</span> undefined <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports <span class="token operator">=</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// zepto 源码</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><h3 id="基本概念">基本概念</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在解析源码之前，为了方便理解，根据代码中涉及到的一些变量名，做概念上的统一：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>app.js</code>和 <code>name.js</code>打包到了<code>main.js</code>；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>app.js</code>依赖的<code>zepto</code>库太大，被拆分到了<code>vendors.main.js</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">chunk 是打包后产出的文件，内部包含多个模块的代码，比如 <code>main.js</code>就是一个 chunk，内部包含打包之前的<code>app.js</code>和<code>name.js</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">module 是 js 模块，例如：<code>app.js</code>和<code>name.js</code>。</li>
+</ol>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：可以简单理解 chunk 是打包后的文件产物，一个 chunk 可能包含多个模块；模块是打包前的文件。</p>
+</blockquote>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以，通过上面的概念，<code>installedChunks</code>这个变量，从命名上我们应该知道跟 chunk 有关系，而<code>deferredModules</code>则跟模块有关系。</p>
+</div><div class="cl-preview-section"><h3 id="跟普通打包产出的差异">跟普通打包产出的差异</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">比较下之前的打包产出物，发现变化如下：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;">IIFE 函数 return 出来的是<code>checkDeferredModules</code>；</li>
+<li style="font-size: 20px; line-height: 38px;">在 entry 配置了入口文件是又两个文件组成的数组，但是打包之后 IIFE 的参数<code>modules</code>变成了三个，即<code>name.js</code>、<code>app.js</code>和一个自动生成的依赖<code>app.js</code>和<code>name.js</code>的<code>0</code>模块；</li>
+<li style="font-size: 20px; line-height: 38px;">IIFE 内部新增<code>webpackJsonpCallback</code>用于加载 splitChunk 内容；</li>
+<li style="font-size: 20px; line-height: 38px;">在文件引用关系上，会先加载<code>vendors.main.js</code>，然后加载<code>main.js</code>（app.js），先将内容绑定到<code>webpackJsonp</code>数组。</li>
+</ol>
+</div><div class="cl-preview-section"><h3 id="vendors.main.js-代码解析"><code>vendors.main.js</code> 代码解析</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">接下来，我们看下代码执行的过程。因为<code>vendors.main.js</code>会在<code>main.js</code>（app.js）之前被引入到页面，所以首先发生在<code>vendors.main.js</code>中，会将<code>main.js</code>执行需要的依赖模块统一放入<code>webpackJsonp</code>数组，<code>webpackJsonp</code>数组的格式如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// webpackJsonp的每一项都是一个数组组成</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">'vendors.main'</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token comment">// 打包后的chunkId数组，</span>
+    <span class="token punctuation">{</span>moduleId<span class="token punctuation">:</span> factory<span class="token punctuation">}</span> <span class="token comment">// 文件对应的包含的模块对象，key 是模块 id，value 是 factory 函数</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">值得注意的是，其实源码中 <code>zepto</code> 的源码代码如下：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// npm zepto源码</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>global<span class="token punctuation">,</span> factory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> define <span class="token operator">===</span> <span class="token string">'function'</span> <span class="token operator">&amp;&amp;</span> define<span class="token punctuation">.</span>amd<span class="token punctuation">)</span>
+    <span class="token function">define</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token keyword">else</span>
+    <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// zepto source</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">而经过 Webpack 处理之后的这部分定义代码发生了下面的变化：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">;</span>
+    <span class="token comment">// 下面是 zepto 的代码</span>
+    <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>global<span class="token punctuation">,</span> factory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+            <span class="token operator">!</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token function-variable function">__WEBPACK_AMD_DEFINE_RESULT__</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> module<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            __WEBPACK_AMD_DEFINE_RESULT__ <span class="token operator">!==</span> undefined <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports <span class="token operator">=</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// zepto 源码</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>typeof define === 'function' &amp;&amp; define.amd</code>直接被替换成<code>true</code></li>
+<li style="font-size: 20px; line-height: 38px;"><code>define</code> 被直接作为执行了，执行结果非<code>undefined</code>（return）作为<code>module.exports</code>了</li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">简单来说上面的操作，是把 AMD 的 define 方法，换成了 Webpack 的 <code>module.export = factory(global)</code>。这部分是直接将 AMD 的模块定义替换 Webpack 自己的模块管理方式，相关的转换可以在<code>webpack/lib/dependencies/AMDDefineDependency.js</code>找到。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>vendors.main.js</code>内容相对简单，一句话概括就是给<code>webpackJsonp</code>数组增加子项，等待<code>main.js</code>处理。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：这里有个坑，实际 zepto 代码执行的时候会报错。这里本文最后会说原因和解决方式，下面继续产出源码分析。</p>
+</blockquote>
+</div><div class="cl-preview-section"><h3 id="main.js内容介绍"><code>main.js</code>内容介绍</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">当进入<code>main.js</code>文件后，执行 IIFE 函数，遍历<code>webpackJsonp</code>数组，将数组项交给<code>webpackJsonpCallback</code>处理：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">var</span> jsonpArray <span class="token operator">=</span> <span class="token punctuation">(</span>window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">=</span> window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">var</span> oldJsonpFunction <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span>push<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// **这里重写了webpackJsonp数组的 push 函数</span>
+<span class="token comment">// 实际当后续还有模块通过 push 方法添加到webpackJsonp，则直接调用webpackJsonp</span>
+jsonpArray<span class="token punctuation">.</span>push <span class="token operator">=</span> webpackJsonpCallback<span class="token punctuation">;</span>
+jsonpArray <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> jsonpArray<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">下面来重点解读下<code>webpackJsonpCallback</code>的源码。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：注意上面的代码重写了 webpackJsonp 数组的 push 函数，用处有：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">实际当后续还有模块通过 push 方法添加到 webpackJsonp，则直接调用 webpackJsonp，比如再加载个 webpack 打包后的 verdons 文件；</li>
+<li style="font-size: 20px; line-height: 38px;"><code>import()</code> / <code>require.ensure</code>这种异步加载的方式，加载之后实际<code>webpackJsonp.push</code>就是<code>webpackJsonpCallback</code>函数了，后面详细解释，记住即可。</li>
+</ol>
+</blockquote>
+</div><div class="cl-preview-section"><h4 id="webpackjsonpcallback-函数" style="font-size: 26px;"><code>webpackJsonpCallback</code> 函数</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>webpackJsonpCallback</code> 函数主要是用于加载 chunk 及其内部包含模块的函数，用到了<code>installedChunks</code>对象来存储 chunk 的状态。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips: <code>installedChunks</code>是一个存储 chunk 状态的对象，在 splitChunk，没有使用 <code>import()</code> / <code>require.ensure</code> 的情况下，状态只有两种：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">undefined：没有加载</li>
+<li style="font-size: 20px; line-height: 38px;">0 加载成功</li>
+</ol>
+</blockquote>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">function</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> chunkIds <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// 数组，保存了该 chunk 文件的 chunkId 值</span>
+    <span class="token keyword">var</span> moreModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// 对象，保存的chunk 文件包含的模块</span>
+    <span class="token keyword">var</span> executeModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// 数组，可执行的模块，被传进来的 moduleId 会被优先执行</span>
+
+    <span class="token keyword">var</span> moduleId<span class="token punctuation">,</span>
+        chunkId<span class="token punctuation">,</span>
+        i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>
+        resolves <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token comment">// 1. 循环判断chunks 的加载状态</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> chunkIds<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        chunkId <span class="token operator">=</span> chunkIds<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token comment">// 使用installChunks中存储chunk的加载状态，据此判断chunk是否加载完毕</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 在 splitChunk 没有 import() /require.ensure下，状态始终是</span>
+            resolves<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 给 chunk 添加加载完成的标识，状态0</span>
+        installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 2. 将 chunk 文件中的 module 添加到 modules 对象上，modules 是 IIFE 函数的参数</span>
+    <span class="token comment">// 即 app.js name.js 0 的对象</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>moduleId <span class="token keyword">in</span> moreModules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>hasOwnProperty<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>moreModules<span class="token punctuation">,</span> moduleId<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> moreModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>parentJsonpFunction<span class="token punctuation">)</span> <span class="token function">parentJsonpFunction</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>resolves<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        resolves<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// 3. 如果有需要执行的模块，则加入 deferredModules 数组</span>
+    deferredModules<span class="token punctuation">.</span>push<span class="token punctuation">.</span><span class="token function">apply</span><span class="token punctuation">(</span>deferredModules<span class="token punctuation">,</span> executeModules <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 4. 每次执行完最后，都要执行下checkDeferredModules 函数，检测下状态，达到entry 可执行状态没（即依赖模块都加载没）</span>
+    <span class="token keyword">return</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h4 id="checkdeferredmodules-函数" style="font-size: 26px;"><code>checkDeferredModules</code> 函数</h4>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">介绍完<code>webpackJsonpCallback</code>，再看下 IIFE 函数最后的执行代码，实际是将<code>0</code>和<code>vendors.main</code>俩模块放入<code>deferredModules</code>，然后检测<code>deferredModules</code>内模块的状态。</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// 将entry 等模块添加到deferredModules</span>
+deferredModules<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'vendors.main'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// 检测已经注册到deferredModules的模块，并且触发 factory</span>
+<span class="token keyword">return</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<code>checkDeferredModules</code>函数主要是遍历<code>deferredModules</code>数组中模块状态，保证 Chunk 文件中模块和依赖的模块都已经加载成功，然后执行<code>__webpack_require__</code>，触发 entry 的 factory，详细过程可以查看下面的代码注释。</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// `checkDeferredModules` 函数</span>
+<span class="token keyword">function</span> <span class="token function">checkDeferredModules</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> result<span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> deferredModules<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> deferredModule <span class="token operator">=</span> deferredModules<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">var</span> fulfilled <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+        <span class="token comment">// 1. 循环开始检测依赖模块的状态</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> j <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> deferredModule<span class="token punctuation">.</span>length<span class="token punctuation">;</span> j<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">var</span> depId <span class="token operator">=</span> deferredModule<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token comment">// 2. 使用installedChunks 对象值来检测状态</span>
+            <span class="token comment">// installedChunks中存储的状态，在webpackJsonpCallback得到修改</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>depId<span class="token punctuation">]</span> <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> fulfilled <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 3. 只有模块所需的chunk都加载完毕，该模块才会被执行</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>fulfilled<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            deferredModules<span class="token punctuation">.</span><span class="token function">splice</span><span class="token punctuation">(</span>i<span class="token operator">--</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            result <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> deferredModule<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在<code>checkDeferredModules</code>函数的最后：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">result <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> deferredModule<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">return</span> result<span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">将 <code>deferredModule</code>第一个子项，赋值给<code>__webpack_require__.s</code>，即作为入口文件，然后执行<code>__webpack_require__</code>进行注册，并且返回第一个模块的<code>exports</code>结果，至此整个打包产物的执行流程就结束了。</p>
+</div><div class="cl-preview-section"><h2 id="多文件打包的产出分析" style="font-size: 30px;">多文件打包的产出分析</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">多文件的打包产出物，其实核心的内容跟单文件打包没有差别，如果多文件+<code>splitChunks</code>方式的打包，也跟单文件<code>splitShunks</code>没有差别，只不过在拆分 chunk 上会略有不同，所以不再继续讨论。下面来讨论下在模块中使用<code>import()</code>或者<code>require.ensure</code>异步加载模块的打包产物执行过程。</p>
+</div><div class="cl-preview-section"><h2 id="import-方式打包的产出物解析" style="font-size: 30px;"><code>import()</code> 方式打包的产出物解析</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先修改<code>app.js</code>的内容，修改成下面的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// app.js</span>
+<span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'zepto'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>webpack.config.js</code>的代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+    mode<span class="token punctuation">:</span> <span class="token string">'development'</span><span class="token punctuation">,</span>
+    devtool<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+    entry<span class="token punctuation">:</span> <span class="token string">'./src/app.js'</span><span class="token punctuation">,</span>
+    optimization<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        <span class="token comment">// runtimeChunk:{name: 'runtime'},</span>
+        splitChunks<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+            chunks<span class="token punctuation">:</span> <span class="token string">'all'</span><span class="token punctuation">,</span>
+            minSize<span class="token punctuation">:</span> <span class="token number">10</span><span class="token punctuation">,</span>
+            minChunks<span class="token punctuation">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+            name<span class="token punctuation">:</span> <span class="token string">'vendors.main'</span><span class="token punctuation">,</span>
+            cacheGroups<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                vendors<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+                    test<span class="token punctuation">:</span> <span class="token regex">/[\\/]node_modules[\\/]/</span><span class="token punctuation">,</span>
+                    priority<span class="token punctuation">:</span> <span class="token operator">-</span><span class="token number">10</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">那么执行<code>npx webpack --config webpack.config.js</code>之后，在 dist 文件夹会找到<code>main.js</code>和<code>verdors.main.js</code>，其中<code>verdors.main.js</code>跟上一部分<code>splitChunks</code>没有区别，<code>main.js</code>却发生了变化：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// main.js，忽略掉相同的部分代码</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>modules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// webpackBootstrap</span>
+    <span class="token comment">// webpackJsonpCallback 发生变化</span>
+    <span class="token keyword">function</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> chunkIds <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">var</span> moreModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// add "moreModules" to the modules object,</span>
+        <span class="token comment">// then flag all "chunkIds" as loaded and fire callback</span>
+        <span class="token keyword">var</span> moduleId<span class="token punctuation">,</span>
+            chunkId<span class="token punctuation">,</span>
+            i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            resolves <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> chunkIds<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            chunkId <span class="token operator">=</span> chunkIds<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                resolves<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">for</span> <span class="token punctuation">(</span>moduleId <span class="token keyword">in</span> moreModules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>hasOwnProperty<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>moreModules<span class="token punctuation">,</span> moduleId<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> moreModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>parentJsonpFunction<span class="token punctuation">)</span> <span class="token function">parentJsonpFunction</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        <span class="token keyword">while</span> <span class="token punctuation">(</span>resolves<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            resolves<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 忽略一部分相同代码</span>
+
+    <span class="token comment">// script path function</span>
+    <span class="token keyword">function</span> <span class="token function">jsonpScriptSrc</span><span class="token punctuation">(</span>chunkId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> __webpack_require__<span class="token punctuation">.</span>p <span class="token operator">+</span> <span class="token string">''</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token string">'vendors.main'</span><span class="token punctuation">:</span> <span class="token string">'vendors.main'</span><span class="token punctuation">}</span><span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">||</span> chunkId<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">'.js'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// 忽略一部分相同代码</span>
+
+    <span class="token comment">// 新增__webpack_require__.e方法，异步加载 js</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">e</span> <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token function">requireEnsure</span><span class="token punctuation">(</span>chunkId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> promises <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+        <span class="token comment">// JSONP chunk loading for javascript</span>
+
+        <span class="token keyword">var</span> installedChunkData <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunkData <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 0 means "already installed".</span>
+
+            <span class="token comment">// a Promise means "currently loading".</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunkData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                promises<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunkData<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+                <span class="token comment">// setup Promise in chunk cache</span>
+                <span class="token keyword">var</span> promise <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    installedChunkData <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                promises<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">(</span>installedChunkData<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> promise<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token comment">// start chunk loading</span>
+                <span class="token keyword">var</span> script <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">var</span> onScriptComplete<span class="token punctuation">;</span>
+
+                script<span class="token punctuation">.</span>charset <span class="token operator">=</span> <span class="token string">'utf-8'</span><span class="token punctuation">;</span>
+                script<span class="token punctuation">.</span>timeout <span class="token operator">=</span> <span class="token number">120</span><span class="token punctuation">;</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>nc<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    script<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'nonce'</span><span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">.</span>nc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+                script<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token function">jsonpScriptSrc</span><span class="token punctuation">(</span>chunkId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+                <span class="token function-variable function">onScriptComplete</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token comment">// avoid mem leaks in IE.</span>
+                    script<span class="token punctuation">.</span>onerror <span class="token operator">=</span> script<span class="token punctuation">.</span>onload <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+                    <span class="token function">clearTimeout</span><span class="token punctuation">(</span>timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token keyword">var</span> chunk <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                            <span class="token keyword">var</span> errorType <span class="token operator">=</span> event <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span>type <span class="token operator">===</span> <span class="token string">'load'</span> <span class="token operator">?</span> <span class="token string">'missing'</span> <span class="token punctuation">:</span> event<span class="token punctuation">.</span>type<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            <span class="token keyword">var</span> realSrc <span class="token operator">=</span> event <span class="token operator">&amp;&amp;</span> event<span class="token punctuation">.</span>target <span class="token operator">&amp;&amp;</span> event<span class="token punctuation">.</span>target<span class="token punctuation">.</span>src<span class="token punctuation">;</span>
+                            <span class="token keyword">var</span> error <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>
+                                <span class="token string">'Loading chunk '</span> <span class="token operator">+</span> chunkId <span class="token operator">+</span> <span class="token string">' failed.\n('</span> <span class="token operator">+</span> errorType <span class="token operator">+</span> <span class="token string">': '</span> <span class="token operator">+</span> realSrc <span class="token operator">+</span> <span class="token string">')'</span>
+                            <span class="token punctuation">)</span><span class="token punctuation">;</span>
+                            error<span class="token punctuation">.</span>type <span class="token operator">=</span> errorType<span class="token punctuation">;</span>
+                            error<span class="token punctuation">.</span>request <span class="token operator">=</span> realSrc<span class="token punctuation">;</span>
+                            chunk<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token punctuation">}</span>
+                        installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> undefined<span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span><span class="token punctuation">;</span>
+                <span class="token keyword">var</span> timeout <span class="token operator">=</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token function">onScriptComplete</span><span class="token punctuation">(</span><span class="token punctuation">{</span>type<span class="token punctuation">:</span> <span class="token string">'timeout'</span><span class="token punctuation">,</span> target<span class="token punctuation">:</span> script<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">120000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                script<span class="token punctuation">.</span>onerror <span class="token operator">=</span> script<span class="token punctuation">.</span>onload <span class="token operator">=</span> onScriptComplete<span class="token punctuation">;</span>
+                document<span class="token punctuation">.</span>head<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>script<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+        <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 忽略一部分相同代码</span>
+    <span class="token comment">// 新增一个 oe 方法，用于报错处理</span>
+    __webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">oe</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 下面部分代码没有变化</span>
+    <span class="token keyword">var</span> jsonpArray <span class="token operator">=</span> <span class="token punctuation">(</span>window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">=</span> window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">var</span> oldJsonpFunction <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span>push<span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    jsonpArray<span class="token punctuation">.</span>push <span class="token operator">=</span> webpackJsonpCallback<span class="token punctuation">;</span>
+    jsonpArray <span class="token operator">=</span> jsonpArray<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">var</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> jsonpArray<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>jsonpArray<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">var</span> parentJsonpFunction <span class="token operator">=</span> oldJsonpFunction<span class="token punctuation">;</span>
+
+    <span class="token comment">// return 返回的是 __webpack_require__(entry)的代码</span>
+    <span class="token keyword">return</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>s <span class="token operator">=</span> <span class="token string">'./src/app.js'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token string">'./src/name.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token string">'Alex'</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+
+    <span class="token string">'./src/app.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> name <span class="token operator">=</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./src/name.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        __webpack_require__
+            <span class="token punctuation">.</span><span class="token function">e</span><span class="token punctuation">(</span><span class="token string">'vendors.main'</span><span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>
+                <span class="token punctuation">(</span>require <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+                    <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./node_modules/zepto/dist/zepto.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span>
+            <span class="token punctuation">)</span>
+            <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>oe<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">通过观察代码，发现增加了一个关键函数<code>__webpack_require__.e</code>，用 Promise 的方式来异步加载 js 模块。代码的起点 IIFE 函数，只不过<code>app.js</code>内的<code>import()</code>部分代码被处理成了下面代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">__webpack_require__
+    <span class="token punctuation">.</span><span class="token function">e</span><span class="token punctuation">(</span><span class="token string">'vendors.main'</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>
+        <span class="token punctuation">(</span>require <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+            <span class="token function">__webpack_require__</span><span class="token punctuation">(</span><span class="token string">'./node_modules/zepto/dist/zepto.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">bind</span><span class="token punctuation">(</span><span class="token keyword">null</span><span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span>
+    <span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token keyword">catch</span><span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>oe<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以核心是<code>__webpack_require__.e</code>函数</p>
+</div><div class="cl-preview-section"><h3 id="webpack_require__.e函数"><code>__webpack_require__.e</code>函数</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">简单来说，<code>__webpack_require__.e</code>是通过创建<code>script</code>标签的方式来异步加载 js 文件，然后返回一个 Promise 对象：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js">__webpack_require__<span class="token punctuation">.</span><span class="token function-variable function">e</span> <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token function">requireEnsure</span><span class="token punctuation">(</span>chunkId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// promise 数组</span>
+    <span class="token keyword">var</span> promises <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token comment">// 1. 判断状态，状态为不为0，即没有加载，没加载则进入加载逻辑</span>
+    <span class="token keyword">var</span> installedChunkData <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunkData <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 还记得之前installedChunkData的状态吗？</span>
+        <span class="token comment">// 在这里chunk的状态有以下几种：</span>
+        <span class="token comment">// 1.1. undefined 没有加载</span>
+        <span class="token comment">// 1.2. 0 加载完成</span>
+        <span class="token comment">// 1.3. Promise 正在加载中，单一个模块被多次依赖引用的时候，这时候通过检测这个状态可以判断模块正在被加载，不需要重复创建script 加载 js</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunkData<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            promises<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunkData<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 2. 首先创建一个 promise 对象</span>
+            <span class="token keyword">var</span> promise <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                installedChunkData <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// installedChunks[chunkId] 内容是：[resole, reject, promise实例]</span>
+            promises<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">(</span>installedChunkData<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> promise<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+            <span class="token comment">// 3. 创建一个 script 标签</span>
+            <span class="token keyword">var</span> script <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">createElement</span><span class="token punctuation">(</span><span class="token string">'script'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token keyword">var</span> onScriptComplete<span class="token punctuation">;</span>
+
+            script<span class="token punctuation">.</span>charset <span class="token operator">=</span> <span class="token string">'utf-8'</span><span class="token punctuation">;</span>
+            script<span class="token punctuation">.</span>timeout <span class="token operator">=</span> <span class="token number">120</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>__webpack_require__<span class="token punctuation">.</span>nc<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// 添加 script 的 nonce 属性</span>
+                script<span class="token punctuation">.</span><span class="token function">setAttribute</span><span class="token punctuation">(</span><span class="token string">'nonce'</span><span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">.</span>nc<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+            <span class="token comment">// 4. 添加 script 标签的 src</span>
+            script<span class="token punctuation">.</span>src <span class="token operator">=</span> <span class="token function">jsonpScriptSrc</span><span class="token punctuation">(</span>chunkId<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 5. onload 回到函数</span>
+            <span class="token function-variable function">onScriptComplete</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>event<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token comment">// avoid mem leaks in IE.</span>
+                script<span class="token punctuation">.</span>onerror <span class="token operator">=</span> script<span class="token punctuation">.</span>onload <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+                <span class="token function">clearTimeout</span><span class="token punctuation">(</span>timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                <span class="token keyword">var</span> chunk <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+                <span class="token comment">// 判断状态，保证只执行一次，0表示加载完成</span>
+                <span class="token comment">// 划重点：下面逻辑中需要注意，并没有加载成功的逻辑！！而是只有加载失败的逻辑</span>
+                <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk <span class="token operator">!==</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                    <span class="token keyword">if</span> <span class="token punctuation">(</span>chunk<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                        <span class="token keyword">var</span> errorType <span class="token operator">=</span> event <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>event<span class="token punctuation">.</span>type <span class="token operator">===</span> <span class="token string">'load'</span> <span class="token operator">?</span> <span class="token string">'missing'</span> <span class="token punctuation">:</span> event<span class="token punctuation">.</span>type<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        <span class="token keyword">var</span> realSrc <span class="token operator">=</span> event <span class="token operator">&amp;&amp;</span> event<span class="token punctuation">.</span>target <span class="token operator">&amp;&amp;</span> event<span class="token punctuation">.</span>target<span class="token punctuation">.</span>src<span class="token punctuation">;</span>
+                        <span class="token keyword">var</span> error <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span>
+                            <span class="token string">'Loading chunk '</span> <span class="token operator">+</span> chunkId <span class="token operator">+</span> <span class="token string">' failed.\n('</span> <span class="token operator">+</span> errorType <span class="token operator">+</span> <span class="token string">': '</span> <span class="token operator">+</span> realSrc <span class="token operator">+</span> <span class="token string">')'</span>
+                        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+                        error<span class="token punctuation">.</span>type <span class="token operator">=</span> errorType<span class="token punctuation">;</span>
+                        error<span class="token punctuation">.</span>request <span class="token operator">=</span> realSrc<span class="token punctuation">;</span>
+                        <span class="token comment">// 出现错误了，执行 promise 的 reject</span>
+                        chunk<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">(</span>error<span class="token punctuation">)</span><span class="token punctuation">;</span>
+                    <span class="token punctuation">}</span>
+                    installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> undefined<span class="token punctuation">;</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span><span class="token punctuation">;</span>
+            <span class="token comment">// 设置加载超时时间为120s</span>
+            <span class="token keyword">var</span> timeout <span class="token operator">=</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token function">onScriptComplete</span><span class="token punctuation">(</span><span class="token punctuation">{</span>type<span class="token punctuation">:</span> <span class="token string">'timeout'</span><span class="token punctuation">,</span> target<span class="token punctuation">:</span> script<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">120000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token comment">// 6. 添加回调函数绑定</span>
+            script<span class="token punctuation">.</span>onerror <span class="token operator">=</span> script<span class="token punctuation">.</span>onload <span class="token operator">=</span> onScriptComplete<span class="token punctuation">;</span>
+            <span class="token comment">// 7. 添加到 document head 中，开始执行</span>
+            document<span class="token punctuation">.</span>head<span class="token punctuation">.</span><span class="token function">appendChild</span><span class="token punctuation">(</span>script<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// 返回一个 promise.all</span>
+    <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>promises<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在上面的代码中，需要重点说下：</p>
+</div><div class="cl-preview-section"><ol>
+<li style="font-size: 20px; line-height: 38px;"><code>installedChunks</code>的状态，在这里 chunk 的状态有以下几种： 1. undefined：没有加载 2. 0：加载完成 3. Promise：正在加载中，当一个模块被多次依赖引用的时候，这时候通过检测这个状态可以判断模块正在被加载，不需要重复创建 script 加载 js</li>
+<li style="font-size: 20px; line-height: 38px;"><strong>上面代码解决了加载的问题，但是没有找到加载成功的代码，只有 error 的逻辑，详见上面的代码注释</strong></li>
+</ol>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">那么加载成功的代码去哪里了呢？</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">我们还记得在<code>splitChunks</code>部分提到的重写<code>webpackJsonp.push</code>的方法吗？这里加载的<code>vendors.main.js</code>实际在往数组添加项目，执行<code>webpackJsonp.push</code>的时候已经执行<code>webpackJsonpCallback</code>了：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">(</span>window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">=</span> window<span class="token punctuation">[</span><span class="token string">'webpackJsonp'</span><span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token punctuation">[</span><span class="token string">'vendors.main'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token string">'./node_modules/zepto/dist/zepto.js'</span><span class="token punctuation">:</span> <span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先在<code>__webpack_require__.e</code>中定义了<code>installChunks</code>的内容代码：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// 2. 首先创建一个 promise 对象</span>
+<span class="token keyword">var</span> promise <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    installedChunkData <span class="token operator">=</span> installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span>resolve<span class="token punctuation">,</span> reject<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// installedChunks[chunkId] 内容是：[resole, reject, promise实例]</span>
+promises<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">(</span>installedChunkData<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> promise<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><code>installedChunks[chunkId]</code> 内容是：<code>[resole, reject, promise实例]</code>，在<code>webpackJsonpCallback</code>函数中，被读取出来<code>resolve</code>然后执行了！详见下面的注释：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// main.js webpackJsonpCallback</span>
+<span class="token keyword">function</span> <span class="token function">webpackJsonpCallback</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> chunkIds <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">var</span> moreModules <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">var</span> moduleId<span class="token punctuation">,</span>
+        chunkId<span class="token punctuation">,</span>
+        i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span>
+        resolves <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span> <span class="token comment">// 这个resolves数组收集 加载js文件成功的 promise resolve 函数</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> chunkIds<span class="token punctuation">.</span>length<span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        chunkId <span class="token operator">=</span> chunkIds<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token comment">// 1. 这里取出 installedChunks[chunkId]，判断成功</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// 2. 收集 resolve，installedChunks[chunkId][0] 就是 resolve！</span>
+            resolves<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+        <span class="token comment">// 3. 设置成功状态，修改为0</span>
+        installedChunks<span class="token punctuation">[</span>chunkId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span>moduleId <span class="token keyword">in</span> moreModules<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>Object<span class="token punctuation">.</span>prototype<span class="token punctuation">.</span>hasOwnProperty<span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>moreModules<span class="token punctuation">,</span> moduleId<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> moreModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>parentJsonpFunction<span class="token punctuation">)</span> <span class="token function">parentJsonpFunction</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// 4. 最后遍历数组执行 resolve</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>resolves<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        resolves<span class="token punctuation">.</span><span class="token function">shift</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">整个过程执行完毕！</p>
+</div><div class="cl-preview-section"><h2 id="「遗留问题」zepto-引用报错的问题" style="font-size: 30px;">「遗留问题」zepto 引用报错的问题</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">本文第二部分，解析<code>splitChunk</code>产出的代码时，故意预留一个坑：zepto 执行的时候会报错，具体如下：</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d07727b0001e0e804930193.png" alt="图片描述" data-original="http://img.mukewang.com/5d07727b0001e0e804930193.png" class="" style="cursor: pointer;"><br>
+通过分析报错原因，我们来更好地理解下 Webpack 的模块执行机制。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">首先看下 Zepto 的源码结构：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">/* Zepto v1.2.0 - zepto event ajax form ie - zeptojs.com/license */</span>
+<span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>global<span class="token punctuation">,</span> factory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> define <span class="token operator">===</span> <span class="token string">'function'</span> <span class="token operator">&amp;&amp;</span> define<span class="token punctuation">.</span>amd<span class="token punctuation">)</span>
+        <span class="token function">define</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token keyword">return</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> Zepto <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// ...</span>
+
+        <span class="token keyword">return</span> $<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    window<span class="token punctuation">.</span>Zepto <span class="token operator">=</span> Zepto<span class="token punctuation">;</span>
+    window<span class="token punctuation">.</span>$ <span class="token operator">===</span> undefined <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>window<span class="token punctuation">.</span>$ <span class="token operator">=</span> Zepto<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> Zepto<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">可以看出，它只使用了 AMD 规范的模块导出方法 define，没有用 CommonJs 规范的方法 <code>module.exports</code> 来导出模块，不过这不是造成报错的原因。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">被 Webpack 打包后，zepto 的内容变成：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>module<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">var</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">;</span> <span class="token comment">/* Zepto v1.2.0 - zepto event ajax form ie - zeptojs.com/license */</span>
+    <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span>global<span class="token punctuation">,</span> factory<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+            <span class="token operator">!</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token function-variable function">__WEBPACK_AMD_DEFINE_RESULT__</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+                <span class="token keyword">return</span> <span class="token function">factory</span><span class="token punctuation">(</span>global<span class="token punctuation">)</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> __webpack_require__<span class="token punctuation">,</span> exports<span class="token punctuation">,</span> module<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+            __WEBPACK_AMD_DEFINE_RESULT__ <span class="token operator">!==</span> undefined <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports <span class="token operator">=</span> __WEBPACK_AMD_DEFINE_RESULT__<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">else</span> <span class="token punctuation">{</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">,</span> <span class="token keyword">function</span><span class="token punctuation">(</span>window<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">var</span> Zepto <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            <span class="token comment">// ...</span>
+
+            <span class="token keyword">return</span> $<span class="token punctuation">;</span>
+        <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+        window<span class="token punctuation">.</span>Zepto <span class="token operator">=</span> Zepto<span class="token punctuation">;</span>
+        window<span class="token punctuation">.</span>$ <span class="token operator">===</span> undefined <span class="token operator">&amp;&amp;</span> <span class="token punctuation">(</span>window<span class="token punctuation">.</span>$ <span class="token operator">=</span> Zepto<span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> Zepto<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">以上代码是模块执行的闭包，化简一下其实就是 Webpack 把 AMD 规范的 <code>define</code> 方法转换成了 <code>module.export = factory(global)</code>，以此来获取 factory 方法返回的对象。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">在模块加载（import/require）时，Webpack 会通过下面这种方法来执行模块闭包并导入模块：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token keyword">function</span> <span class="token function">__webpack_require__</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Check if module is in cache</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    <span class="token comment">// Create a new module (and put it into the cache)</span>
+    <span class="token keyword">var</span> module <span class="token operator">=</span> <span class="token punctuation">(</span>installedModules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span>
+        i<span class="token punctuation">:</span> moduleId<span class="token punctuation">,</span>
+        l<span class="token punctuation">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+        exports<span class="token punctuation">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+        hot<span class="token punctuation">:</span> <span class="token function">hotCreateModule</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        parents<span class="token punctuation">:</span> <span class="token punctuation">(</span><span class="token punctuation">(</span>hotCurrentParentsTemp <span class="token operator">=</span> hotCurrentParents<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>hotCurrentParents <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span> hotCurrentParentsTemp<span class="token punctuation">)</span><span class="token punctuation">,</span>
+        children<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Execute the module function</span>
+    modules<span class="token punctuation">[</span>moduleId<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span>module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> module<span class="token punctuation">,</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">,</span> <span class="token function">hotCreateRequire</span><span class="token punctuation">(</span>moduleId<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Flag the module as loaded</span>
+    module<span class="token punctuation">.</span>l <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Return the exports of the module</span>
+    <span class="token keyword">return</span> module<span class="token punctuation">.</span>exports<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">其核心在于 <code>modules[moduleId].call</code>，它会传入新初始化的 <code>module.exports</code> 来作为模块闭包的上下文（<code>context</code>），并运行模块闭包来将模块暴露的对象加入到已加载的模块对象（<code>installedModules</code>）中。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以对于 Zepto 来说，它初始化时使用的 <code>this</code>（见下图）其实就是 <code>module.exports</code>，但这个 <code>module.exports</code> 没有赋值过任何变量，即 Zepto 初始化使用的 <code>this</code> 为空对象。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;"><img src="http://img.mukewang.com/5d0772580001549903980528.png" alt="图片描述" data-original="http://img.mukewang.com/5d0772580001549903980528.png" class="" style="cursor: pointer;"><br>
+而在 Zepto 中，实际想用的 <code>this</code> 是<code>window</code>对象，所以 <code>factory(global)</code> 中 <code>global</code> 为空对象，Zepto 运行函数中的 <code>window</code> 也就变成了空对象，而 <code>document = window.document</code>，这个 <code>document</code> 为 <code>undefined</code>，因此会造成 <code>document.createElement</code> 会报 <code>TypeError</code>。</p>
+</div><div class="cl-preview-section"><h3 id="解决-webpack-引入-zepto-报错问题">解决 Webpack 引入 Zepto 报错问题</h3>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">要解决这个问题，需要使用两个 loader：<a href="https://github.com/webpack-contrib/script-loader">script-loader</a>和<a href="https://github.com/webpack-contrib/exports-loader">exports-loader</a>。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">script-loader 会把我们指定的模块 JavaScript 文件转成纯字符串，并用 <code>eval.call(null, string)</code> 执行，这样执行的作用域就为全局作用域了，即这里的<code>this</code>就是<code>window</code>了。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">但是如果只用 script-loader，我们要使用 Zepto 对象的时候就不能使用<code>import/require</code>引入了，而是直接作为一个全局对象来使用：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">/*
+ * 不能使用 `import $ from 'zepto'`
+ * 因为 zepto.js 执行后返回值为 undefined
+ * 因为 module.exports 默认初始为空对象
+ * 所以 $ 也为空对象
+ */</span>
+
+<span class="token function">$</span><span class="token punctuation">(</span><span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">这样的写法就是：当 Webpack 初始化时，zepto.js 会在<code>eval</code>下执行一遍，将 Zepto 对象赋值给 <code>window.$</code> 并挂载到 Window 上。因此后续的 <code>$</code>、<code>Zepto</code> 变量就都可用了，但是没有这种方式只执行一次，不是每次调用（<code>import/require</code>）的时候都会返回一个引入的对象。这种使用全局对象的实现方法不够友好，还是将对象以 ES6 Module/CommonJs/AMD 方式暴露出来更好。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">为了让我们的模块导入更加地「模块化」，可以 <code>import/require</code>，而不是像上面那么「与众不同」，我们还需要 exports-loader 的帮助。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">exports-loader 可以导出我们指定的对象:</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'exports?window.Zepto!./zepto.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">他的作用就是在模块闭包最后加一句 <code>module.exports = window.Zepto</code> 来导出我们需要的对象，这样我们就可以愉快地 <code>import $ from 'zepto'</code> 了。</p>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">所以最后的配置是：</p>
+</div><div class="cl-preview-section"><pre class=" language-js"><code class="prism  language-js"><span class="token comment">// webpack.config</span>
+<span class="token punctuation">{</span>
+    module<span class="token punctuation">:</span> <span class="token punctuation">{</span>
+        rules<span class="token punctuation">:</span> <span class="token punctuation">[</span>
+            <span class="token comment">// ....</span>
+            <span class="token punctuation">{</span>
+                test<span class="token punctuation">:</span> require<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token string">'zepto'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+                use<span class="token punctuation">:</span> <span class="token punctuation">[</span><span class="token string">'exports-loader?window.Zepto'</span><span class="token punctuation">,</span> <span class="token string">'script-loader'</span><span class="token punctuation">]</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div><div class="cl-preview-section"><h2 id="总结" style="font-size: 30px;">总结</h2>
+</div><div class="cl-preview-section"><p style="font-size: 20px; line-height: 38px;">到此为止，我们已经理解了单文件打包、<code>splitChunks</code>和<code>import()</code>打包产出物的代码执行全流程。通过分析Webpack 的构建产出代码执行过程，能够让更加深入理解 Webpack 的内核实现。Webpack 的产出物是公共各自的模板进行拼接代码而成的，针对不同的打包配置，Webpack 打包出来的代码执行过程有所差异。</p>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">Tips：为了便于学习与代码阅读，还可以在 Webpack 配置文件中添加<code>optimization:{runtimeChunk: {name: 'runtime'}}</code>配置项，这样会让 Webpack 将 runtime 与模块注册代码分开打包，runtime 部分汇单独打包到<code>runtime.js</code>中。</p>
+</blockquote>
+</div><div class="cl-preview-section"><blockquote>
+<p style="font-size: 20px; line-height: 38px;">本小节 Webpack 相关面试题：</p>
+<ol>
+<li style="font-size: 20px; line-height: 38px;">在 Webpack 中怎么引入类似 jQuery 和 Zepto 这种没有模块化的代码？</li>
+<li style="font-size: 20px; line-height: 38px;">Webpack 打包出来的代码是怎么执行的？异步加载的模块是怎么执行的？</li>
+</ol>
+</blockquote>
+</div></div>
+            </div>
+                            <!-- 买过的阅读 -->
+                <div class="art-next-prev clearfix">
+                                                                        <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/284">
+                                                    <div class="prev l clearfix">
+                                <div class="icon l">
+                                    <i class="imv2-arrow3_l"></i>
+                                </div>
+                                <p>
+                                    Webpack 工作流程
+                                </p>
+                            </div>
+                        </a>
+                                                                                            <!-- 已买且开放 或者可以试读 -->
+                            <a href="/read/29/article/286">
+                                                    <div class="next r clearfix">
+                                <p>
+                                    Webpack 的模块热替换做了什么？
+                                </p>
+                                <div class="icon r">
+                                    <i class="imv2-arrow3_r"></i>
+                                </div>
+
+                            </div>
+                        </a>
+                                    </div>
+                    </div>
+        <div class="comments-con js-comments-con" id="coments_con">     <div class="number">精选留言 <span class="js-number">0</span></div>     <div class="comments">         <div class="input-fake js-showcommentModal">             欢迎在这里发表留言，作者筛选后可公开显示         </div>                      <div class="noData">                 <p>                     <i class="imv2-error_c"></i>                 </p>                 <p>目前暂无任何讨论</p>             </div>              </div>  </div>
+
+
+
+    </div>
+    
+    
+    
+
+</div>
+ 
+<!-- 专栏介绍页专栏评价 -->
+
+<!-- 专栏介绍页底部三条评价 -->
+
+<!-- 专栏阅读页弹层目录和介绍页页面目录 -->
+
+<!-- 专栏阅读页发布回复 -->
+
+<!-- 专栏阅读页发布评论 -->
+
+<!-- 专栏阅读页底部评论 -->
+
+<!-- 专栏阅读 单个 评论 -->
+
+<!-- 新增回复和展开三条以外回复 -->
+
+<!-- 立即订阅的弹窗 -->
+
+
+
+
+
+
+
+
+
+
+
+
+</div></body></html>
