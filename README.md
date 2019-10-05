@@ -3,7 +3,8 @@
 
 ### 电子书
 
-- [电子书](https://pan.baidu.com/s/1NASRrGZsAZ7_hsaNs1l2cQ)
+- [小册](https://pan.baidu.com/s/1NASRrGZsAZ7_hsaNs1l2cQ)
+- [电子书(kkae)](https://pan.baidu.com/s/1WrRZC4WtB0-vzmLSkQ9a7A)
 
 
 
