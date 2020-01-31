@@ -11,15 +11,15 @@
 ### 前端
 
 - [前端常见面试题](<https://pan.baidu.com/s/1gV0NQScNejaZfXdWLfSErg>)
-- [2018黑马整套PHP教程](<https://pan.baidu.com/s/16FcWMU9s7XhKXu3bEMZ9HA>)
-- [尤雨溪讲解vue高级特性](<https://pan.baidu.com/s/1lZS1i6fjZowpnv-7P2wung>)
-- [奇舞HTML+CSS+JS基础](<https://pan.baidu.com/s/1dEoHU998kug4nDuYahk1VQ>)
+- [PHP教程](<https://pan.baidu.com/s/16FcWMU9s7XhKXu3bEMZ9HA>)
+- [vue高级特性](<https://pan.baidu.com/s/1lZS1i6fjZowpnv-7P2wung>)
+- [HTML+CSS+JS基础](<https://pan.baidu.com/s/1dEoHU998kug4nDuYahk1VQ>)
 - [UI设计课程](<https://pan.baidu.com/s/1dMxafzkuoJawyb-gbmZwuQ>)
-- [2018尚硅谷前端整套](<https://pan.baidu.com/s/1pjcmHZrfFjDPZqdshY2nMA>)
-- [传智黑马前端36期](<https://pan.baidu.com/s/18h86KEb-R5dd94nbJwMSrw> )
+- [前端](<https://pan.baidu.com/s/1pjcmHZrfFjDPZqdshY2nMA>)
+- [前端](<https://pan.baidu.com/s/18h86KEb-R5dd94nbJwMSrw> )
 - [javascript版数据结构](<https://pan.baidu.com/s/1NjBfx534awp9t9mWo9S4Gg>)
-- [TypeScript精讲](<https://pan.baidu.com/s/1eQ9eCSkz6TAdbkGXpNRweA>)
-- [React实战进阶45讲](<https://pan.baidu.com/s/1wRl_sUO0s3o6u9cCl2I0BA>)
+- [TypeScript](<https://pan.baidu.com/s/1eQ9eCSkz6TAdbkGXpNRweA>)
+- [React实战](<https://pan.baidu.com/s/1wRl_sUO0s3o6u9cCl2I0BA>)
 - [JavaScript高级与设计模式](<https://pan.baidu.com/s/1vQweAbOtCSv2Q82tRUW66w>)
 - [JavaScript设计模式](https://pan.baidu.com/s/1tC-dfsK75zKk4siJh53HjA)
 - [开发微信小程序跳一跳](<https://pan.baidu.com/s/14yWOiStxUg9hUolJ214vbA>)
@@ -29,7 +29,7 @@
 - [Go语言教程](<https://pan.baidu.com/s/1t8aj8GrJd1jUIzJHs82gtg>)
 - [Javascript高级框架设计教程](https://pan.baidu.com/s/1Qpmmh2VRyl-kg3VUajBRnQ)
 - [uni-app](https://pan.baidu.com/s/101pK2ZZ1PsVcSipEHzSrbg)
-- [（创客学院）嵌入式+物联网](https://pan.baidu.com/s/1l4627DGWgORTrG4z55KFzA)
+- [嵌入式+物联网](https://pan.baidu.com/s/1l4627DGWgORTrG4z55KFzA)
 
 
 
@@ -56,15 +56,15 @@
 ### Python
 
 - [Python网络爬虫](<https://pan.baidu.com/s/1WLnrDQnR3fvlE51q6CuIhg>)
-- [黑马Python37期](<https://pan.baidu.com/s/1x7rRkpNSh2rdKK9Qng-sqA>)
+- [Python](<https://pan.baidu.com/s/1x7rRkpNSh2rdKK9Qng-sqA>)
 
 
 
 ### C、C++
 
-- [侯捷C++教程](https://pan.baidu.com/s/13hmtWtzzMpZP0K_Sn0VSNA)
-- [邓俊辉-算法训练营 第二期](<https://pan.baidu.com/s/1SC66zN7UBE7kjrrIrWNK1Q>)
-- [传智C++24期](<https://pan.baidu.com/s/1GQRGqgBNe9f4YznQkaY24A>)
+- [C++教程](https://pan.baidu.com/s/13hmtWtzzMpZP0K_Sn0VSNA)
+- [算法训练营 第二期](<https://pan.baidu.com/s/1SC66zN7UBE7kjrrIrWNK1Q>)
+- [C++24期](<https://pan.baidu.com/s/1GQRGqgBNe9f4YznQkaY24A>)
 
 
 
@@ -73,7 +73,7 @@
 - [考研资料](<https://pan.baidu.com/s/1fCvnxCiHi8xy_2YxO3MF3Q>)
 - [考研英语](<https://pan.baidu.com/s/1coifN97dIslKPTQMugBSUw>)
 - [考研政治](<https://pan.baidu.com/s/1HWMKEoza284GQ4yXHUG1lw>)
-- [王道考研 基础+冲刺班(数据结构,计算机网络,操作系统,组成原理)](<https://pan.baidu.com/s/1DoDnWluDht2FVoYRf1LFsA>)
+- [(数据结构,计算机网络,操作系统,组成原理)](<https://pan.baidu.com/s/1DoDnWluDht2FVoYRf1LFsA>)
 - [2019教师资格证备考资料](<https://pan.baidu.com/s/1YU8ggMGt4uWONF8p-zz7vg>)
 - [计算机三级网络技术+二级Python语言(提取c1na)](<https://pan.baidu.com/s/1l1Xr7WJbqhquvkNnYaB3BA>)
 - [专升本资料](<https://pan.baidu.com/s/136bIwqyTr-2JXHcZ-w2YfQ>)
